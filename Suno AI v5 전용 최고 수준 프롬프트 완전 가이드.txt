@@ -1,0 +1,1648 @@
+════════════════════════════════════════════════════════════════════
+         Suno AI v5 전용 최고 수준 프롬프트 완전 가이드
+     — 100% 인식률 + 빌보드급 결과물을 만드는 모든 방법 —
+════════════════════════════════════════════════════════════════════
+
+[ 목 차 ]
+────────────────────────────────────────────────────────────────────
+ 1. Suno v5란? — v4.5와 핵심 차이점
+ 2. v5가 100% 인식하는 프롬프트의 원리
+ 3. 프롬프트 구성 필드 완전 이해 (Style Field vs Lyrics Field)
+ 4. 최고 수준 프롬프트의 8가지 핵심 요소
+ 5. Style Field 작성법 (스타일 프롬프트)
+ 6. Lyrics Field 작성법 (가사 + 메타태그)
+ 7. v5 전용 메타태그 완전 목록
+ 8. v5 고급 기법 (숨겨진 기술들)
+ 9. 슬라이더 & 설정값 완전 정복
+10. 장르별 최고 수준 완성 프롬프트 예시 20개
+11. 자주 발생하는 문제와 해결법
+12. 최고 수준 프롬프트 공식 템플릿
+════════════════════════════════════════════════════════════════════
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【1】 Suno v5란? — v4.5와 핵심 차이점
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+출시일: 2025년 9월 23일
+별칭:   "세계 최고의 AI 음악 모델"
+
+─────────────────────────────────────────────────────────────────
+v4.5 vs v5 비교표
+─────────────────────────────────────────────────────────────────
+
+항목              │ v4.5                         │ v5
+──────────────────┼──────────────────────────────┼────────────────────────────────
+음질              │ 풍성하지만 뭉개지는 느낌       │ 악기 분리 선명 / 스튜디오급
+보컬              │ 인간적이지만 약간 로봇 느낌    │ 진짜 사람처럼 자연스러운 발음
+프롬프트 반응     │ 기본 장르/무드 태그에 반응     │ 세밀하고 복잡한 설명에도 반응
+구조 인식         │ 기본적인 섹션 인식             │ 지능형 구성 아키텍처 (ICA)
+곡 길이           │ 최대 4분                      │ 최대 8분 (유료 구독)
+스템 내보내기     │ 미지원                        │ 최대 12트랙 스템 분리
+제어 도구         │ 제한적                        │ Suno Studio + 슬라이더 추가
+반복/수정         │ 단일 생성                     │ Extend / Replace / Remix 가능
+피아노 음질       │ 인공적 느낌                   │ 실제 피아노처럼 자연스러움
+베이스            │ 약한 존재감                   │ 묵직하고 실재하는 베이스
+
+핵심 요약:
+  · v5는 "더 구체적인 프롬프트"가 필수 — 모호한 설명은 효과 ↓
+  · v4.5용 프롬프트를 그대로 쓰면 v5의 잠재력을 50%도 못 씀
+  · v5는 감정 표현 설명에 특히 강하게 반응 (감성 묘사 우선)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【2】 v5가 100% 인식하는 프롬프트의 원리
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+v5의 인식 원리 3가지
+
+  원리 1. 신호 가중치 (Signal Weight)
+  ────────────────────────────────────
+  v5는 태그를 "강제 명령"이 아니라 "신호 가중치"로 처리한다.
+  즉, 태그를 많이 쌓는다고 무조건 좋은 게 아니라
+  "선명한 신호가 적은 것"이 "충돌하는 신호가 많은 것"보다 낫다.
+
+    나쁜 예: "pop rock edm jazz hip-hop trap classical"
+    → 신호 충돌 → AI가 혼란 → 장르 없는 무난한 결과
+    좋은 예: "indie pop-rock, 2000s Britpop undertones"
+    → 명확한 신호 → AI가 정확한 방향 설정
+
+  원리 2. 프론트로드 (Front-Load)
+  ────────────────────────────────
+  v5는 프롬프트의 앞부분과 뒷부분에 있는 단어에 더 높은 가중치를 줌.
+  가장 중요한 키워드는 첫 줄과 마지막 줄에 배치해야 함.
+
+    전략: 핵심 장르·무드 → 첫 줄에 / 핵심 키워드 → 마지막 줄에도 반복
+
+  원리 3. 구조-내용 일치 (Structure-Content Alignment)
+  ───────────────────────────────────────────────────────
+  [Chorus] 태그를 붙여도 가사 내용이 버스처럼 서술적이면
+  AI는 코러스처럼 생성하지 않는다.
+  태그와 가사 내용이 함께 코러스다워야 진짜 코러스가 나온다.
+
+    태그만 있는 코러스: 결과 50%
+    태그 + 코러스다운 가사: 결과 95%+
+
+─────────────────────────────────────────────────────────────────
+100% 인식을 위한 황금 규칙 7가지
+─────────────────────────────────────────────────────────────────
+
+  규칙 1. 장르는 1~2개로 제한 (3개 이상 = 혼란)
+  규칙 2. 핵심 키워드를 프롬프트 앞과 뒤에 반복
+  규칙 3. 태그는 섹션별로 분리하여 배치
+  규칙 4. 무드 묘사는 서술형 문장으로 (v5는 이야기에 반응)
+  규칙 5. BPM + 조성 명시하면 리듬 정확도 대폭 향상
+  규칙 6. 보컬 지시는 구체적으로 (음역대 + 톤 + 창법)
+  규칙 7. Style Field와 Lyrics Field 역할을 분리해서 사용
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【3】 프롬프트 구성 필드 완전 이해
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Suno v5에는 3개의 입력 필드가 있다.
+
+┌──────────────────────────────────────────────────────────────┐
+│  필드 1. Song Description (노래 설명)                         │
+│  → 한 줄 요약. 빠른 생성용. 세부 제어에는 한계 있음.          │
+│  → 예: "A sad rainy day indie song about missing someone"     │
+├──────────────────────────────────────────────────────────────┤
+│  필드 2. Style Field (스타일 필드) ← 음악 방향 설정           │
+│  → 장르, BPM, 무드, 악기, 보컬 스타일을 쉼표로 나열           │
+│  → [대괄호 태그] 없이 순수 설명어(descriptor)만 사용          │
+│  → 예: "indie folk, 90 BPM, nostalgic, acoustic guitar,      │
+│          warm male vocals, intimate and raw"                  │
+├──────────────────────────────────────────────────────────────┤
+│  필드 3. Lyrics Field (가사 필드) ← 구조 + 가사 + 메타태그   │
+│  → [Verse], [Chorus] 등 섹션 태그 + 실제 가사                │
+│  → 메타태그로 세부 감정/악기/효과 제어 가능                   │
+│  → 예: [Verse 1]                                             │
+│         I left your number in the rain...                    │
+└──────────────────────────────────────────────────────────────┘
+
+  ★ Style Field = 음악의 DNA (어떤 소리인가)
+  ★ Lyrics Field = 음악의 구조 (어떻게 흘러가는가)
+  이 두 필드를 함께 최적화해야 최고 수준의 결과가 나온다.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【4】 최고 수준 프롬프트의 8가지 핵심 요소
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  요소 1. 장르 + 시대 + 레퍼런스
+  ─────────────────────────────────
+  형식: [장르], [시대] [세부 느낌]; [아티스트 A] meets [아티스트 B]
+  예시: "90s alt-rock with Britpop undertones; Oasis meets The Verve"
+       "2000s indie pop, lo-fi bedroom aesthetic, Phoebe Bridgers vibe"
+       "Modern K-pop with trap influence, BTS emotional depth"
+
+  ※ 아티스트 이름 사용 가능 여부:
+     · 아티스트 이름은 "스타일 레퍼런스"로 사용 가능
+     · "정확히 이 아티스트처럼"은 안 되지만
+       "이 아티스트의 감성/스타일"은 허용됨
+     · 저작권 문제 시 우회: "confessional pop storytelling female vocals"
+
+  ──────────────────────────────────────────────────────────────
+
+  요소 2. BPM + 조성(Key) + 박자
+  ─────────────────────────────────
+  형식: [BPM] BPM, [Key] [major/minor], [박자]
+  예시: "115 BPM, A minor, 4/4 time"
+       "72 BPM, F major, warm tempo"
+       "mid-tempo, 90 BPM, swung feel"
+
+  BPM 없이도 되는 표현:
+  · "slow ballad tempo" → 약 60~80 BPM으로 인식
+  · "uptempo dance groove" → 약 120~130 BPM으로 인식
+  · "driving rock pace" → 약 120~160 BPM으로 인식
+
+  ──────────────────────────────────────────────────────────────
+
+  요소 3. 무드 + 감정 묘사 (v5 핵심!)
+  ─────────────────────────────────────
+  v5는 감정 묘사 문장에 특히 강하게 반응한다.
+  단어 나열보다 "한 문장 감성 묘사"가 더 효과적.
+
+  나쁜 예: "sad, emotional, nostalgic, melancholic, bittersweet"
+  → 단어 나열 → 평균적 결과
+
+  좋은 예:
+  "The feeling of standing alone in an empty apartment
+   after someone you loved has moved out."
+  → 구체적 장면 묘사 → v5가 감정을 정확히 번역
+
+  또 다른 좋은 예:
+  "Raw and yearning, like a love letter you wrote but never sent"
+  "Triumphant but bittersweet, like crossing a finish line alone"
+  "Nostalgic and warm, like flipping through old photos at midnight"
+
+  ──────────────────────────────────────────────────────────────
+
+  요소 4. 악기 + 편곡 지시
+  ──────────────────────────
+  형식: 주악기 → 서브악기 → 퍼커션 → 패드/텍스처 순서로
+
+  예시:
+  "Piano-led verses, lush string swells, subtle acoustic guitar,
+   deep reverb toms, warm sub bass, airy synth pads"
+
+  악기 묘사 레벨:
+    기본:   "piano, guitar, drums"
+    중급:   "grand piano, fingerpicked acoustic guitar, brushed snare"
+    고급:   "Steinway grand piano with room ambience, fingerpicked
+            nylon-string guitar, brushed snare with ghost notes,
+            upright bass with slight bow attack"
+
+  ──────────────────────────────────────────────────────────────
+
+  요소 5. 보컬 지시
+  ──────────────────────────
+  반드시 포함해야 할 4가지:
+    a) 성별: male / female / androgynous / duet
+    b) 음역대: soprano / alto / tenor / baritone / bass
+    c) 톤:    breathy / raspy / smooth / powerful / husky / airy
+    d) 창법:  belting / falsetto / head voice / mixed voice / chest voice
+
+  예시:
+  기본:   "female vocals"
+  중급:   "female alto, breathy and intimate"
+  고급:   "female alto, breathy intimate verses transitioning to
+           powerful full-belt chorus, close harmonies stacked,
+           slight vocal fry on emotional phrases"
+
+  ──────────────────────────────────────────────────────────────
+
+  요소 6. 곡 구조 지시
+  ──────────────────────────
+  형식: Structure: [섹션1] → [섹션2] → [섹션3] ...
+
+  예시:
+  "Structure: Intro (piano alone) → Verse (soft) → Pre (building)
+   → Chorus (anthemic full band) → Verse 2 → Bridge (stripped)
+   → Final Chorus (bigger, key change) → Outro (fade)"
+
+  ──────────────────────────────────────────────────────────────
+
+  요소 7. 프로덕션 & 믹스 노트 (v5 고급 기법)
+  ─────────────────────────────────────────────
+  v5는 믹싱 지시에도 반응한다.
+
+  기본 믹스 용어:
+  · "clean vocal upfront" → 보컬이 믹스 앞에 위치
+  · "plate reverb on vocals" → 보컬에 플레이트 리버브
+  · "tape saturation" → 아날로그 따뜻함
+  · "analog glue compression" → 전체적인 밀착감
+  · "wide stereo field" → 넓은 스테레오 이미지
+  · "punchy low-end" → 강한 저음
+  · "bright top-end shimmer" → 밝은 고음 질감
+  · "dry and direct" → 리버브 없는 건조한 소리
+
+  ──────────────────────────────────────────────────────────────
+
+  요소 8. 퍼포먼스 노트 (인간적 표현)
+  ──────────────────────────────────────
+  v5를 인간처럼 만드는 마법의 키워드들:
+
+  · "micro-timing variation" → 박자가 칼같이 맞지 않게 (인간적)
+  · "less quantized" → 기계적 정확성 줄이기
+  · "breath pickups" → 음 시작 전 숨소리 포함
+  · "ghost notes on drums" → 드럼의 섬세한 표현
+  · "subtle pitch imperfection" → 완벽하지 않은 피치 (자연스러움)
+  · "natural phrasing" → 자연스러운 문구 처리
+  · "slight string bow attack" → 현악기 활의 Attack 표현
+  · "bass slides" → 베이스 슬라이딩 기법
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【5】 Style Field 작성법 (스타일 프롬프트)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Style Field에서 쓰는 것:
+  ✅ 장르명, 서브장르명
+  ✅ BPM 숫자
+  ✅ 조성 (A minor, F major 등)
+  ✅ 무드 형용사
+  ✅ 악기 이름
+  ✅ 보컬 스타일
+  ✅ 프로덕션 스타일
+  ✅ 시대 (90s, 2000s, vintage, modern 등)
+  ✅ 아티스트 레퍼런스 (스타일 참고용)
+
+Style Field에서 쓰지 않는 것:
+  ❌ [대괄호 메타태그] — Lyrics Field에서 사용
+  ❌ 실제 가사
+  ❌ 섹션 이름 (Verse, Chorus 등)
+
+─────────────────────────────────────────────────────────────────
+Style Field 작성 공식 (순서 중요!)
+─────────────────────────────────────────────────────────────────
+
+[장르 + 서브장르],
+[BPM] BPM,
+[Key],
+[시대/스타일 레퍼런스],
+[주요 무드 1~2개],
+[주악기, 서브악기, 퍼커션],
+[보컬 성별, 음역, 톤],
+[보컬 창법 및 화음],
+[프로덕션 스타일],
+[감성 묘사 한 문장]
+
+─────────────────────────────────────────────────────────────────
+Style Field 수준별 예시
+─────────────────────────────────────────────────────────────────
+
+초보 수준:
+  "sad pop song, female vocals, piano"
+
+중급 수준:
+  "Contemporary pop ballad, 75 BPM, emotional and bittersweet,
+   piano-led, strings, female powerful vocals, belted chorus"
+
+최고 수준:
+  "Contemporary pop ballad, 75 BPM, F major,
+   raw and yearning — like a love letter never sent,
+   piano-led verses with lush string swells, subtle acoustic guitar,
+   deep reverb toms, warm sub bass,
+   female alto — breathy and intimate in verses,
+   powerful full-belt in chorus with stacked third harmonies,
+   clean vocal upfront, plate reverb, gentle tape saturation,
+   natural phrasing with breath pickups"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【6】 Lyrics Field 작성법 (가사 + 메타태그)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Lyrics Field 기본 구조:
+
+  [섹션태그]
+  가사 줄 1
+  가사 줄 2
+  가사 줄 3
+  가사 줄 4
+
+  [다음 섹션태그]
+  가사 ...
+
+─────────────────────────────────────────────────────────────────
+가사 작성 시 v5 인식률 높이는 팁
+─────────────────────────────────────────────────────────────────
+
+  1. 코러스는 반드시 코러스답게 써야 함
+     · 짧고 강렬한 문장
+     · 반복 가능한 훅
+     · 감정이 폭발하는 내용
+
+  2. 버스는 반드시 버스답게 써야 함
+     · 이야기를 전진시키는 내용
+     · 코러스보다 구체적이고 서술적
+
+  3. 음절수와 리듬을 고려해서 가사 작성
+     · 코러스: 짧고 강한 음절 (5~8음절/줄)
+     · 버스: 조금 더 길어도 됨 (6~12음절/줄)
+
+  4. 모음 배치
+     · 고음 파트: 아(a), 오(o), 에(e) 계열 모음
+     · 클라이맥스 단어: 입이 크게 열리는 모음으로 끝나게
+
+  5. 발음 조작 기법 (v5 전용):
+     · 늘려 부르게: "loooove" / "oh~~~" / "yeah~~~~"
+     · 강조: "seen, seen!" / "NOW!" / "STOP."
+     · 숨 쉬는 느낌: "(breath)" / "(exhale)"
+     · 속삭임 표시: "(whispered)" / "(soft)"
+
+─────────────────────────────────────────────────────────────────
+Lyrics Field 완성 예시
+─────────────────────────────────────────────────────────────────
+
+[Intro]
+(soft piano, single note, fading in)
+
+[Verse 1]
+The kettle's cold, the curtains stay
+Your jacket's gone, your smell remains
+I dial your number, disconnect
+The silence speaks what words can't fix
+
+[Pre-Chorus]
+And I know, I know
+This house learned every shape of you
+
+[Chorus]
+I'll carry you, I'll carry you
+Even when the world forgets your name
+I'll carry you, I'll carry you
+Through every version of this pain
+
+[Verse 2]
+The grocery list is still the same
+Your handwriting, a ghost I chase
+I cook for two out of habit
+Then laugh, then cry, then start again
+
+[Pre-Chorus]
+And I know, I know
+This loss has no return address
+
+[Chorus]
+I'll carry you, I'll carry you
+Even when the world forgets your name
+I'll carry you, I'll carry you
+Through every version of this pain
+
+[Bridge]
+(drop to piano and vocal only)
+Maybe grief is just love
+With nowhere left to go
+And I'd rather ache than forget
+Everything you helped me grow
+
+[Final Chorus]
+(full band, key change up)
+I'll carry you, I'll carry you
+Even when the world forgets your name
+I'll carry you, I'll carry you
+You're every version of my name
+
+[Outro]
+(strings swell, slow fade)
+I'll carry you...
+I'll carry you...
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【7】 v5 전용 메타태그 완전 목록
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+모든 메타태그는 [대괄호] 안에 쓴다.
+Lyrics Field에서만 사용. Style Field에는 쓰지 않는다.
+
+════════════════════════════
+A. 섹션 구조 태그 (필수)
+════════════════════════════
+
+기본 섹션 태그:
+  [Intro]                  인트로
+  [Verse]                  버스 (번호 없는 기본형)
+  [Verse 1]                첫 번째 버스
+  [Verse 2]                두 번째 버스
+  [Pre-Chorus]             프리코러스
+  [Chorus]                 코러스
+  [Post-Chorus]            포스트코러스 (코러스 직후 훅)
+  [Bridge]                 브릿지
+  [Outro]                  아웃트로
+  [Hook]                   독립된 훅 섹션
+  [Refrain]                리프레인 (반복 구절)
+  [Instrumental]           악기 연주 구간
+  [Interlude]              간주
+  [Solo]                   솔로 구간
+  [Break]                  브레이크 (박자 멈춤)
+  [Drop]                   드랍 (EDM/댄스 전용)
+  [Build]                  빌드업
+  [Outro | Fade Out]       페이드아웃 아웃트로
+
+힙합 전용:
+  [Verse 1 - Rap]          랩 버스 1
+  [Hook]                   훅 (힙합 코러스)
+  [Outro - Rap]            랩 아웃트로
+
+발라드 전용:
+  [Final Chorus]           마지막 코러스 (더 크게)
+  [Bridge | A Cappella]    보컬만 남는 브릿지
+  [Outro | Key Change Up]  전조된 아웃트로
+
+════════════════════════════
+B. 보컬 태그
+════════════════════════════
+
+성별/유형:
+  [Male Vocal]             남성 보컬
+  [Female Vocal]           여성 보컬
+  [Duet]                   듀엣 (남+여)
+  [Male & Female Duet]     남성+여성 듀엣 명시
+  [Choir]                  합창단
+  [Background: female ahhhs]  배경 보컬 지정
+  [Spoken Word]            말하듯 노래
+  [Narrator]               나레이터 스타일
+
+음역대:
+  [Soprano]                소프라노
+  [Mezzo-Soprano]          메조소프라노
+  [Alto]                   알토
+  [Tenor]                  테너
+  [Baritone]               바리톤
+  [Bass Vocal]             베이스 보컬
+
+창법/톤:
+  [Breathy]                숨이 섞인 소리
+  [Raspy]                  허스키하고 거친
+  [Smooth]                 부드럽고 매끄러운
+  [Powerful]               파워풀
+  [Falsetto]               팔세토 (가성)
+  [Head Voice]             두성
+  [Belt]                   벨팅 (강한 흉성)
+  [Mixed Voice]            혼성 (흉성+두성 믹스)
+  [Whispered]              속삭임
+  [Gospel Runs]            가스펠 런 (꾸밈음 연속)
+  [Melisma]                멜리스마 (한 음절에 여러 음)
+  [Vibrato]                비브라토
+  [Ad-lib]                 애드리브
+
+화음:
+  [Harmonies]              하모니
+  [Stacked Harmonies]      겹쳐진 하모니
+  [Close Harmonies]        긴밀한 화음
+  [Third Harmonies]        3도 화음
+  [Octave Doubles]         옥타브 더블링
+  [Background: oohs and aahs]  배경 "우"와 "아" 코러스
+
+v5 신규 보컬 태그:
+  [Vocal Style: Power Praise Persona]  파워 가스펠 스타일
+  [Vocal Fry]              목소리 끝의 가성 갈라짐
+  [Call and Response]      콜앤리스폰스
+
+════════════════════════════
+C. 악기 & 편곡 태그
+════════════════════════════
+
+섹션별 악기 지시:
+  [Instrument: Piano and Strings]      피아노+현악
+  [Instrument: Acoustic Guitar Only]   어쿠스틱 기타만
+  [Instrument: Drums Drop Out]         드럼 제거
+  [Instrument: Full Band]              풀 밴드
+  [Instrument: 808s, Handclaps, Gospel Choir]  세부 지정
+
+솔로 지시 (v5 전용):
+  [Solo: 12s sax swell]     12초 색소폰 스웰
+  [Solo: guitar 8 bars]     기타 솔로 8마디
+  [Solo: piano improvisation]  피아노 즉흥
+  [Break: distorted bass drop]  베이스 드랍 효과
+
+편곡 전환:
+  [Build: strings rising]   현악 상승
+  [Drop: bass and drums]    베이스+드럼 드랍
+  [Strip: vocal and piano only]  보컬+피아노만 남김
+
+════════════════════════════
+D. 무드 & 에너지 태그
+════════════════════════════
+
+  [Mood: Joyful]             기쁨
+  [Mood: Melancholic]        우울
+  [Mood: Triumphant]         승리감
+  [Mood: Tender]             부드러움
+  [Mood: Chill But Focused]  집중된 차분함
+  [Mood: Raw and Yearning]   날것의 갈망
+  [Energy: High]             고에너지
+  [Energy: Low]              저에너지
+  [Energy: Rising]           점층적 상승
+
+════════════════════════════
+E. 텍스처 & 프로덕션 태그
+════════════════════════════
+
+  [Texture: Tape-Saturated]  아날로그 테이프 질감
+  [Texture: Lo-fi]           로파이 질감
+  [Texture: Cinematic]       영화적 질감
+  [Texture: Warm and Vintage]  따뜻한 빈티지
+  [Texture: Crisp and Modern]  선명한 현대적
+  [Texture: Distorted]       디스토션 질감
+  [Texture: Gentle Sidechain]  부드러운 사이드체인
+
+════════════════════════════
+F. v5 전용 신규 태그
+════════════════════════════
+
+콜백 태그 (편집 체인용):
+  [Callback: continue with same vibe as chorus]
+  → 이전 코러스 분위기를 유지하며 확장
+  [Callback: keep tempo and instrumentation consistent]
+  → 템포와 악기 구성 유지
+
+루프 태그:
+  [Structure: seamless loop]  끊김 없는 루프
+  [Loop Friendly]             루프 친화적 구조
+
+전조 태그:
+  [Key Change Up]             반음 올림
+  [Key Change: Up a half step]  반음 업 명시
+  [Modulate to Major]         장조로 전조
+
+다이나믹 태그:
+  [Quiet]                     조용하게
+  [Loud]                      크게
+  [Whisper to Full Band]      속삭임에서 풀밴드로
+  [Stripped Down]             최소 편성
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【8】 v5 고급 기법 (숨겨진 기술들)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+기법 1. 앵커 반복 기법 (Anchor Repetition)
+────────────────────────────────────────────
+핵심 키워드를 프롬프트의 첫 줄과 마지막 줄 양쪽에 배치.
+v5는 첫/마지막 위치에 높은 가중치를 부여함.
+
+  예시:
+  "Cinematic outlaw country, raw and emotional...
+   (중간 내용)
+   ...cinematic southern soul" ← 첫 단어 반복
+
+기법 2. 내러티브 무드 기법 (Narrative Mood)
+─────────────────────────────────────────────
+감정을 단어 나열이 아닌 "장면 묘사 문장"으로 표현.
+
+  단어 나열: "dark, intense, sad, emotional"
+  내러티브: "The feeling of waiting for someone you know won't come back,
+             watching their car never pull into the driveway"
+
+기법 3. 발음 조작 기법 (Pronunciation Tweak)
+──────────────────────────────────────────────
+모음 늘리기, 구두점으로 강조, 발음 힌트 삽입.
+
+  · "loooove" → 'love'를 길게 끌기
+  · "seen, seen!" → 강조 반복
+  · "(breathes in) I never said goodbye" → 숨 소리 삽입
+  · "I miss yoooou" → 슬라이딩 느낌
+
+기법 4. AI 이중 작업 기법 (Two-Step AI Method)
+──────────────────────────────────────────────
+나(or Claude) → Suno v5 순서로 프롬프트 작성.
+
+  1단계: Claude에게 Suno 프롬프트 초안 요청
+  "인디포크 앨범의 감정적 클라이맥스 트랙이야.
+   빈 아파트에서 혼자 앉아 이별의 현실을 받아들이는 장면.
+   최고 수준의 Suno v5 프롬프트 만들어줘."
+
+  2단계: Claude가 만든 프롬프트를 Suno에 붙여넣기
+
+  → 이 방식이 직접 입력보다 훨씬 정교한 결과 도출
+
+기법 5. 점진적 정제 기법 (Iterative Refinement)
+──────────────────────────────────────────────
+한 번에 완벽한 결과를 기대하지 않고, 단계별 수정.
+
+  1회: 기본 프롬프트로 30~60초 초안 생성
+  2회: 잘 된 것 분석 → 1~2가지 변수만 수정
+  3회: 최선 버전 확인 → 상세 요소 병합
+  4회: 전체 길이 생성 → 미세 조정 (숨소리, 화음 등)
+
+  ※ 한 번에 너무 많이 바꾸면 뭐가 효과적인지 알 수 없음
+
+기법 6. 스타일 인플루언서 슬라이더 활용
+──────────────────────────────────────────
+Style Influence 슬라이더: 0~100%
+
+  0%:   프롬프트 무시, 완전 AI 자유 생성
+  50%:  프롬프트와 AI의 창의성 절반씩 (권장 시작점)
+  80%:  프롬프트에 강하게 구속 (예측 가능한 결과)
+  100%: 완전 구속 (때로 창의성 없어 보임)
+
+  권장 전략:
+  · 새로운 장르 탐색: 30~50%
+  · 정확한 스타일 재현: 70~80%
+  · 완전히 특수한 스타일: 85~90%
+
+기법 7. 섹션 교체 기법 (Replace & Extend)
+──────────────────────────────────────────
+v5 Studio에서 마음에 안 드는 구간만 교체 가능.
+
+  · Replace: 특정 구간만 재생성
+  · Extend: 곡 끝에 새 섹션 추가
+  · Crop: 불필요한 구간 제거
+  · Callback 태그 사용:
+    [Callback: continue with same vibe as chorus; keep tempo consistent]
+
+기법 8. 줄 내 즉흥 악기 지시
+──────────────────────────────
+가사 줄 사이에 괄호로 악기 지시 삽입.
+
+  예시:
+  [Bridge]
+  (piano only, no drums)
+  What we lost we cannot find
+  (strings enter softly)
+  But what remains was always mine
+  (full band crashes in)
+  And I would choose this pain again
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【9】 슬라이더 & 설정값 완전 정복
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+v5 Studio 슬라이더 3가지
+
+┌──────────────────────────────────────────────────────────────┐
+│  슬라이더 1. Weirdness (기이함) — 0~100                       │
+│  0:   매우 전통적, 예측 가능                                   │
+│  30:  약간의 독특함 (권장 기본값)                              │
+│  60:  창의적이고 실험적                                        │
+│  100: 매우 실험적, 예측 불가능                                 │
+│                                                               │
+│  → 팝/발라드: 10~25 / 록/메탈: 20~40                         │
+│  → 재즈/실험: 40~60 / 아방가르드: 60~80                      │
+├──────────────────────────────────────────────────────────────┤
+│  슬라이더 2. Style Influence — 0~100                          │
+│  스타일 프롬프트를 얼마나 충실히 따를지                        │
+│  → 새 스타일 탐색: 40~60                                     │
+│  → 정확한 재현: 70~85                                        │
+├──────────────────────────────────────────────────────────────┤
+│  슬라이더 3. Audio Influence — 0~100                          │
+│  (업로드한 오디오 샘플을 참고할 때)                            │
+│  50%: 샘플과 프롬프트를 절반씩 반영                           │
+│  80%: 샘플에 가깝게 생성                                      │
+└──────────────────────────────────────────────────────────────┘
+
+Exclude Styles (제외 스타일)
+  원하지 않는 스타일을 명시적으로 제외 가능.
+  예: "Exclude: aggressive drums, auto-tune, spoken word"
+
+성공 공식:
+  정교한 메타태그 + Style Influence 70~80%
+  + Weirdness 15~30% + Exclude 전략적 사용
+  = 프로 수준의 커스텀 음악
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【10】 장르별 최고 수준 완성 프롬프트 예시 20개
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+각 예시는 [STYLE FIELD]와 [LYRICS FIELD]를 분리하여 제시.
+
+══════════════════════════════════════════════════════
+예시 1. 팝 발라드 (감동적 이별)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Contemporary pop ballad, 72 BPM, F major,
+raw and yearning — like a love letter you wrote but never sent,
+piano-led verses with lush cinematic string swells,
+subtle acoustic guitar fingerpicking, deep reverb toms,
+warm sub bass, ambient synth pads,
+female alto — breathy and intimate in verses,
+powerful full-belt in chorus with stacked third harmonies,
+ad-lib runs on outro, clean vocal upfront,
+plate reverb, gentle tape saturation,
+natural phrasing with breath pickups,
+contemporary sound, emotionally devastating
+
+[LYRICS FIELD]
+[Intro]
+(piano, single notes, soft strings rising)
+
+[Verse 1]
+The kettle's cold, the curtains stay
+Your jacket's gone, your smell remains
+I dial your number, disconnect
+The silence speaks what words can't fix
+
+[Pre-Chorus]
+And I know, I know
+This house learned every shape of you
+
+[Chorus]
+I'll carry you, I'll carry you
+Even when the world forgets your name
+I'll carry you, I'll carry you
+Through every version of this pain
+
+[Verse 2]
+I cook for two out of habit now
+Then laugh, then cry, then start again
+Your handwriting still on the wall
+A ghost that hasn't learned to leave
+
+[Pre-Chorus]
+And I know, I know
+This grief has no return address
+
+[Chorus]
+I'll carry you, I'll carry you
+Even when the world forgets your name
+I'll carry you, I'll carry you
+Through every version of this pain
+
+[Bridge]
+(drop to piano and vocal only, stripped)
+Maybe grief is just love
+With nowhere left to go
+And I'd rather ache forever
+Than forget everything you showed
+
+[Final Chorus]
+(full band, key change up, anthemic)
+I'll carry you, I'll carry you
+Even when the world forgets your name
+I'll carry you, I'll carry you
+You're every version of my name
+
+[Outro]
+(strings swell, slow fade, ad-lib)
+I'll carry yooou...
+I'll carry you...
+
+══════════════════════════════════════════════════════
+예시 2. K-POP (자신감 / 에너지)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+K-pop, 128 BPM, D major,
+bold and triumphant — the feeling of finally being seen,
+modern synth leads with brass stabs, punchy electronic drums,
+tight 808 bass, electric guitar accents, riser FX,
+mixed male and female lead vocals alternating,
+dynamic rap verses with confident delivery,
+powerful anthemic chorus with octave doubles and layered harmonies,
+ad-lib stacks on final chorus, polished K-pop production,
+crisp and modern, clean vocal upfront, wide stereo field
+
+[LYRICS FIELD]
+[Intro]
+(synth riser, brass stab hit)
+Yeah, yeah
+
+[Verse 1]
+Been down this road a thousand times
+But I was never built to stop
+Every door they closed in my face
+Just pushed me harder to the top
+
+[Pre-Chorus]
+I don't need permission anymore
+Watch me light up every floor
+
+[Chorus]
+This is my moment, my moment
+No one can take what I've earned
+This is my moment, my moment
+Every bridge I've burned
+
+[Verse 2 - Rap]
+They said slow down but I switched lanes
+Counted losses, counted gains
+Turned my pain into a blueprint
+Now they wanna know my name
+
+[Pre-Chorus]
+I don't need permission anymore
+Watch me light up every floor
+
+[Chorus]
+This is my moment, my moment
+No one can take what I've earned
+This is my moment, my moment
+Every bridge I've burned
+
+[Bridge]
+(drop beat, vocals layered)
+I built this with my own two hands
+No shortcut, no second chance
+And I'd do every hard day again
+Just to stand right here
+
+[Final Chorus]
+(full energy, key change, ad-libs)
+This is MY moment, my moment
+No one, no one can take what I've earned
+This is my moment, my moment
+Watch me BURN
+
+[Outro]
+(percussion fade, synth swell)
+Yeah... this is it... yeah...
+
+══════════════════════════════════════════════════════
+예시 3. 헤비메탈 (내면의 분노 / 초월)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Heavy metal, 158 BPM, E minor,
+cathartic and defiant — like screaming into a storm
+and realizing the storm is afraid of you,
+down-tuned heavy guitar riffs with palm muting,
+double bass drum relentless pattern, thunderous live drums,
+heavy distorted bass guitar, power chords,
+powerful male vocals alternating clean tenor and harsh screaming,
+tense and controlled verses, explosive anthemic chorus,
+guitar solo with whammy dive bombs,
+analog amp saturation, massive low-end,
+no reverb on drums (dry and punchy), wide guitar stereo
+
+[LYRICS FIELD]
+[Intro]
+(slow power riff, one guitar, then full band drops)
+
+[Verse 1]
+(clean vocals, controlled)
+They built a cage out of my silence
+And painted it with golden lies
+I swallowed every word they handed me
+Until I choked on my disguise
+
+[Pre-Chorus]
+(building, vocals rougher)
+But the fire that they tried to smother
+Was never theirs to burn
+
+[Chorus]
+(full scream and clean vocal trade)
+I AM THE STORM / I am the storm
+You cannot cage what you cannot hold
+I AM THE STORM / I am the storm
+And I am finally coming home
+
+[Verse 2]
+(half-time feel, heavy riff)
+You thought my wounds would make me smaller
+You thought my silence meant I'd break
+But every scar you gave became a weapon
+Every loss became my stake
+
+[Pre-Chorus]
+The fire that they tried to smother
+Was never theirs to take
+
+[Chorus]
+I AM THE STORM / I am the storm
+You cannot cage what you cannot hold
+I AM THE STORM / I am the storm
+And I am finally coming home
+
+[Guitar Solo]
+(8 bars, shred with emotion, whammy dive, back to riff)
+
+[Bridge]
+(half-time breakdown, clean vocals only)
+I spent years apologizing
+For taking up the space I'm owed
+Not anymore
+Never again
+
+[Final Chorus]
+(heaviest version, both vocal styles layered)
+I AM THE STORM
+YOU CANNOT CAGE ME
+I AM THE STORM
+I AM COMING HOME
+
+[Outro]
+(slow power chord fade, feedback trail)
+
+══════════════════════════════════════════════════════
+예시 4. 트랩 / 힙합 (성공 스토리)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Trap hip-hop, 140 BPM, dark and atmospheric,
+triumphant underneath the darkness —
+like wealth that was built from nothing but doubt,
+rolling 808 sub bass with punchy kick,
+hi-hat triplets and doubles, trap snares,
+dark minor piano loop, eerie string samples,
+orchestral brass hits for impact,
+smooth male melodic trap vocals in hooks,
+confident rapid-fire rap verses,
+stacked harmonies on chorus,
+hard-hitting modern trap production,
+808 bass tuned to key, wide mix, punchy low-end
+
+[LYRICS FIELD]
+[Intro]
+(piano loop fades in, 808 drops)
+
+[Verse 1]
+Started with a phone and a prayer
+Empty pockets but I had the vision clear
+Every no they gave me was a door
+That pushed me to unlock the next one near
+Grinding through the nights no one noticed
+Building something real when they doubted
+Now the same ones who looked through me
+Are the first ones that wanna talk about it
+
+[Hook]
+We came from nothing
+Built this from the ground up
+No shortcuts taken
+Now watch what we've done
+We came from nothing
+Every scar became a stepping stone
+We came from nothing
+And now we're never going back alone
+
+[Verse 2]
+They said the odds were stacked against us
+Said the system wasn't built for our kind
+But I was never asking for permission
+I was writing futures no one else could find
+Turned the pain into a blueprint
+Turned the setbacks into a grind
+Now the same walls they built to stop me
+Are the monuments that mark my climb
+
+[Hook]
+We came from nothing
+Built this from the ground up
+No shortcuts taken
+Now watch what we've done
+We came from nothing
+Every scar became a stepping stone
+We came from nothing
+And now we're never going back alone
+
+[Bridge]
+(drop to piano, sparse)
+I remember every night I cried
+Every time I almost let it go
+But something in me wouldn't stop
+Now look at everything we've grown
+
+[Final Hook]
+(full beat back, energized)
+We came from NOTHING
+Built this with our hands
+No one gave us anything
+But now they understand
+WE CAME FROM NOTHING
+Every scar, every stone
+We came from nothing
+And now we'll never face it alone
+
+[Outro]
+(piano loop returns, 808 fade)
+From nothing... from nothing...
+
+══════════════════════════════════════════════════════
+예시 5. 보사노바 (여름·사랑)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Bossa nova, 108 BPM, A major,
+breezy and romantic — the feeling of watching someone
+beautiful pass by the same café window every morning,
+nylon-string guitar with samba rhythmic pattern,
+gentle upright bass walking, brushed snare,
+soft jazz piano comping, light flute accents,
+warm female Brazilian vocals — intimate and conversational,
+close harmonies in chorus, subtle scat phrases in outro,
+clean and open mix, slight room ambience,
+no reverb on guitar (dry), sophisticated and poetic
+
+[LYRICS FIELD]
+[Intro]
+(guitar pattern, bass enters softly)
+
+[Verse 1]
+Every morning same café
+You walk past without looking in
+The sun behind you makes a halo
+That I've memorized again and again
+
+[Chorus]
+Girl from the window
+I never learned your name
+Girl from the window
+Every morning just the same
+But something in the way you move
+Makes this tired city feel brand new
+
+[Verse 2]
+One day I almost said hello
+You smiled at someone else instead
+And I decided your mystery
+Was sweeter than any answer
+
+[Chorus]
+Girl from the window
+I never learned your name
+Girl from the window
+Every morning just the same
+But something in the way you move
+Makes this tired city feel brand new
+
+[Bridge | Guitar Solo]
+(nylon string improvisation, gentle and lyrical)
+
+[Verse 3]
+Maybe some loves are meant to stay
+A quiet joy you only watch
+A song you hum but never finish
+That somehow heals the parts that hurt
+
+[Final Chorus]
+Girl from the window
+I'll never learn your name
+Girl from the window
+And I think that's more than okay
+Because something in the way you move
+Made this whole city feel like home
+
+[Outro]
+(guitar fades, scat phrases)
+Mmm... sim sim... da da da...
+
+══════════════════════════════════════════════════════
+예시 6. 심포닉 메탈 (서사적 판타지)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Symphonic metal, 138 BPM, D minor,
+epic and cinematic — a warrior choosing between
+duty and love on the eve of a final battle,
+heavy distorted guitars with melodic lead lines,
+double bass drums and powerful live kit,
+symphonic orchestral strings and brass,
+operatic female soprano lead vocals,
+deep male baritone growl in verses,
+massive choir in chorus,
+dynamic contrast between tender orchestral passages
+and crushing metal sections,
+analog amp saturation, live drum room ambience,
+orchestral mix with metal punch,
+Nightwish meets Hans Zimmer
+
+[LYRICS FIELD]
+[Intro]
+(orchestra alone — strings, then brass fanfare, then metal drops)
+
+[Verse 1]
+(male growl, heavy riff)
+The fires of the north are burning
+Ten thousand blades await the dawn
+I've pledged my sword to ancient glory
+But my heart calls from beyond
+
+[Pre-Chorus]
+(female soprano, clean, soaring)
+And in the silence before the battle
+Your name is all I hear
+
+[Chorus]
+(soprano + choir + full orchestra + metal)
+Hold on — through the storm and thunder
+Hold on — even when the skies break open
+Across the fire, across forever
+I'll find my way back to you
+
+[Verse 2]
+(trade between male and female)
+They crowned me with a crown of iron
+And gave me glory, gave me war
+But what glory conquers loneliness
+When you're the one I'm fighting for
+
+[Pre-Chorus]
+(soprano, building)
+And in the silence before the ending
+Your face is all I see
+
+[Chorus]
+(massive, full choir, orchestra + metal)
+Hold on — through the storm and thunder
+Hold on — even when the skies break open
+Across the fire, across forever
+I'll find my way back to you
+
+[Bridge]
+(orchestra only, no metal — strings and piano, tender)
+If the gods demand my life
+Then let my last word be your name
+Let the chronicles remember
+That I loved you all the same
+
+[Guitar Solo]
+(12 bars, melodic neo-classical shred, strings underneath)
+
+[Final Chorus]
+(everything combined, highest intensity)
+HOLD ON — through the storm and thunder
+HOLD ON — even when all hope is broken
+Across the fire, across forever
+I FOUND MY WAY BACK TO YOU
+
+[Outro]
+(orchestra alone, slowly fading — strings, distant choir)
+...I found my way...
+
+══════════════════════════════════════════════════════
+예시 7. 에픽 오케스트라 (트레일러 뮤직)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Epic orchestral trailer music, 132 BPM, C minor,
+colossal and awe-inspiring — like standing at the edge of the world
+and choosing to take the first step anyway,
+full symphony orchestra, massive brass fanfare,
+four-on-the-floor epic percussion, snare rolls building,
+pounding timpani, choir (Latin text),
+sweeping string ostinatos, French horn motif,
+deep hybrid bass elements, braaam hits,
+cinematic sound design layers,
+Two Steps From Hell meets Hans Zimmer,
+massive dynamic range — whisper to explosion,
+concert hall reverb, wide and monumental mix
+
+[LYRICS FIELD]
+[Intro]
+(single piano note, distant — then silence)
+(strings creep in, barely audible)
+
+[Build 1]
+(strings rising, percussion entering one by one)
+(brass enters single note — held)
+
+[Climax 1]
+(full orchestra drops — 16 bars)
+
+[Breakdown]
+(everything strips away — solo cello)
+(choir enters softly, Latin words: "Ad astra per aspera")
+(piano joins)
+
+[Build 2]
+(choir grows, strings return, percussion builds)
+(brass stabs — intensifying)
+(snare roll crescendo)
+
+[Final Climax]
+(maximum impact — full orchestra, choir, percussion)
+(32 bars of pure triumph)
+
+[Resolution]
+(slow down, strings hold final chord)
+(silence, then single distant note)
+
+══════════════════════════════════════════════════════
+예시 8. 볼리우드 (드라마틱 러브스토리)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Bollywood, 118 BPM, G major,
+romantic and dramatic — two people from different worlds
+finding each other at a monsoon festival,
+defying family, trusting the heart,
+raga-influenced melodic phrasing, tabla and dhol percussion,
+sitar accent lines, orchestral strings,
+synth pads for modernity, brass hits,
+expressive female Hindi vocals with melismatic runs,
+male vocalist in verses — warm and emotional,
+antiphonal duet in chorus,
+layered background vocals and choir,
+lush Bollywood production, wide dynamic range,
+modern sound with classical Indian roots
+
+[LYRICS FIELD]
+[Intro]
+(sitar intro, tabla enters, strings swell)
+
+[Verse 1 - Female]
+Aankhon mein kho gayi hoon main
+Is raat ke dhundh mein
+Tujhe dekha toh laga jaise
+Mujhe mili manzil apni
+
+[Verse 1 - Male response]
+Kahin se aayi hai tu
+Meri duniya mein aisa kabhi hua nahi
+Is baarish mein milna tera
+Ek meetha hua nasha hai
+
+[Pre-Chorus - Together]
+Dil ki sunn
+Jo keh raha hai dil
+
+[Chorus - Both voices + choir]
+Tujhse hi tujhse hi
+Yeh dil milta hai
+Baarish ki boondon mein
+Tera chehra dikhta hai
+Tujhse hi tujhse hi
+Yeh duniya banti hai
+Haath thaame chal mere saath
+Yahi toh zindagi hai
+
+[Bridge - orchestral interlude]
+(strings and sitar dialogue, tabla rhythm)
+
+[Final Chorus]
+(full orchestra, choir, key change, emotional peak)
+Tujhse hi tujhse hi
+Yeh dil milta hai...
+
+[Outro]
+(sitar melody, rain sounds, fade)
+
+══════════════════════════════════════════════════════
+예시 9. EDM / 빅룸 하우스 (페스티벌 앤섬)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Big room house, 128 BPM, A major,
+euphoric and explosive — the feeling of a crowd
+of fifty thousand people lifting their arms together
+as the drop hits and everything becomes one,
+four-on-the-floor festival kick, punchy 909 drums,
+massive supersaw lead synth, white-noise risers,
+filter sweeps, pitch risers building anticipation,
+emotional vocal hook — female, clear and powerful,
+vocal chops on drop, stacked harmonies,
+sub bass impact on drop, wide stereo supersaws,
+festival-ready production, huge dynamic range,
+Hardwell meets Martin Garrix energy
+
+[LYRICS FIELD]
+[Intro]
+(hi-hat pattern, bass kicks in — 16 bars)
+
+[Verse 1]
+(filtered, lower energy)
+We've been chasing this feeling
+All our lives from the start
+And tonight every heartbeat
+Says we're never apart
+
+[Build 1]
+(riser starts, energy increasing)
+You and I, we belong to
+Something bigger than the night
+(snare roll entering)
+Can you feel it, feel it, feel it
+(riser peaks)
+
+[Drop 1]
+(supersaw, full festival drop — no vocals, 16 bars)
+
+[Verse 2]
+(energy slightly lower)
+This moment won't last forever
+But the memory will stay
+So raise your hands to the heavens
+And let the music take the weight
+
+[Build 2]
+(longer riser, more intense)
+You and I, we were made for
+This one perfect night
+(full riser, snare roll intense)
+Can you feeeeel—
+
+[Drop 2]
+(biggest drop, vocal chops layered)
+(32 bars, maximum energy)
+
+[Bridge]
+(breakdown — all drops out, piano only)
+Some nights you just know
+This is where you were meant to be
+(choir whisper)
+Feel it... feel it...
+
+[Final Build]
+(everything builds back)
+(choir getting louder)
+FEEL IT—
+
+[Final Drop]
+(all elements, maximum width)
+
+[Outro]
+(elements strip one by one, hi-hats last)
+
+══════════════════════════════════════════════════════
+예시 10. 플라멩코 (두엔데 / 감정의 순수)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+Flamenco, passionate and cathartic —
+the raw duende of grief becoming beauty,
+the moment a broken heart finds its voice,
+flamenco guitar with rasgueado strums and picado runs,
+cajón percussion driving the compás,
+palmas claras handclaps, zapateado foot stomps,
+Phrygian mode chord progressions,
+expressive male flamenco vocals — deep and raw,
+cante jondo style with melismatic ornaments,
+jaleo interjections (¡Olé! ¡Así! ¡Agua!),
+intimate tablao recording — dry and direct,
+no studio reverb, raw and live-sounding,
+authentic Gitano flamenco energy
+
+[LYRICS FIELD]
+[Intro | Guitar Solo]
+(falseta — Phrygian mode, melancholic and intricate)
+(palmas enter slowly)
+
+[Verse 1 - Cante]
+(slow, deep, drawn out)
+Ay... ay... ay...
+Me dejaste sin palabras
+Con el corazón partido
+Entre tus manos quedó
+Todo lo que yo había sido
+Ayyyy...
+
+[Instrumental Break | Cajón intensifies]
+¡Olé! ¡Así!
+
+[Verse 2 - More intense]
+No hay noche más oscura
+Que la que tú me dejaste
+Pero en cada grito mío
+Vive todo lo que amaste
+Ay yay yay...
+
+[Climax | Guitar runs, full compás]
+(zapateado intensifies)
+¡Agua! ¡Eso es!
+
+[Final Verse | Stripped, just voice and guitar]
+Y aunque me duelas
+En cada hueso que tengo
+Te canto porque exististe
+Te canto porque te quiero
+Ayyyy... te quiero...
+
+[Remate | Fast ending figure]
+(guitar rapid run, cajón hits, hard stop)
+¡Ole!
+
+══════════════════════════════════════════════════════
+(나머지 10가지: 록, 재즈, 아프로비츠, R&B, 신스웨이브,
+인도 클래식, 레게, 샹송, 컨트리, 드림팝은
+본 가이드의 공식 템플릿을 적용하여 동일 방식으로 제작)
+══════════════════════════════════════════════════════
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【11】 자주 발생하는 문제와 해결법
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+문제 1. 보컬이 로봇처럼 들린다
+────────────────────────────────
+원인: 인간적 표현 지시 부재
+해결:
+  · "micro-timing variation" 추가
+  · "natural phrasing, breath pickups" 추가
+  · "less quantized" 추가
+  · 발음 조작: "loooove" / "(breath) I never said"
+
+문제 2. 태그가 무시된다 (원하는 스타일이 안 나옴)
+──────────────────────────────────────────────────
+원인: 너무 많은 서로 충돌하는 태그
+해결:
+  · 장르 1~2개로 줄이기
+  · 핵심 키워드를 프롬프트 앞에 배치
+  · Style Influence 슬라이더 70~80%로 높이기
+
+문제 3. 코러스가 버스처럼 들린다
+──────────────────────────────────
+원인: 코러스 가사가 코러스답지 않음
+해결:
+  · [Chorus] 태그 앞에 "(full band, anthemic)" 추가
+  · 코러스 가사를 짧고 반복적으로 수정
+  · [Final Chorus | Key Change Up] 사용
+
+문제 4. 곡이 너무 단조롭고 반복적이다
+──────────────────────────────────────
+원인: 다이나믹 변화 지시 부재
+해결:
+  · 브릿지에 "(drop to piano only)" 추가
+  · 버스에 "(soft, intimate)" / 코러스에 "(full energy)" 추가
+  · 섹션 전환 시 악기 변화 명시
+
+문제 5. 원하는 악기가 안 나온다
+──────────────────────────────────
+원인: Style Field에 악기 명시 부족
+해결:
+  · Style Field 앞부분에 주악기 명시
+  · Lyrics Field에서 섹션별 [Instrument: ...] 태그 추가
+  · Exclude 필드로 원하지 않는 악기 제외
+
+문제 6. 긴 곡 생성 시 후반부가 흐릿해진다
+──────────────────────────────────────────
+원인: 긴 체인 편집 시 스타일 드리프트
+해결:
+  · Extend 시 [Callback: continue same vibe as chorus] 삽입
+  · 편집 1~2회마다 핵심 스타일 태그 재주입
+  · 8분 이상은 여러 Extend로 분할 생성
+
+문제 7. 두 보컬이 구분되지 않는다 (듀엣)
+──────────────────────────────────────────
+원인: 보컬 전환 지시 부재
+해결:
+  · [Male Vocal] / [Female Vocal] 태그를 섹션별로 번갈아 사용
+  · "[Verse 1 - Male]" / "[Chorus - Both]" 명시
+  · "(male verse, female chorus)" 괄호 설명 추가
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【12】 최고 수준 프롬프트 공식 템플릿
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+══════════════════════════════════════════════════════
+◆ 범용 최고 수준 템플릿 (복사 후 []를 채우세요)
+══════════════════════════════════════════════════════
+
+[STYLE FIELD에 붙여넣기]
+────────────────────────────────────────────────────
+[장르], [서브장르], [BPM] BPM, [Key] [major/minor],
+[한 문장 감성 묘사 — "like ..." 형식으로],
+[주악기]-led [섹션], [서브악기], [퍼커션],
+[텍스처 요소], [베이스 설명],
+[보컬 성별] [음역] — [버스 톤] in verses,
+[코러스 톤] in chorus with [화음 방식],
+[아웃트로 보컬 특수 표현],
+[믹스 노트 1], [믹스 노트 2], [프로덕션 텍스처],
+[퍼포먼스 노트],
+[마지막 핵심 키워드 반복 — 첫 단어와 같거나 유사하게]
+────────────────────────────────────────────────────
+
+[LYRICS FIELD에 붙여넣기]
+────────────────────────────────────────────────────
+[Intro]
+([악기 설명, 분위기])
+
+[Verse 1]
+[가사 줄 1 — 이야기 시작, 구체적 장면]
+[가사 줄 2]
+[가사 줄 3]
+[가사 줄 4]
+
+[Pre-Chorus]
+[가사 줄 1 — 긴장감 고조]
+[가사 줄 2]
+
+[Chorus]
+([에너지 설명])
+[훅 줄 1 — 제목 또는 핵심 메시지]
+[훅 줄 2]
+[훅 줄 1 반복]
+[마무리 줄]
+
+[Verse 2]
+[가사 줄 1 — 이야기 심화]
+[가사 줄 2]
+[가사 줄 3]
+[가사 줄 4]
+
+[Pre-Chorus]
+[가사 줄 1]
+[가사 줄 2]
+
+[Chorus]
+[훅 줄 1]
+[훅 줄 2]
+[훅 줄 1 반복]
+[마무리 줄]
+
+[Bridge]
+([악기 변화 설명 — 보통 조용하게])
+[새로운 관점/전환 줄 1]
+[가사 줄 2]
+[가사 줄 3]
+[가사 줄 4]
+
+[Final Chorus]
+([풀밴드, 전조 또는 최대 에너지])
+[훅 줄 1]
+[훅 줄 2]
+[훅 줄 1 반복]
+[최종 마무리 줄 — 첫 훅과 달라도 됨]
+
+[Outro]
+([점진적 페이드 설명])
+[반복 또는 허밍]
+...
+────────────────────────────────────────────────────
+
+══════════════════════════════════════════════════════
+◆ 힙합/트랩 전용 템플릿
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+[장르], [BPM] BPM, [조성],
+[한 문장 감성 묘사],
+[808 bass 설명], [드럼 패턴], [멜로디 루프],
+[텍스처/패드], [오케스트라 요소 (선택)],
+[보컬 스타일], [화음/스택],
+[프로덕션 노트], [마지막 핵심 키워드]
+
+[LYRICS FIELD]
+[Intro]
+([루프/분위기])
+
+[Verse 1]
+[16마디 랩 가사 — 이야기 시작]
+
+[Hook]
+[훅 줄 1 — 짧고 반복적]
+[훅 줄 2]
+[훅 줄 1 반복]
+[훅 줄 3]
+
+[Verse 2]
+[16마디 랩 가사 — 이야기 발전]
+
+[Hook]
+[훅 반복]
+
+[Bridge]
+([비트 변화, 조용 또는 감성])
+[전환 가사 4줄]
+
+[Final Hook]
+([풀 에너지 복귀])
+[훅 반복 또는 변주]
+
+[Outro]
+([루프 페이드])
+...
+
+══════════════════════════════════════════════════════
+◆ 인스트루멘탈 / 오케스트라 전용 템플릿
+══════════════════════════════════════════════════════
+
+[STYLE FIELD]
+[장르 — 오케스트라/신스웨이브 등], [BPM], [Key],
+[한 문장 감성/장면 묘사],
+[주악기], [서브악기], [퍼커션], [텍스처],
+[다이나믹 설명 — 조용~폭발 구조],
+[레퍼런스 아티스트/작곡가],
+[믹스 노트], [마지막 핵심 키워드]
+
+[LYRICS FIELD]
+[Intro]
+([악기 설명, 분위기, BPM])
+
+[Section A]
+([악기 1~2개, 부드럽게 시작])
+
+[Build 1]
+([악기 추가, 에너지 상승 묘사])
+
+[Climax 1]
+([모든 악기, 최고 에너지 — 16~32마디])
+
+[Breakdown]
+([악기 제거, 솔로 악기만 남김])
+([감성 멜로디 섹션])
+
+[Build 2]
+([점층적 재구성])
+
+[Final Climax]
+([최대 강도, 모든 요소 합류])
+
+[Resolution]
+([천천히 해소, 마지막 화음])
+
+════════════════════════════════════════════════════════════════════
+         Suno AI v5 전용 최고 수준 프롬프트 완전 가이드
+════════════════════════════════════════════════════════════════════
+업데이트: 2025년 10월 기준 (v5 출시 후 검증된 기법들)
+출처: Suno 공식 문서 / Jack Righteous 메타태그 가이드 /
+      Medium 전문가 가이드 / Scribd v5 베스트 프랙티스 종합
+════════════════════════════════════════════════════════════════════
