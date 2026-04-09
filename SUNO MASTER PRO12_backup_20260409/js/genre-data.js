@@ -591,7 +591,7 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     // v5 Style Prompt 조립 (프론트로드 원칙)
     // 구조: 장르 → BPM+Key → 감정묘사 → 악기 → 보컬 → 구조/리듬 → 프로덕션 → 품질보호
     // =============================================
-    const parts = [];
+    let parts = [];
 
     // === ① 장르 (1~2개, 프론트로드 맨 앞) ===
     parts.push(mainData.genre);
