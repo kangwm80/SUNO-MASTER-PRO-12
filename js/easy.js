@@ -342,9 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const opt = document.createElement('option');
             opt.value = main;
             opt.textContent = main;
-            // 해당 카테고리의 첫 번째 장르 설명으로 툴팁
-            const firstGenre = GENRE_DATABASE.find(g => g.main === main);
-            opt.title = firstGenre ? `${main} 카테고리 (${GENRE_DATABASE.filter(g => g.main === main).length}개 장르)` : '';
+            // 해당 카테고리의 장르 설명 + 개수
+            const genres = GENRE_DATABASE.filter(g => g.main === main);
+            const sampleDescs = genres.slice(0, 3).map(g => g.genre).join(', ');
+            opt.title = `${main} 카테고리 (${genres.length}개 장르)\n예: ${sampleDescs}`;
             mainDD.appendChild(opt);
         });
 
@@ -366,6 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const opt = document.createElement('option');
                 opt.value = sub;
                 opt.textContent = sub;
+                // 서브 카테고리 장르 목록을 tooltip으로 표시
+                const subGenres = GENRE_DATABASE.filter(g => g.main === selected && g.sub === sub);
+                const genreNames = subGenres.map(g => g.genre).join(', ');
+                opt.title = `${sub} (${subGenres.length}개 장르)\n${genreNames}`;
                 subDD.appendChild(opt);
             });
         });

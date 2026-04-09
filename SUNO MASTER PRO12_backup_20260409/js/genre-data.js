@@ -671,6 +671,18 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     // 음질 최적화 가이드 반영: 보컬 안전 + 노이즈 방지 + 라디오 레디
     parts.push('professional studio quality, clean production, consistent tonal balance throughout, no background noise, controlled reverb, pitch-perfect vocals, radio-ready sound');
 
+    // === 최종 보컬 충돌 방지: 사용자 선택 보컬과 반대 성별 제거 ===
+    if (vocalOptions && vocalOptions.type && vocalOptions.type !== 'instrumental') {
+        const userVocal = vocalOptions.type.toLowerCase();
+        if (/^male\b/i.test(userVocal) && !/female/i.test(userVocal)) {
+            // 남성 선택 → female vocals 제거
+            parts = parts.map(p => p.replace(/,?\s*female\s*vocals?/gi, '').replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim()).filter(Boolean);
+        } else if (/female/i.test(userVocal)) {
+            // 여성 선택 → male vocals 단독 제거 (female은 유지)
+            parts = parts.map(p => p.replace(/,?\s*\bmale\s*vocals?\b(?!\s*and)/gi, '').replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim()).filter(Boolean);
+        }
+    }
+
     // === 950자 제한 적용 (우선순위 기반 축소) ===
     let stylePrompt = parts.join(', ');
     if (stylePrompt.length > MAX_PROMPT_LENGTH) {
@@ -681,7 +693,16 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
         coreParts.push(`${bpm} BPM`);
         coreParts.push(selectedKey);
         if (moodSentences[0]) coreParts.push(moodSentences[0]);
-        if (mainData.vocal) coreParts.push(mainData.vocal.split(', ').slice(0, 3).join(', '));
+        if (mainData.vocal) {
+            let fallbackVocal = mainData.vocal.split(', ').slice(0, 3).join(', ');
+            fallbackVocal = fallbackVocal.replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim();
+            // 사용자가 보컬 성별을 선택한 경우, 반대 성별 제거
+            if (vocalOptions && vocalOptions.type) {
+                if (/^male\b/i.test(vocalOptions.type)) fallbackVocal = fallbackVocal.replace(/,?\s*female\s*vocals?/gi, '').trim();
+                else if (/female/i.test(vocalOptions.type)) fallbackVocal = fallbackVocal.replace(/,?\s*\bmale\s*vocals?/gi, '').trim();
+            }
+            if (fallbackVocal) coreParts.push(fallbackVocal);
+        }
         if (mainData.instruments) coreParts.push(mainData.instruments.split(', ').slice(0, 2).join(', '));
         coreParts.push(billboardHook);
         coreParts.push(qualityBlock);
