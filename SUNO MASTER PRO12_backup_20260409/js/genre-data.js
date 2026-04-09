@@ -434,6 +434,21 @@ function recommendGenres(targetAges, places, moods) {
 // 제한: 950자 이하
 const MAX_PROMPT_LENGTH = 950;
 
+// 연령대별 장르 선호도 (전 세계 연령대별 음악 장르 선호도 분석 반영)
+const AGE_GENRE_PREFERENCE = {
+    'teen': ['Pop', 'K-Pop', 'Hip Hop / Rap', 'Trap', 'EDM', 'Dance Pop', 'Phonk', 'Hyperpop', 'Lo-Fi'],
+    'male-20s': ['Hip Hop / Rap', 'R&B / Soul', 'Pop', 'K-Pop', 'EDM', 'Indie', 'Latin', 'Lo-Fi'],
+    'female-20s': ['Pop', 'K-Pop', 'R&B / Soul', 'Indie Pop', 'EDM', 'Latin', 'Lo-Fi'],
+    'male-30s': ['Pop', 'R&B / Soul', 'Hip Hop / Rap', 'Rock', 'Indie', 'EDM', 'Jazz'],
+    'female-30s': ['Pop', 'R&B / Soul', 'K-Pop', 'Indie Pop', 'Ballad', 'EDM'],
+    'male-40s': ['Pop', 'Rock', 'R&B / Soul', 'Jazz', 'Country / Folk', 'Hip Hop / Rap', 'Ballad'],
+    'female-40s': ['Pop', 'Country / Folk', 'R&B / Soul', 'Ballad', 'Rock', 'Jazz'],
+    'male-50s': ['Rock', 'Ballad', 'Country / Folk', 'Jazz', 'Classical', 'Pop', 'Trot'],
+    'female-50s': ['Ballad', 'Pop', 'Trot', 'Country / Folk', 'Classical', 'Jazz'],
+    'senior': ['Ballad', 'Trot', 'Classical', 'Jazz', 'Country / Folk', 'Pop'],
+    '_default': ['Pop', 'R&B / Soul', 'Hip Hop / Rap', 'Rock', 'EDM']
+};
+
 // 분위기 → 서술형 문장 변환 (v5 핵심: 단어 나열 ❌ → 서술형 ✅)
 const MOOD_SENTENCE_MAP = {
     comfortable: "like settling into a warm couch on a quiet evening",
@@ -503,53 +518,66 @@ const GENRE_KEY_MAP = {
     '_default': ['C major','G major','A minor','D major','E minor']
 };
 
-// 장르별 프로덕션 스타일 맵
+// 장르별 프로덕션 스타일 맵 (음질 최적화 프롬프트 공식 반영)
 const PRODUCTION_STYLE_MAP = {
-    'pop': 'polished pop production, tight low-end, bright vocal presence',
-    'rock': 'punchy rock mix, guitar-forward, dynamic drum compression',
-    'hip hop': 'heavy 808 bass, crisp hi-hats, spacious vocal mix',
-    'r&b': 'warm analog feel, smooth bass, silky vocal reverb',
-    'electronic': 'wide stereo image, deep sub-bass, precise synth layering',
-    'jazz': 'warm natural room tone, minimal compression, live instrument feel',
-    'classical': 'concert hall ambience, natural dynamics, orchestral depth',
-    'folk': 'organic acoustic recording, natural room reverb, warm tape feel',
-    'metal': 'high-gain guitar wall, tight drum triggering, aggressive compression',
-    'reggae': 'dub-style delay, heavy bass, laid-back groove mix',
-    'latin': 'vibrant percussion mix, warm brass, rhythmic clarity',
-    'country': 'Nashville production, warm acoustic, steel guitar shimmer',
-    '_default': 'balanced professional mix, clear frequency separation'
+    'pop': 'radio-ready mastered sound, competitive loudness, vocals upfront and clear with plate reverb, punchy kick drum with tight sub bass, clean low-mids, wide stereo field, analog warmth with tape saturation, glue compression feel, bright and airy top end',
+    'rock': 'punchy rock drums with room ambience, guitar-forward mix with amp saturation, dynamic drum compression, raw and energetic mix, controlled low-end rumble, vocals cutting through with presence boost, tight and punchy analog sound',
+    'hip hop': 'hard-hitting modern trap production, 808 bass tuned to key, sidechain compression, punchy trap drums with tight snare crack, kick and bass in mono center, vocals clear and upfront with slight saturation, dark atmospheric pads with subtle reverb, loud and impactful commercial mastering level',
+    'r&b': 'warm analog feel, smooth bass groove, silky vocal reverb with pre-delay, intimate and close vocal with warm plate reverb, lush layered harmonies, tape saturation warmth, balanced and organic mix',
+    'electronic': 'four-on-the-floor punchy kick, deep sub bass, classic sidechain pumping compression, wide stereo supersaws, massive stereo field, festival-loud mastering, crisp hi-hats with sparkle, bright top-end, punchy transients preserved through limiting',
+    'jazz': 'natural acoustic dynamics preserved, open and dynamic range, minimal compression, room ambience and natural space, warm analog character, vintage recording feel, close-mic intimacy on piano and bass, balanced and natural mastering',
+    'classical': 'concert hall ambience, natural dynamics, orchestral depth, warm and spacious recording, no over-compression, delicate balance between sections, rich low-end with clear string detail',
+    'folk': 'organic acoustic recording, natural room reverb, warm tape feel, intimate close-mic sound, gentle dynamics, unprocessed and honest production, acoustic guitar body resonance',
+    'metal': 'dry and direct drum sound, heavy distorted guitar tone with amp saturation, punchy double bass drums, tight and aggressive, low-end rumble with controlled sub bass, vocals cutting through with presence boost, loud and aggressive mastering',
+    'reggae': 'offbeat guitar chops, heavy dub bass, spacious dub-style delay, laid-back groove mix, warm and round sound, deep bass with clean midrange',
+    'latin': 'vibrant percussion mix, warm brass, rhythmic clarity, punchy congas and bongos, wide stereo field, energetic and lively mastering, clean vocal upfront',
+    'country': 'Nashville production, warm acoustic guitar, steel guitar shimmer, clean vocal upfront, natural room sound, balanced and polished, gentle tape compression',
+    'ambient': 'ethereal soundscapes, gentle reverb washes, minimal compression, spacious and wide, soft dynamic range, atmospheric textures, no harsh transients',
+    'funk': 'tight and punchy drum hits, funky slap bass, crisp rhythm guitar, wide stereo field, clean and dynamic mix, groove-locked rhythm section',
+    '_default': 'professional studio quality, clean and polished production, balanced mix, clear frequency separation, radio-ready sound'
 };
 
-// 장르별 보컬 강화 맵 (보컬 완전 가이드 반영)
+// 장르별 보컬 강화 맵 (음악 장르별 보컬 완전 가이드 반영)
 const VOCAL_ENHANCEMENT_MAP = {
-    'pop': { style: 'clean polished vocals, pitch-perfect delivery', technique: 'catchy melodic hooks, layered harmonies' },
-    'ballad': { style: 'emotional expressive vocals, dynamic breath control', technique: 'powerful chorus belting, intimate verse whisper' },
-    'r&b': { style: 'soulful smooth vocals, warm chest voice', technique: 'melodic runs, subtle vibrato, breathy intimacy' },
-    'rock': { style: 'powerful raw vocals, gritty edge', technique: 'belted chorus, dynamic range from whisper to scream' },
-    'hip hop': { style: 'confident rhythmic delivery, sharp articulation', technique: 'tight flow, punchy cadence, ad-libs' },
-    'jazz': { style: 'sophisticated vocal phrasing, jazzy scatting', technique: 'behind-the-beat timing, warm vibrato, improvised runs' },
-    'folk': { style: 'warm storytelling vocals, natural unpolished tone', technique: 'gentle fingerpicking-matched delivery, honest expression' },
-    'electronic': { style: 'ethereal processed vocals, airy texture', technique: 'reverb-heavy delivery, layered vocal chops' },
-    'metal': { style: 'powerful aggressive vocals, controlled intensity', technique: 'screaming chorus, clean verse contrast, growl accents' },
-    '_default': { style: 'natural human vocals, controlled emotional delivery', technique: 'professional delivery, consistent tone' }
+    'pop': { style: 'clean polished vocals, pitch-perfect delivery, bright and clear tone, staccato articulation', technique: 'catchy melodic hooks, layered harmonies, belting on chorus, agile vocal runs, natural phrasing with breath pickups' },
+    'ballad': { style: 'emotional expressive vocals, deep resonant tone, dynamic breath control, legato phrasing', technique: 'powerful chorus belting, intimate verse whisper, wide vibrato, blended mixed voice, long sustained phrases' },
+    'r&b': { style: 'soulful smooth vocals, warm chest voice, groovy breathy texture', technique: 'melodic runs and melisma, subtle vibrato, breathy intimacy, ad-libs, rhythmic vocal groove' },
+    'rock': { style: 'powerful raw vocals, gritty raspy edge, chest voice dominant', technique: 'belted chorus, dynamic range from whisper to scream, controlled grit, raw emotional delivery' },
+    'hip hop': { style: 'confident rhythmic delivery, sharp percussive articulation, chest voice', technique: 'tight rap flow, punchy cadence, staccato diction, ad-libs, rhythmic attack' },
+    'jazz': { style: 'sophisticated vocal phrasing, smooth warm tone, jazzy scat improvisation', technique: 'behind-the-beat rubato timing, warm vibrato, improvised runs, head voice transitions, conversational delivery' },
+    'folk': { style: 'warm storytelling vocals, natural unpolished honest tone, intimate close-mic', technique: 'gentle dynamic control, whisper tone, legato phrasing, honest emotional expression' },
+    'electronic': { style: 'ethereal processed vocals, airy crystalline texture, breathy quality', technique: 'minimal vocal runs, precise pitch, layered vocal chops, processed reverb delivery' },
+    'metal': { style: 'powerful aggressive vocals, controlled high intensity, chest voice power', technique: 'screaming chorus, clean verse contrast, growl accents, grit and rasp, belting power' },
+    'gospel': { style: 'powerful soulful vocals, passionate delivery, full-bodied tone', technique: 'power belting, gospel runs, call-and-response, melisma, soaring high notes' },
+    'country': { style: 'genuine warm vocals, storytelling narrative tone, natural vibrato', technique: 'chest voice with head voice transitions, honest expression, twang inflection, legato country phrasing' },
+    'latin': { style: 'passionate warm vocals, rhythmic delivery, chest voice with fire', technique: 'passionate belting, rhythmic vocal attack, vibrato on held notes, sensual breathy moments' },
+    'ambient': { style: 'ethereal floating vocals, whispered breathy tone, distant and spacious', technique: 'minimal technique, soft sustained notes, gentle humming, airy head voice' },
+    'funk': { style: 'punchy rhythmic vocals, tight staccato delivery, energetic chest voice', technique: 'rhythmic attack, falsetto jumps, staccato groove, call-and-response, ad-libs' },
+    '_default': { style: 'natural human vocals, controlled emotional delivery, warm and clear', technique: 'professional pitch-perfect delivery, consistent tone, natural phrasing with breath pickups' }
 };
 
-// 빌보드급 히트곡 구조 요소 (곡 구조 가이드 반영)
+// 빌보드급 히트곡 구조 요소 (히트곡 구조 완전 분석가이드 반영)
 const BILLBOARD_ELEMENTS = {
     energy: [
-        'dynamic build from verse to chorus',
-        'emotional crescendo into chorus',
-        'verse-chorus energy contrast'
+        'dynamic arc from quiet intro to explosive chorus, final chorus bigger than all previous',
+        'emotional crescendo into chorus with stripped bridge contrast before maximum final chorus',
+        'sparse verse into dense chorus contrast, energy builds gradually through verse, bridge strips back',
+        'verse-chorus energy contrast with intentional density management',
+        'dynamic build: minimal intro then building verse then explosive chorus'
     ],
     rhythm: [
-        'syncopated groove with pocket feel',
-        'tight rhythmic precision with human micro-timing',
-        'groove-driven rhythm section'
+        'syncopated groove with pocket feel, off-beat accents, anticipated downbeats',
+        'tight rhythmic precision with human micro-timing variation, less quantized feel',
+        'groove-driven rhythm section with drum fills every 4 bars, bigger fills every 8 bars',
+        'heavy syncopation, off-beat guitar chops, snare on beats 2 and 4 backbeat',
+        'pushed rhythms with syncopated bass groove, staggered rhythmic layers'
     ],
     hook: [
-        'memorable melodic hook',
-        'catchy singalong chorus',
-        'anthemic chorus melody'
+        'immediate hook from first note, catchy opening motif that grabs attention from bar one',
+        'memorable melodic hook with singalong chorus, anthemic melody that sticks',
+        'catchy chorus with melodic and flowing vocals over rhythmic backing',
+        'vocal-led melody with rhythmic instrumentation, melodic hook doubled in octaves',
+        'instant recognizable hook with three-second memorability'
     ]
 };
 
@@ -659,7 +687,7 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
 
     // === ⑨ 품질 보호 블록 (프론트로드: 마지막=높은 가중치) ===
     // 음질 최적화 가이드 반영: 보컬 안전 + 노이즈 방지 + 라디오 레디
-    parts.push('professional studio quality, clean production, consistent tonal balance throughout, no background noise, controlled reverb, pitch-perfect vocals, radio-ready sound');
+    parts.push('professional studio quality, clean and polished production, consistent tonal balance throughout, cohesive mix from start to finish, no background noise or shimmer, controlled reverb, pitch-perfect and in-tune vocals, natural phrasing and delivery, vocals upfront and clear, warm and grounded vocal tone, clean dynamic range, radio-ready sound');
 
     // === 최종 보컬 충돌 방지: 사용자가 남성/여성 단독 선택 시 반대 성별 제거 ===
     // 듀엣 선택 시에는 필터링하지 않음
@@ -902,9 +930,15 @@ function getExcludeStyles(mainData, subData, moods) {
         excludes.push("vocal ad-libs", "sudden dynamics", "crowd noise");
     }
 
-    // === 음질 보호 기본 제외 (음질 가이드 반영) ===
-    // 과도한 프로세싱 방지
-    excludes.push("excessive reverb", "clipping", "lo-fi artifacts");
+    // === 음질 보호 기본 제외 (Suno AI v5 음질 문제 완전 해결 가이드 반영) ===
+    excludes.push("excessive reverb", "clipping", "lo-fi artifacts", "audio glitches", "digital artifacts");
+    // 보컬 안전: 극단적 고음/비명 방지
+    excludes.push("extreme high register", "over-compression");
+    // 장르별 shimmer 위험 대응
+    const mainCatLower = (mainData.main || '').toLowerCase();
+    if (mainCatLower.includes('metal') || mainCatLower.includes('electronic')) {
+        excludes.push("shimmer", "digital noise", "harsh high frequencies");
+    }
 
     // === 장르 간 충돌 방지 ===
     if (subData) {
