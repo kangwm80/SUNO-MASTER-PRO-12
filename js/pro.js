@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dawn: '새벽', sunset: '일몰', running: '달릴때'
     };
 
-    const vocalGenderMap = { male: 'male vocals', female: 'female vocals', group: 'group vocals', instrumental: 'instrumental, no vocals' };
+    const vocalGenderMap = { male: 'male vocals', female: 'female vocals', duet: 'male and female duet', group: 'group vocals', instrumental: 'instrumental, no vocals' };
     const vocalStyleMap = { 'chest-voice': 'chest voice', 'head-voice': 'head voice', falsetto: 'falsetto', belting: 'belting', vibrato: 'vibrato', breathy: 'breathy', grit: 'grit raspy', whisper: 'whisper', rap: 'rap flow', autotune: 'auto-tuned' };
     const vocalRangeMap = { bass: 'bass range', baritone: 'baritone', tenor: 'tenor', alto: 'alto', mezzo: 'mezzo-soprano', soprano: 'soprano' };
     const instrumentMap = { piano: 'piano', 'acoustic-guitar': 'acoustic guitar', 'electric-guitar': 'electric guitar', 'bass-guitar': 'bass guitar', drums: 'drums', synth: 'synthesizer', strings: 'strings', brass: 'brass section', saxophone: 'saxophone', violin: 'violin', cello: 'cello', organ: 'organ', '808': '808 bass', 'drum-machine': 'drum machine', percussion: 'percussion', choir: 'choir harmonies', orchestra: 'full orchestra' };

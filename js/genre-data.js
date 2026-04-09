@@ -620,20 +620,12 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     }
 
     // === ⑤ 보컬 (사용자 선택 우선 → DB 보컬 + 장르별 강화) ===
-    // 듀엣/남녀 혼합 보컬 절대 금지: 단일 보컬만 허용
+    // 사용자가 남성/여성 단독 선택 시 → 반대 성별이 프롬프트에 섞이지 않도록 보호
+    // 사용자가 듀엣 선택 시 → 듀엣 허용
     if (vocalOptions && vocalOptions.type) {
         const vParts = [];
         if (vocalOptions.type !== 'instrumental') {
-            // duet vocals → 사용하지 않고 단일 보컬로 대체
-            let vocalType = vocalOptions.type;
-            if (/duet|male and female|남녀/i.test(vocalType)) {
-                vocalType = 'female vocals';
-            }
-            // male + female 동시 포함 방지
-            if (/male.*female|female.*male/i.test(vocalType)) {
-                vocalType = vocalType.replace(/,?\s*(fe)?male\s*vocals?\s*/i, '').trim() || 'female vocals';
-            }
-            vParts.push(vocalType);
+            vParts.push(vocalOptions.type);
             if (vocalOptions.age) vParts.push(vocalOptions.age);
             if (vocalOptions.range) vParts.push(vocalOptions.range);
             if (vocalOptions.styles && vocalOptions.styles.length > 0) {
@@ -646,9 +638,7 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
             parts.push('instrumental, no vocals');
         }
     } else if (mainData.vocal) {
-        // DB 보컬에서도 듀엣/남녀 혼합 제거
         let dbVocal = mainData.vocal.split(', ').slice(0, 3).join(', ');
-        dbVocal = dbVocal.replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim();
         parts.push(`${dbVocal || vocalEnhance.style}, ${vocalEnhance.technique}`);
     } else {
         parts.push(`${vocalEnhance.style}, ${vocalEnhance.technique}`);
@@ -671,15 +661,19 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     // 음질 최적화 가이드 반영: 보컬 안전 + 노이즈 방지 + 라디오 레디
     parts.push('professional studio quality, clean production, consistent tonal balance throughout, no background noise, controlled reverb, pitch-perfect vocals, radio-ready sound');
 
-    // === 최종 보컬 충돌 방지: 사용자 선택 보컬과 반대 성별 제거 ===
+    // === 최종 보컬 충돌 방지: 사용자가 남성/여성 단독 선택 시 반대 성별 제거 ===
+    // 듀엣 선택 시에는 필터링하지 않음
     if (vocalOptions && vocalOptions.type && vocalOptions.type !== 'instrumental') {
         const userVocal = vocalOptions.type.toLowerCase();
-        if (/^male\b/i.test(userVocal) && !/female/i.test(userVocal)) {
-            // 남성 선택 → female vocals 제거
-            parts = parts.map(p => p.replace(/,?\s*female\s*vocals?/gi, '').replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim()).filter(Boolean);
-        } else if (/female/i.test(userVocal)) {
-            // 여성 선택 → male vocals 단독 제거 (female은 유지)
-            parts = parts.map(p => p.replace(/,?\s*\bmale\s*vocals?\b(?!\s*and)/gi, '').replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim()).filter(Boolean);
+        const isDuet = /duet/i.test(userVocal);
+        if (!isDuet) {
+            if (/^male\b/i.test(userVocal) && !/female/i.test(userVocal)) {
+                // 남성만 선택 → female vocals, duet 제거
+                parts = parts.map(p => p.replace(/,?\s*female\s*vocals?/gi, '').replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim()).filter(Boolean);
+            } else if (/female/i.test(userVocal)) {
+                // 여성만 선택 → male vocals 단독, duet 제거
+                parts = parts.map(p => p.replace(/,?\s*\bmale\s*vocals?\b(?!\s*and)/gi, '').replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim()).filter(Boolean);
+            }
         }
     }
 
@@ -695,9 +689,9 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
         if (moodSentences[0]) coreParts.push(moodSentences[0]);
         if (mainData.vocal) {
             let fallbackVocal = mainData.vocal.split(', ').slice(0, 3).join(', ');
-            fallbackVocal = fallbackVocal.replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim();
-            // 사용자가 보컬 성별을 선택한 경우, 반대 성별 제거
-            if (vocalOptions && vocalOptions.type) {
+            // 사용자가 남성/여성 단독 선택 시 반대 성별 + duet 제거 (듀엣 선택 시에는 유지)
+            if (vocalOptions && vocalOptions.type && !/duet/i.test(vocalOptions.type)) {
+                fallbackVocal = fallbackVocal.replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim();
                 if (/^male\b/i.test(vocalOptions.type)) fallbackVocal = fallbackVocal.replace(/,?\s*female\s*vocals?/gi, '').trim();
                 else if (/female/i.test(vocalOptions.type)) fallbackVocal = fallbackVocal.replace(/,?\s*\bmale\s*vocals?/gi, '').trim();
             }
