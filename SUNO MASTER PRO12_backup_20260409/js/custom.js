@@ -1695,21 +1695,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 프롬프트 파일 불러오기
     const fileImport = document.getElementById('fileImport');
     const importBox = document.getElementById('importBox');
-    let pendingImportFile = null;
     const importFilenameEl = document.getElementById('importFilename');
-    const btnLoadFile = document.getElementById('btnLoadFile');
 
     fileImport.addEventListener('change', e => {
         const file = e.target.files[0];
         if (!file) return;
-        pendingImportFile = file;
-        importFilenameEl.textContent = `선택된 파일: ${file.name}`;
+        importFilenameEl.textContent = `선택 중: ${file.name}`;
         importFilenameEl.style.display = 'block';
-        btnLoadFile.style.display = 'inline-flex';
-    });
-
-    btnLoadFile.addEventListener('click', () => {
-        if (!pendingImportFile) return;
         const reader = new FileReader();
         reader.onload = event => {
             const content = event.target.result;
@@ -1718,16 +1710,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyImportedData(parsed);
                 importBox.classList.add('success');
                 importBox.querySelector('.import-title').textContent = '불러오기 완료!';
-                importBox.querySelector('.import-desc').textContent = `"${pendingImportFile.name}" 파일에서 프롬프트를 불러왔습니다. 6단계로 이동합니다.`;
+                importBox.querySelector('.import-desc').textContent = `"${file.name}" 파일에서 프롬프트를 불러왔습니다. 6단계로 이동합니다.`;
                 setTimeout(() => goToStep(6), 1500);
             } else {
                 importBox.querySelector('.import-title').textContent = '파일을 읽을 수 없습니다';
                 importBox.querySelector('.import-desc').textContent = 'SUNO MASTER PRO 12에서 저장한 txt 파일만 불러올 수 있습니다.';
             }
-            pendingImportFile = null; fileImport.value = '';
-            importFilenameEl.style.display = 'none'; btnLoadFile.style.display = 'none';
+            fileImport.value = '';
+            importFilenameEl.style.display = 'none';
         };
-        reader.readAsText(pendingImportFile, 'UTF-8');
+        reader.readAsText(file, 'UTF-8');
     });
 
     function parsePromptFile(content) {
