@@ -591,6 +591,69 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('vocalStyleGroup').style.display = 'none';
         document.getElementById('vocalApplyArea').style.display = 'none';
         showGeneratePromptBtn(false);
+
+        // === 보컬 자동 추천: 장르/타겟/분위기 기반 ===
+        const mainGenre = selections.genres[0] || '';
+        const genreEntry = GENRE_DATABASE.find(g => g.genre === mainGenre);
+        const mainCategory = genreEntry ? (genreEntry.main || '') : '';
+        const targetList = selections.target || [];
+        const moodList = selections.mood || [];
+
+        // 보컬 타입 추천 로직
+        let recommendedType = 'female vocals'; // 기본값
+        const maleGenres = ['Hip Hop / Rap', 'Metal', 'Rock'];
+        const femaleGenres = ['Pop', 'R&B / Soul', 'Jazz', 'Ambient / New Age'];
+        if (maleGenres.includes(mainCategory)) recommendedType = 'male vocals';
+        else if (femaleGenres.includes(mainCategory)) recommendedType = 'female vocals';
+        // 타겟층 기반 보정
+        if (targetList.includes('male-20s') || targetList.includes('male-30s') || targetList.includes('male-40s')) recommendedType = 'male vocals';
+        if (targetList.includes('female-20s') || targetList.includes('female-30s') || targetList.includes('female-40s')) recommendedType = 'female vocals';
+        // 분위기 기반 보정
+        if (moodList.includes('powerful') || moodList.includes('confidence') || moodList.includes('anger')) recommendedType = 'male vocals';
+        if (moodList.includes('dreamy') || moodList.includes('healing') || moodList.includes('cozy')) recommendedType = 'female vocals';
+
+        // DB에서 보컬 힌트 확인
+        if (genreEntry && genreEntry.vocal) {
+            const dbVocal = genreEntry.vocal.toLowerCase();
+            if (/\bmale\b/.test(dbVocal) && !/female/.test(dbVocal)) recommendedType = 'male vocals';
+            else if (/female/.test(dbVocal)) recommendedType = 'female vocals';
+        }
+
+        // 추천 보컬 타입 자동 선택
+        const typeBtn = document.querySelector(`#vocalTypeOptions .vocal-option-btn[data-value="${recommendedType}"]`);
+        if (typeBtn) {
+            typeBtn.classList.add('selected');
+            vocalSelections.type = recommendedType;
+            document.getElementById('vocalAgeGroup').style.display = 'block';
+
+            // 연령대 자동 추천
+            let recommendedAge = 'young adult vocals';
+            if (targetList.some(t => t.includes('50s') || t.includes('60s'))) recommendedAge = 'veteran vocals';
+            else if (targetList.some(t => t.includes('40s'))) recommendedAge = 'seasoned vocals';
+            else if (targetList.some(t => t.includes('30s'))) recommendedAge = 'mature vocals';
+            else if (targetList.some(t => t.includes('teen'))) recommendedAge = 'teen vocals';
+
+            const ageBtn = document.querySelector(`#vocalAgeOptions .vocal-option-btn[data-value="${recommendedAge}"]`);
+            if (ageBtn) {
+                ageBtn.classList.add('selected');
+                vocalSelections.age = recommendedAge;
+                renderVocalRanges();
+                document.getElementById('vocalRangeGroup').style.display = 'block';
+
+                // 음역대 자동 추천 (첫 번째 중간 옵션)
+                const isMale = recommendedType.includes('male') && !recommendedType.includes('female');
+                const ranges = isMale ? maleRanges : femaleRanges;
+                const midRange = ranges[Math.floor(ranges.length / 2)];
+                const rangeBtn = document.querySelector(`#vocalRangeOptions .vocal-option-btn[data-value="${midRange.value}"]`);
+                if (rangeBtn) {
+                    rangeBtn.classList.add('selected');
+                    vocalSelections.range = midRange.value;
+                    renderVocalStyles();
+                    document.getElementById('vocalStyleGroup').style.display = 'block';
+                    document.getElementById('vocalApplyArea').style.display = 'block';
+                }
+            }
+        }
     }
 
     document.querySelectorAll('#vocalTypeOptions .vocal-option-btn').forEach(btn => {
@@ -1377,6 +1440,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let generatedExcludeBase = '', userExcludeTags = [];
 
     function buildFinalPrompt() {
+      try {
         if (importedPromptData) {
             const data = importedPromptData;
             document.getElementById('promptExplanation').textContent = data.explanation || '불러온 프롬프트입니다. 아래에서 수정 후 사용하세요.';
@@ -1417,6 +1481,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         initExcludeToggles(); updateVocalTypeBadge(result.stylePrompt, result.mainGenre);
         autoSaveToLibrary(result);
+      } catch(e) {
+        console.error('buildFinalPrompt error:', e);
+        document.getElementById('promptExplanation').textContent = '프롬프트 생성 중 오류가 발생했습니다: ' + e.message;
+        document.getElementById('stylePromptText').value = '오류: ' + e.message;
+      }
     }
 
     function updateVocalTypeBadge(stylePrompt, mainGenreData) {
