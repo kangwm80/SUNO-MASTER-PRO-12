@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNO MASTER PRO 12</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 상단 네비게이션 -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-text">SUNO MASTER PRO 12</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="btn-text-size" id="btnTextSize" title="글자 크기 조절">
+                <span class="text-size-icon">가</span>
+            </button>
+            <button class="btn-dark-mode" id="btnDarkMode" title="화면 밝기 조절">
+                <span class="dark-mode-icon">&#9790;</span>
+            </button>
+            <button class="btn-help" id="btnHelp" title="도움말">
+                <span>?</span> 도움말
+            </button>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main">
+        <!-- 환영 메시지 -->
+        <section class="welcome">
+            <h1 class="welcome-title">나만의 음악을 만들어보세요</h1>
+            <p class="welcome-desc">전문가가 아니어도 괜찮습니다. 당신의 상상을 Suno AI가 인식하는 최적의 프롬프트로 변환해드립니다.</p>
+        </section>
+
+        <!-- 메인 메뉴 카드들 -->
+        <section class="menu-cards">
+            <!-- 카드 1: 쉬운 모드 -->
+            <div class="card card-easy" tabindex="0" role="button" aria-label="쉽게 만들기">
+                <div class="card-icon-wrap card-icon-easy">
+                    <span class="card-icon">&#127908;</span>
+                </div>
+                <h2 class="card-title">쉽게 만들기</h2>
+                <p class="card-desc">버튼만 딸깍으로<br>프롬프트 자동생성</p>
+                <div class="card-badge">초보자 추천</div>
+            </div>
+
+            <!-- 카드 2: 직접 입력 -->
+            <div class="card card-custom" tabindex="0" role="button" aria-label="직접 만들기">
+                <div class="card-icon-wrap card-icon-custom">
+                    <span class="card-icon">&#9998;</span>
+                </div>
+                <h2 class="card-title">직접 만들기</h2>
+                <p class="card-desc">만들고 싶은 음악 입력하면<br>프롬프트 자동생성</p>
+                <div class="card-badge card-badge-mid">자유 입력</div>
+            </div>
+
+            <!-- 카드 3: 전문가 모드 -->
+            <div class="card card-pro" tabindex="0" role="button" aria-label="전문가 모드">
+                <div class="card-icon-wrap card-icon-pro">
+                    <span class="card-icon">&#127911;</span>
+                </div>
+                <h2 class="card-title">전문가 모드</h2>
+                <p class="card-desc">당신의 프롬프트를<br>업그레이드 해드립니다</p>
+                <div class="card-badge card-badge-pro">고급 설정</div>
+            </div>
+
+            <!-- 카드 4: 노래제목&가사 만들기 -->
+            <div class="card card-lyrics" tabindex="0" role="button" aria-label="노래제목&가사 만들기">
+                <div class="card-icon-wrap card-icon-lyrics">
+                    <span class="card-icon">&#128221;</span>
+                </div>
+                <h2 class="card-title">노래제목&가사 만들기</h2>
+                <p class="card-desc">히트곡 노래제목&가사를 만들고<br>중복체크&관리합니다</p>
+                <div class="card-badge card-badge-lyrics">제목&가사</div>
+            </div>
+
+            <!-- 카드 5: 썸네일 이미지 만들기 -->
+            <div class="card card-thumbnail" tabindex="0" role="button" aria-label="썸네일 이미지 만들기">
+                <div class="card-icon-wrap card-icon-thumbnail">
+                    <span class="card-icon">&#127912;</span>
+                </div>
+                <h2 class="card-title">썸네일 이미지 만들기</h2>
+                <p class="card-desc">커버 이미지 생성부터<br>편집까지 한 번에</p>
+                <div class="card-badge card-badge-thumb">이미지</div>
+            </div>
+
+            <!-- 카드 6: Tools -->
+            <div class="card card-tools" tabindex="0" role="button" aria-label="Tools">
+                <div class="card-icon-wrap card-icon-tools">
+                    <span class="card-icon">&#128295;</span>
+                </div>
+                <h2 class="card-title">Tools</h2>
+                <p class="card-desc">유튜브 분석, 타임라인 생성 등<br>다양한 도구 모음</p>
+                <div class="card-badge card-badge-tools">도구</div>
+            </div>
+
+            <!-- 카드 7: 영상제작 -->
+            <div class="card card-video" tabindex="0" role="button" aria-label="영상제작">
+                <div class="card-icon-wrap card-icon-video">
+                    <span class="card-icon">&#127916;</span>
+                </div>
+                <h2 class="card-title">영상제작</h2>
+                <p class="card-desc">뮤직비디오, 쇼츠 영상을<br>쉽고 빠르게 제작합니다</p>
+                <div class="card-badge card-badge-video">영상</div>
+            </div>
+
+            <!-- 카드 8: 내 음악 보관함 -->
+            <div class="card card-library" tabindex="0" role="button" aria-label="내 음악 보관함">
+                <div class="card-icon-wrap card-icon-library">
+                    <span class="card-icon">&#128193;</span>
+                </div>
+                <h2 class="card-title">내 음악 보관함</h2>
+                <p class="card-desc">이전에 만든 음악을<br>다시 듣고 관리합니다</p>
+                <div class="card-badge card-badge-lib">내 음악</div>
+            </div>
+        </section>
+
+        <!-- 빠른 시작 섹션 -->
+        <section class="quick-start">
+            <h2 class="section-title">빠르게 시작하기</h2>
+            <p class="section-desc">아래 분위기를 누르면 바로 음악이 만들어집니다</p>
+            <div class="mood-buttons">
+                <button class="mood-btn mood-happy">&#127774; 신나는</button>
+                <button class="mood-btn mood-calm">&#127752; 잔잔한</button>
+                <button class="mood-btn mood-sad">&#127783; 슬픈</button>
+                <button class="mood-btn mood-romantic">&#10084; 로맨틱</button>
+                <button class="mood-btn mood-epic">&#9889; 웅장한</button>
+                <button class="mood-btn mood-retro">&#127926; 복고풍</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- 하단 상태바 -->
+    <footer class="footer">
+        <div class="footer-left">
+            <span class="status-dot"></span>
+            <span>Suno AI 연결됨</span>
+        </div>
+        <div class="footer-center">
+            <span>SUNO MASTER PRO 12 v1.0</span>
+        </div>
+        <div class="footer-right">
+            <span id="currentTime"></span>
+        </div>
+    </footer>
+
+    <!-- 글자 크기 팝업 -->
+    <div class="popup-overlay" id="textSizePopup">
+        <div class="popup">
+            <h3 class="popup-title">글자 크기 조절</h3>
+            <div class="text-size-options">
+                <button class="size-btn" data-size="small">가<span class="size-label">작게</span></button>
+                <button class="size-btn active" data-size="medium">가<span class="size-label">보통</span></button>
+                <button class="size-btn" data-size="large">가<span class="size-label">크게</span></button>
+                <button class="size-btn" data-size="xlarge">가<span class="size-label">매우 크게</span></button>
+            </div>
+            <button class="popup-close" id="closeTextSize">닫기</button>
+        </div>
+    </div>
+
+    <!-- 도움말 팝업 -->
+    <div class="popup-overlay" id="helpPopup">
+        <div class="popup popup-help">
+            <h3 class="popup-title">도움말</h3>
+            <div class="help-content">
+                <div class="help-item">
+                    <span class="help-icon">&#127908;</span>
+                    <div>
+                        <strong>쉽게 만들기</strong>
+                        <p>음악을 처음 만드시는 분께 추천합니다. 타겟층, 장소, 분위기만 고르면 AI가 알아서 만들어줍니다.</p>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">&#9998;</span>
+                    <div>
+                        <strong>직접 만들기</strong>
+                        <p>가사를 직접 쓰거나, 원하는 느낌을 글로 설명하면 그에 맞는 음악을 만듭니다.</p>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">&#127911;</span>
+                    <div>
+                        <strong>전문가 모드</strong>
+                        <p>장르, 악기, 빠르기(BPM) 등 세부 사항을 직접 설정할 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">&#128221;</span>
+                    <div>
+                        <strong>노래제목&가사 만들기</strong>
+                        <p>AI가 노래 제목과 가사를 만들어주고, 중복 여부를 체크하여 저작권을 보호합니다.</p>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">&#127912;</span>
+                    <div>
+                        <strong>썸네일 이미지 만들기</strong>
+                        <p>음악 커버 이미지를 AI로 생성하고, 편집까지 한 번에 할 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">&#128295;</span>
+                    <div>
+                        <strong>Tools</strong>
+                        <p>유튜브 분석기, 타임라인 생성기, 음악 분석기 등 다양한 도구를 제공합니다.</p>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">&#127916;</span>
+                    <div>
+                        <strong>영상제작</strong>
+                        <p>뮤직비디오, 쇼츠 영상 등을 쉽고 빠르게 제작할 수 있습니다.</p>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">&#128193;</span>
+                    <div>
+                        <strong>내 음악 보관함</strong>
+                        <p>이전에 만든 음악을 다시 듣거나 다운로드할 수 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="popup-close" id="closeHelp">닫기</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

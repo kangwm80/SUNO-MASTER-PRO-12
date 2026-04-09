@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 음악 보관함 - SUNO MASTER PRO 12</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/library.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 상단 헤더 -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn" title="메인으로 돌아가기">
+                <span class="back-arrow">&#8592;</span>
+                <span class="back-text">메인으로</span>
+            </a>
+            <div class="logo">
+                <span class="logo-text">SUNO MASTER PRO 12</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="btn-text-size" id="btnTextSize" title="글자 크기 조절">
+                <span class="text-size-icon">가</span>
+            </button>
+            <button class="btn-dark-mode" id="btnDarkMode" title="화면 밝기 조절">
+                <span class="dark-mode-icon">&#9790;</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- 제목 -->
+        <section class="lib-header">
+            <div class="step-title-row">
+                <h1 class="step-title">내 음악 보관함</h1>
+                <button class="btn-collapse-step" id="btnCollapseLib">숨기기</button>
+            </div>
+            <p class="lib-subtitle">만든 프롬프트를 한 곳에서 관리하세요</p>
+        </section>
+
+        <!-- 통계 카드 -->
+        <section class="stats-row">
+            <div class="stat-card">
+                <span class="stat-number" id="statTotal">0</span>
+                <span class="stat-label">전체 프롬프트</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="statFavorite">0</span>
+                <span class="stat-label">즐겨찾기</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="statGenres">0</span>
+                <span class="stat-label">사용한 장르</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="statThisMonth">0</span>
+                <span class="stat-label">이번 달</span>
+            </div>
+        </section>
+
+        <!-- 검색 & 필터 -->
+        <section class="lib-toolbar">
+            <div class="search-bar">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="searchInput" placeholder="장르, 분위기, 메모 검색..." class="search-input">
+            </div>
+            <div class="filter-btns">
+                <button class="filter-btn active" data-filter="all">전체</button>
+                <button class="filter-btn" data-filter="favorite">&#11088; 즐겨찾기</button>
+                <button class="filter-btn" data-filter="recent">최신순</button>
+                <button class="filter-btn" data-filter="oldest">오래된순</button>
+            </div>
+            <div class="lib-actions">
+                <button class="lib-action-btn" id="btnExportAll">
+                    <span>&#128230;</span> 전체 내보내기
+                </button>
+                <button class="lib-action-btn" id="btnImportLib">
+                    <span>&#128196;</span> 불러오기
+                </button>
+                <input type="file" id="fileImportLib" accept=".json,.txt" style="display: none;">
+                <button class="lib-action-btn lib-danger" id="btnClearAll">
+                    <span>&#128465;</span> 전체 삭제
+                </button>
+            </div>
+        </section>
+
+        <!-- 프롬프트 목록 -->
+        <section class="lib-list" id="libList">
+            <!-- JS에서 동적 생성 -->
+        </section>
+
+        <!-- 비어있을 때 -->
+        <section class="lib-empty" id="libEmpty" style="display: none;">
+            <div class="empty-icon">&#127925;</div>
+            <h2 class="empty-title">아직 보관한 프롬프트가 없어요</h2>
+            <p class="empty-desc">"쉽게 만들기"에서 프롬프트를 만들면 자동으로 여기에 저장됩니다</p>
+            <a href="easy.html" class="btn-go-create holo-btn">
+                <span>&#127908;</span> 쉽게 만들기로 가기
+            </a>
+        </section>
+    </main>
+
+    <!-- 상세 보기 팝업 -->
+    <div class="popup-overlay" id="detailPopup">
+        <div class="popup popup-detail">
+            <div class="detail-header">
+                <h3 class="popup-title" id="detailTitle">프롬프트 상세</h3>
+                <button class="detail-close" id="detailClose">&#10005;</button>
+            </div>
+            <div class="detail-body" id="detailBody">
+                <!-- JS에서 동적 생성 -->
+            </div>
+            <div class="detail-actions">
+                <button class="action-btn holo-btn" id="detailCopy">
+                    <span>&#128203;</span> 전체 복사
+                </button>
+                <button class="action-btn" id="detailExport">
+                    <span>&#128190;</span> 파일 저장
+                </button>
+                <button class="action-btn" id="detailReuse">
+                    <span>&#128260;</span> 다시 사용하기
+                </button>
+                <button class="action-btn lib-danger" id="detailDelete">
+                    <span>&#128465;</span> 삭제
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 글자 크기 팝업 -->
+    <div class="popup-overlay" id="textSizePopup">
+        <div class="popup">
+            <h3 class="popup-title">글자 크기 조절</h3>
+            <div class="text-size-options">
+                <button class="size-btn" data-size="small">가<span class="size-label">작게</span></button>
+                <button class="size-btn active" data-size="medium">가<span class="size-label">보통</span></button>
+                <button class="size-btn" data-size="large">가<span class="size-label">크게</span></button>
+                <button class="size-btn" data-size="xlarge">가<span class="size-label">매우 크게</span></button>
+            </div>
+            <button class="popup-close" id="closeTextSize">닫기</button>
+        </div>
+    </div>
+
+    <script src="js/library.js"></script>
+</body>
+</html>

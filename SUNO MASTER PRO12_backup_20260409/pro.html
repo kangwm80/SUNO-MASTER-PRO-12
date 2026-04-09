@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전문가 모드 - SUNO MASTER PRO 12</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/easy.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/pro.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn" title="메인으로"><span class="back-arrow">&#8592;</span><span class="back-text">메인으로</span></a>
+            <div class="logo"><span class="logo-text">SUNO MASTER PRO 12</span></div>
+        </div>
+        <div class="header-right">
+            <button class="btn-text-size" id="btnTextSize" title="글자 크기"><span class="text-size-icon">가</span></button>
+            <button class="btn-dark-mode" id="btnDarkMode" title="화면 밝기"><span class="dark-mode-icon">&#9790;</span></button>
+        </div>
+    </header>
+
+    <div class="step-bar">
+        <div class="step-item active" data-step="1"><div class="step-circle">1</div><span class="step-label">입력</span></div>
+        <div class="step-line"></div>
+        <div class="step-item" data-step="2"><div class="step-circle">2</div><span class="step-label">전문가 설정</span></div>
+        <div class="step-line"></div>
+        <div class="step-item" data-step="3"><div class="step-circle">&#9834;</div><span class="step-label">완성</span></div>
+    </div>
+
+    <main class="main">
+        <!-- ========== STEP 1: 입력 ========== -->
+        <section class="step-page active" id="step1">
+            <div class="step-header">
+                <div class="step-title-row">
+                    <h1 class="step-title">전문가 모드</h1>
+                    <button class="btn-collapse-step">숨기기</button>
+                </div>
+                <p class="step-desc">만들고 싶은 음악을 설명하거나, 기존 프롬프트를 입력하세요.</p>
+            </div>
+
+            <div class="import-area">
+                <div class="import-box" id="importBox">
+                    <span class="import-icon">&#128194;</span>
+                    <p class="import-title">이전에 만든 자료가 있나요?</p>
+                    <p class="import-desc">저장한 파일을 불러오면 모든 설정이 자동으로 복원됩니다</p>
+                    <label class="btn-import holo-btn" for="fileImport"><span>&#128196;</span> 자료 불러오기</label>
+                    <input type="file" id="fileImport" accept=".txt" style="display: none;">
+                </div>
+            </div>
+            <div class="or-divider"><span>또는 아래에 직접 입력하세요</span></div>
+
+            <div class="free-input-area">
+                <textarea class="free-input" id="freeInput" rows="6" placeholder="예시:
+- 비 오는 새벽 감성적인 Neo Soul + Lo-fi 느낌의 음악
+- Acoustic Pop, 95 BPM, D major, 4/4, warm vocals, piano, soft drums
+- 기존에 만든 Suno 프롬프트를 붙여넣기 해도 됩니다"></textarea>
+                <div class="input-tools">
+                    <span class="char-count" id="charCount">0자</span>
+                    <button class="btn-clear-input" id="btnClearInput">지우기</button>
+                </div>
+            </div>
+            <div class="analyze-area">
+                <button class="btn-analyze holo-btn" id="btnAnalyze" disabled>
+                    <span>&#128300;</span> 분석하고 다음 단계로
+                </button>
+            </div>
+        </section>
+
+        <!-- ========== STEP 2: 전문가 설정 ========== -->
+        <section class="step-page" id="step2">
+            <div class="step-header">
+                <div class="step-title-row">
+                    <h1 class="step-title">전문가 설정</h1>
+                    <button class="btn-collapse-step">숨기기</button>
+                </div>
+                <p class="step-desc">모든 항목을 자유롭게 설정하세요. AI가 분석한 결과를 기반으로 추천합니다.</p>
+            </div>
+            <div class="original-input-box" id="originalInput"></div>
+
+            <!-- 타겟층 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#128100; 타겟층 <span class="auto-badge">AI 추천</span></h3>
+                <div class="btn-grid" id="targetBtns">
+                    <button class="toggle-btn" data-value="teens">10대</button>
+                    <button class="toggle-btn" data-value="young-adults">2030세대</button>
+                    <button class="toggle-btn" data-value="middle-aged">5060세대</button>
+                    <button class="toggle-btn" data-value="seniors">시니어세대</button>
+                </div>
+            </div>
+
+            <!-- 장소 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#128205; 장소/활동 <span class="auto-badge">AI 추천</span></h3>
+                <div class="btn-grid" id="placeBtns">
+                    <button class="toggle-btn" data-value="cafe">&#9749; 카페</button>
+                    <button class="toggle-btn" data-value="bar">&#127863; 바/라운지</button>
+                    <button class="toggle-btn" data-value="club">&#127918; 클럽</button>
+                    <button class="toggle-btn" data-value="festival">&#127914; 페스티벌</button>
+                    <button class="toggle-btn" data-value="gym">&#127947; 헬스장</button>
+                    <button class="toggle-btn" data-value="home">&#127968; 집</button>
+                    <button class="toggle-btn" data-value="office">&#128188; 사무실</button>
+                    <button class="toggle-btn" data-value="library">&#128218; 도서관</button>
+                    <button class="toggle-btn" data-value="drive">&#128663; 드라이브</button>
+                    <button class="toggle-btn" data-value="night-drive">&#127747; Night Drive</button>
+                    <button class="toggle-btn" data-value="walk">&#128694; 산책</button>
+                    <button class="toggle-btn" data-value="commute">&#128647; 출퇴근</button>
+                    <button class="toggle-btn" data-value="travel">&#9992; 여행</button>
+                    <button class="toggle-btn" data-value="cooking">&#127859; 요리할때</button>
+                    <button class="toggle-btn" data-value="reading">&#128214; 독서</button>
+                    <button class="toggle-btn" data-value="gaming">&#127918; 게이밍</button>
+                    <button class="toggle-btn" data-value="coding">&#128187; 코딩</button>
+                    <button class="toggle-btn" data-value="yoga">&#129495; 요가</button>
+                    <button class="toggle-btn" data-value="meditation">&#128524; 명상</button>
+                    <button class="toggle-btn" data-value="morning">&#127749; 아침루틴</button>
+                    <button class="toggle-btn" data-value="date">&#128149; 데이트</button>
+                    <button class="toggle-btn" data-value="home-party">&#127881; 홈파티</button>
+                    <button class="toggle-btn" data-value="alone">&#127864; 혼술/혼밥</button>
+                </div>
+            </div>
+
+            <!-- 분위기 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127925; 분위기 <span class="auto-badge">AI 추천</span></h3>
+                <div class="btn-grid" id="moodBtns">
+                    <button class="toggle-btn" data-value="comfortable">&#128524; 편안한</button>
+                    <button class="toggle-btn" data-value="healing">&#127808; 힐링</button>
+                    <button class="toggle-btn" data-value="cozy">&#128715; 포근한</button>
+                    <button class="toggle-btn" data-value="warm">&#9728; 따뜻한</button>
+                    <button class="toggle-btn" data-value="emotional">&#128150; 감성적</button>
+                    <button class="toggle-btn" data-value="dreamy">&#127769; 몽환적</button>
+                    <button class="toggle-btn" data-value="calm">&#127752; 잔잔한</button>
+                    <button class="toggle-btn" data-value="lonely">&#127783; 쓸쓸한</button>
+                    <button class="toggle-btn" data-value="sentimental">&#128167; 센치한</button>
+                    <button class="toggle-btn" data-value="dawn-mood">&#127747; 새벽감성</button>
+                    <button class="toggle-btn" data-value="nostalgic">&#128247; 그리운</button>
+                    <button class="toggle-btn" data-value="flutter">&#128155; 설레는</button>
+                    <button class="toggle-btn" data-value="love">&#10084; 사랑</button>
+                    <button class="toggle-btn" data-value="breakup">&#128148; 이별</button>
+                    <button class="toggle-btn" data-value="feel-good">&#128522; 기분좋은</button>
+                    <button class="toggle-btn" data-value="refreshing">&#127774; 상쾌한</button>
+                    <button class="toggle-btn" data-value="exciting">&#127880; 신나는</button>
+                    <button class="toggle-btn" data-value="groovy">&#128131; 흥겨운</button>
+                    <button class="toggle-btn" data-value="tension-up">&#128293; 텐션업</button>
+                    <button class="toggle-btn" data-value="powerful">&#128170; 파워풀한</button>
+                    <button class="toggle-btn" data-value="confidence">&#128526; 자신감</button>
+                    <button class="toggle-btn" data-value="focus">&#127919; 집중</button>
+                    <button class="toggle-btn" data-value="immersive">&#128161; 몰입</button>
+                    <button class="toggle-btn" data-value="sleep">&#128164; 잠잘때</button>
+                    <button class="toggle-btn" data-value="sleep-aid">&#127769; 수면유도</button>
+                    <button class="toggle-btn" data-value="comfort">&#129303; 위로</button>
+                    <button class="toggle-btn" data-value="rainy">&#127783; 비오는날</button>
+                    <button class="toggle-btn" data-value="dawn">&#127748; 새벽</button>
+                    <button class="toggle-btn" data-value="sunset">&#127751; 일몰</button>
+                    <button class="toggle-btn" data-value="running">&#127939; 달릴때</button>
+                </div>
+            </div>
+
+            <!-- ======= 전문가 전용 섹션 ======= -->
+            <div class="pro-divider"><span>&#9881; 전문가 전용 설정</span></div>
+
+            <!-- 메인 장르 (클릭형 드롭다운) -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127925; 메인 장르 <span class="auto-badge">직접 선택</span></h3>
+                <div class="genre-direct-input">
+                    <button class="genre-select-trigger" id="mainGenreTrigger">클릭하여 메인 장르 선택 &#9660;</button>
+                    <input type="text" class="genre-filter-input" id="mainGenreFilter" placeholder="장르 검색..." style="display:none;">
+                    <div class="genre-dropdown" id="mainGenreDropdown"></div>
+                </div>
+                <div class="selected-genre-display" id="mainGenreDisplay"></div>
+            </div>
+
+            <!-- 서브 장르 (클릭형 드롭다운) -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127912; 서브 장르 (블렌딩) <span class="pro-badge">선택사항</span></h3>
+                <div class="genre-direct-input">
+                    <button class="genre-select-trigger" id="subGenreTrigger">클릭하여 서브 장르 선택 &#9660;</button>
+                    <input type="text" class="genre-filter-input" id="subGenreFilter" placeholder="장르 검색..." style="display:none;">
+                    <div class="genre-dropdown" id="subGenreDropdown"></div>
+                </div>
+                <div class="selected-genre-display" id="subGenreDisplay"></div>
+            </div>
+
+            <!-- 조성 (Key) -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127929; 조성 (Key) <span class="pro-badge">전문가</span></h3>
+                <div class="btn-grid" id="keyBtns">
+                    <button class="toggle-btn" data-value="C major">C Major</button>
+                    <button class="toggle-btn" data-value="C minor">C Minor</button>
+                    <button class="toggle-btn" data-value="D major">D Major</button>
+                    <button class="toggle-btn" data-value="D minor">D Minor</button>
+                    <button class="toggle-btn" data-value="E major">E Major</button>
+                    <button class="toggle-btn" data-value="E minor">E Minor</button>
+                    <button class="toggle-btn" data-value="F major">F Major</button>
+                    <button class="toggle-btn" data-value="F minor">F Minor</button>
+                    <button class="toggle-btn" data-value="G major">G Major</button>
+                    <button class="toggle-btn" data-value="G minor">G Minor</button>
+                    <button class="toggle-btn" data-value="A major">A Major</button>
+                    <button class="toggle-btn" data-value="A minor">A Minor</button>
+                    <button class="toggle-btn" data-value="B major">B Major</button>
+                    <button class="toggle-btn" data-value="B minor">B Minor</button>
+                    <button class="toggle-btn" data-value="Bb major">Bb Major</button>
+                    <button class="toggle-btn" data-value="Eb major">Eb Major</button>
+                    <button class="toggle-btn" data-value="Ab major">Ab Major</button>
+                    <button class="toggle-btn" data-value="F# minor">F# Minor</button>
+                </div>
+            </div>
+
+            <!-- 박자 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127932; 박자 <span class="pro-badge">전문가</span></h3>
+                <div class="btn-grid" id="timeSigBtns">
+                    <button class="toggle-btn" data-value="4/4" title="가장 일반적인 박자. 팝, 록, 힙합 등 대부분의 음악">4/4 (기본)</button>
+                    <button class="toggle-btn" data-value="3/4" title="왈츠 박자. 우아하고 흐르는 느낌">3/4 (왈츠)</button>
+                    <button class="toggle-btn" data-value="6/8" title="부드럽게 흐르는 느낌. 발라드, 아이리시 음악">6/8 (발라드)</button>
+                    <button class="toggle-btn" data-value="2/4" title="행진곡 느낌. 강한 리듬감">2/4 (행진곡)</button>
+                    <button class="toggle-btn" data-value="5/4" title="독특한 리듬. 실험적인 음악">5/4 (실험적)</button>
+                    <button class="toggle-btn" data-value="7/8" title="복잡한 리듬. 프로그레시브, 재즈">7/8 (프로그레시브)</button>
+                </div>
+            </div>
+
+            <!-- BPM -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127918; BPM <span class="auto-badge">AI 추천</span></h3>
+                <div class="bpm-row">
+                    <input type="range" id="bpmSlider" min="50" max="200" value="110" class="bpm-slider">
+                    <span class="bpm-value" id="bpmValue">110 BPM</span>
+                </div>
+                <div class="bpm-presets">
+                    <button class="bpm-preset" data-bpm="66">발라드 (66)</button>
+                    <button class="bpm-preset" data-bpm="80">R&B (80)</button>
+                    <button class="bpm-preset" data-bpm="95">어쿠스틱 (95)</button>
+                    <button class="bpm-preset" data-bpm="110">팝 (110)</button>
+                    <button class="bpm-preset" data-bpm="120">하우스 (120)</button>
+                    <button class="bpm-preset" data-bpm="128">EDM (128)</button>
+                    <button class="bpm-preset" data-bpm="140">K-Pop (140)</button>
+                    <button class="bpm-preset" data-bpm="170">트랩 (170)</button>
+                </div>
+            </div>
+
+            <!-- 보컬 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127908; 보컬 성별 <span class="auto-badge">AI 추천</span></h3>
+                <div class="btn-grid" id="vocalGenderBtns">
+                    <button class="toggle-btn" data-value="male">&#128104; 남성</button>
+                    <button class="toggle-btn" data-value="female">&#128105; 여성</button>
+                    <button class="toggle-btn" data-value="duet">&#128107; 듀엣</button>
+                    <button class="toggle-btn" data-value="group">&#128101; 그룹</button>
+                    <button class="toggle-btn" data-value="instrumental">&#127929; 무보컬</button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3 class="setting-title">&#127924; 보컬 스타일 <span class="auto-badge">AI 추천</span></h3>
+                <div class="btn-grid" id="vocalStyleBtns">
+                    <button class="toggle-btn" data-value="chest-voice" title="자연스럽고 힘 있는 목소리">자연스러운 목소리</button>
+                    <button class="toggle-btn" data-value="head-voice" title="맑고 가벼운 고음">맑은 고음</button>
+                    <button class="toggle-btn" data-value="falsetto" title="가늘고 높은 가성">가성</button>
+                    <button class="toggle-btn" data-value="belting" title="시원하게 지르는 파워 고음">파워 고음</button>
+                    <button class="toggle-btn" data-value="vibrato" title="목소리 떨림으로 감정 표현">목소리 떨림</button>
+                    <button class="toggle-btn" data-value="breathy" title="숨소리 섞인 부드러운 목소리">숨소리 섞인</button>
+                    <button class="toggle-btn" data-value="grit" title="허스키하고 거친 목소리">허스키한</button>
+                    <button class="toggle-btn" data-value="whisper" title="속삭이는 목소리">속삭임</button>
+                    <button class="toggle-btn" data-value="rap" title="랩">랩</button>
+                    <button class="toggle-btn" data-value="autotune" title="전자음 보정">오토튠</button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3 class="setting-title">&#127926; 음역대 <span class="auto-badge">AI 추천</span></h3>
+                <div class="btn-grid" id="vocalRangeBtns">
+                    <button class="toggle-btn" data-value="bass" title="매우 낮은 남성 저음">&#128104; 저음</button>
+                    <button class="toggle-btn" data-value="baritone" title="따뜻한 남성 중저음">&#128104; 중저음</button>
+                    <button class="toggle-btn" data-value="tenor" title="힘찬 남성 고음">&#128104; 고음</button>
+                    <button class="toggle-btn" data-value="alto" title="깊은 여성 저음">&#128105; 저음</button>
+                    <button class="toggle-btn" data-value="mezzo" title="풍부한 여성 중음">&#128105; 중음</button>
+                    <button class="toggle-btn" data-value="soprano" title="맑은 여성 고음">&#128105; 고음</button>
+                </div>
+            </div>
+
+            <!-- 주요 악기 구성 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127929; 주요 악기 구성 <span class="auto-badge">AI 추천</span></h3>
+                <div class="btn-grid" id="instrumentBtns">
+                    <button class="toggle-btn" data-value="piano">&#127929; 피아노</button>
+                    <button class="toggle-btn" data-value="acoustic-guitar">&#127928; 어쿠스틱 기타</button>
+                    <button class="toggle-btn" data-value="electric-guitar">&#127928; 일렉 기타</button>
+                    <button class="toggle-btn" data-value="bass-guitar">&#127928; 베이스 기타</button>
+                    <button class="toggle-btn" data-value="drums">&#129345; 드럼</button>
+                    <button class="toggle-btn" data-value="synth">&#127932; 신디사이저</button>
+                    <button class="toggle-btn" data-value="strings">&#127931; 현악기</button>
+                    <button class="toggle-btn" data-value="brass">&#127930; 관악기</button>
+                    <button class="toggle-btn" data-value="saxophone">&#127927; 색소폰</button>
+                    <button class="toggle-btn" data-value="violin">&#127931; 바이올린</button>
+                    <button class="toggle-btn" data-value="cello">&#127931; 첼로</button>
+                    <button class="toggle-btn" data-value="organ">&#127929; 오르간</button>
+                    <button class="toggle-btn" data-value="808">&#128266; 808 베이스</button>
+                    <button class="toggle-btn" data-value="drum-machine">&#127932; 드럼 머신</button>
+                    <button class="toggle-btn" data-value="percussion">&#129345; 타악기</button>
+                    <button class="toggle-btn" data-value="choir">&#128101; 합창</button>
+                    <button class="toggle-btn" data-value="orchestra">&#127932; 오케스트라</button>
+                </div>
+                <div class="instrument-add-area">
+                    <button class="genre-select-trigger" id="instrumentAddTrigger">+ 악기 더 추가하기 &#9660;</button>
+                    <input type="text" class="genre-filter-input" id="instrumentAddFilter" placeholder="악기 검색..." style="display:none;">
+                    <div class="genre-dropdown" id="instrumentAddDropdown"></div>
+                </div>
+            </div>
+
+            <!-- 프로덕션 노트 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127911; 프로덕션 노트 <span class="pro-badge">전문가</span></h3>
+                <p class="setting-hint">음질과 사운드 텍스처를 세밀하게 조절합니다.</p>
+                <div class="btn-grid" id="productionBtns">
+                    <button class="toggle-btn" data-value="tape saturation" title="아날로그 테이프 특유의 따뜻한 포화감">테이프 새츄레이션</button>
+                    <button class="toggle-btn" data-value="plate reverb" title="금속판 리버브. 부드럽고 자연스러운 울림">플레이트 리버브</button>
+                    <button class="toggle-btn" data-value="room reverb" title="작은 공간의 자연스러운 울림">룸 리버브</button>
+                    <button class="toggle-btn" data-value="hall reverb" title="큰 홀의 웅장한 울림">홀 리버브</button>
+                    <button class="toggle-btn" data-value="dry and direct" title="리버브 최소화. 건조하고 직접적인 사운드">드라이 (리버브 없음)</button>
+                    <button class="toggle-btn" data-value="vinyl crackle" title="LP 레코드 특유의 바스락 소리">바이닐 크랙클</button>
+                    <button class="toggle-btn" data-value="lo-fi texture" title="의도적으로 저음질 느낌을 주는 텍스처">로파이 텍스처</button>
+                    <button class="toggle-btn" data-value="clean vocal upfront" title="보컬을 깨끗하게 앞으로 배치">보컬 전면 배치</button>
+                    <button class="toggle-btn" data-value="wide stereo" title="넓은 스테레오 이미지. 공간감 극대화">와이드 스테레오</button>
+                    <button class="toggle-btn" data-value="sidechain pump" title="킥에 맞춰 다른 악기가 펌핑되는 효과. EDM 필수">사이드체인 펌프</button>
+                    <button class="toggle-btn" data-value="analog warmth" title="아날로그 장비 특유의 따뜻한 사운드">아날로그 따뜻함</button>
+                    <button class="toggle-btn" data-value="crisp highs" title="선명하고 또렷한 고음역대">선명한 고음</button>
+                    <button class="toggle-btn" data-value="deep sub bass" title="깊고 묵직한 서브 베이스">깊은 서브 베이스</button>
+                    <button class="toggle-btn" data-value="gated reverb" title="80년대 스타일의 컷오프 리버브">게이트 리버브</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========== STEP 3: 최종 프롬프트 ========== -->
+        <section class="step-page" id="step3">
+            <div class="step-header">
+                <div class="step-title-row">
+                    <h1 class="step-title">최고 퀄리티 프롬프트 완성!</h1>
+                    <button class="btn-collapse-step">숨기기</button>
+                </div>
+                <p class="step-desc">전문가 설정이 반영된 Suno v5 프롬프트입니다. 직접 수정도 가능합니다.</p>
+            </div>
+
+            <!-- v5 검증 결과 -->
+            <div class="v5-score-card" id="v5ScoreCard">
+                <div class="v5-score-header">
+                    <span class="v5-score-label">Suno v5 인식률</span>
+                    <span class="v5-score-value" id="v5ScoreValue">0%</span>
+                </div>
+                <div class="v5-score-bar"><div class="v5-score-fill" id="v5ScoreFill"></div></div>
+                <div class="v5-checklist" id="v5Checklist"></div>
+            </div>
+
+            <div class="prompt-explanation" id="promptExplanation"></div>
+
+            <div class="prompt-section">
+                <div class="prompt-header">
+                    <h3 class="prompt-label">&#127925; Style Prompt</h3>
+                    <button class="btn-copy" data-target="stylePromptText">복사하기</button>
+                </div>
+                <textarea class="prompt-box prompt-editable" id="stylePromptText" rows="6"></textarea>
+                <div class="prompt-desc-kor" id="stylePromptKor"></div>
+            </div>
+
+            <div class="prompt-section">
+                <div class="prompt-header">
+                    <h3 class="prompt-label">&#128683; Exclude Styles</h3>
+                    <button class="btn-copy" data-target="excludeStylesText">복사하기</button>
+                </div>
+                <textarea class="prompt-box prompt-editable" id="excludeStylesText" rows="2"></textarea>
+                <div class="exclude-toggles">
+                    <p class="exclude-toggles-title">&#9888; 음질 문제 방지 항목</p>
+                    <div class="exclude-btn-grid">
+                        <button class="exclude-tag-btn" data-value="intro" data-kor="인트로 방지">intro</button>
+                        <button class="exclude-tag-btn" data-value="reverb" data-kor="리버브 방지">reverb</button>
+                        <button class="exclude-tag-btn" data-value="fade in" data-kor="페이드인 방지">fade in</button>
+                        <button class="exclude-tag-btn" data-value="distortion" data-kor="왜곡 방지">distortion</button>
+                        <button class="exclude-tag-btn" data-value="noise" data-kor="노이즈 방지">noise</button>
+                        <button class="exclude-tag-btn" data-value="screaming" data-kor="괴기음 방지">screaming</button>
+                        <button class="exclude-tag-btn" data-value="falsetto" data-kor="극단 고음 방지">falsetto</button>
+                        <button class="exclude-tag-btn" data-value="echo" data-kor="에코 방지">echo</button>
+                        <button class="exclude-tag-btn" data-value="choir" data-kor="합창 방지">choir</button>
+                        <button class="exclude-tag-btn" data-value="sound effects" data-kor="효과음 방지">sound effects</button>
+                        <button class="exclude-tag-btn" data-value="four-on-the-floor kick" data-kor="반복적인 4비트 킥 방지">four-on-the-floor kick</button>
+                    </div>
+                    <div class="exclude-custom-row">
+                        <input type="text" class="exclude-custom-input" id="excludeCustomInput" placeholder="직접 입력..." maxlength="30">
+                        <button class="btn-add-exclude" id="btnAddExclude">추가</button>
+                    </div>
+                </div>
+                <div class="prompt-desc-kor" id="excludeStylesKor"></div>
+            </div>
+
+            <div class="prompt-section">
+                <div class="prompt-header"><h3 class="prompt-label">&#9881; More Options</h3></div>
+                <div class="more-options-box">
+                    <div class="option-slider-row">
+                        <span class="slider-label">Weirdness</span>
+                        <div class="slider-bar"><div class="slider-fill" id="weirdnessFill"></div></div>
+                        <span class="slider-value" id="weirdnessValue">50%</span>
+                    </div>
+                    <div class="option-slider-row">
+                        <span class="slider-label">Style Influence</span>
+                        <div class="slider-bar"><div class="slider-fill" id="styleInfluenceFill"></div></div>
+                        <span class="slider-value" id="styleInfluenceValue">50%</span>
+                    </div>
+                </div>
+                <div class="prompt-desc-kor" id="moreOptionsKor"></div>
+            </div>
+
+            <div class="result-actions">
+                <button class="action-btn action-prev-step" id="btnPrevStep"><span>&#8592;</span> 이전 단계</button>
+                <button class="action-btn action-copy-all holo-btn" id="btnCopyAll"><span>&#128203;</span> 전체 복사</button>
+                <button class="action-btn action-save-all holo-btn" id="btnSaveAll"><span>&#128190;</span> 전체 저장하기</button>
+                <button class="action-btn action-apply" id="btnApply"><span>✅</span> 적용하기</button>
+                <button class="action-btn action-goto-lyrics" id="btnGotoLyrics" disabled><span>🎵</span> 노래제목&amp;가사생성</button>
+                <button class="action-btn action-home" id="btnHome"><span>&#127968;</span> 메인으로</button>
+            </div>
+            <div class="apply-complete-msg" id="applyCompleteMsg"></div>
+        </section>
+    </main>
+
+    <div class="nav-buttons" id="navButtons" style="display: none;">
+        <button class="nav-btn nav-prev" id="btnPrev" style="visibility: hidden;"><span>&#8592;</span> 이전</button>
+        <div class="nav-info" id="navInfo">1 / 2 단계</div>
+        <button class="nav-btn nav-next holo-btn" id="btnNext">&#9834; 프롬프트 생성 <span>&#8594;</span></button>
+    </div>
+
+    <div class="popup-overlay" id="textSizePopup">
+        <div class="popup">
+            <h3 class="popup-title">글자 크기 조절</h3>
+            <div class="text-size-options">
+                <button class="size-btn" data-size="small">가<span class="size-label">작게</span></button>
+                <button class="size-btn active" data-size="medium">가<span class="size-label">보통</span></button>
+                <button class="size-btn" data-size="large">가<span class="size-label">크게</span></button>
+                <button class="size-btn" data-size="xlarge">가<span class="size-label">매우 크게</span></button>
+            </div>
+            <button class="popup-close" id="closeTextSize">닫기</button>
+        </div>
+    </div>
+
+    <script src="js/genre-data.js"></script>
+    <script src="js/pro.js"></script>
+</body>
+</html>

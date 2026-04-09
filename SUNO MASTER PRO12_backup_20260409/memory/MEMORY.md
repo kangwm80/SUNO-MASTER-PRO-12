@@ -1,0 +1,1 @@
+- [Suno 확장 프로그램 통합 방향](project_suno_extension.md) — 현재 확장 프로그램 사용, 향후 앱 전환 시 직접 API로 변경

@@ -1,0 +1,92 @@
+<!--
+  ============================================
+  내 프로그램에 추가할 코드 예시
+  ============================================
+
+  기존 HTML에 아래 2가지만 추가하면 됩니다:
+
+  1. "Suno 곡 생성" 버튼
+  2. 버튼 클릭 시 데이터를 확장프로그램에 전달하는 스크립트
+-->
+
+<!-- 방법 1: 버튼 + 스크립트 추가 (가장 간단) -->
+<!-- 기존 HTML의 적절한 위치에 이 버튼을 추가하세요 -->
+<button id="btn-suno-generate" style="
+  background: #e8930c;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+">🎵 Suno 곡 생성</button>
+
+<script>
+  /**
+   * "Suno 곡 생성" 버튼 클릭 시
+   * 
+   * 페이지에서 가사, 스타일, 제목을 수집하여
+   * 크롬 확장프로그램에 전달합니다.
+   * 
+   * ※ 아래 선택자를 내 프로그램의 실제 HTML에 맞게 수정하세요!
+   */
+  document.getElementById('btn-suno-generate').addEventListener('click', function () {
+
+    // ─────────────────────────────────────────
+    // 내 프로그램에서 가사, 스타일, 제목 가져오기
+    // ※ 아래를 내 HTML의 id나 class에 맞게 수정!
+    // ─────────────────────────────────────────
+
+    var title = '';
+    var lyrics = '';
+    var style = '';
+
+    // 예시 1: id로 가져오기
+    // var titleEl = document.getElementById('내-제목-입력란-id');
+    // var lyricsEl = document.getElementById('내-가사-입력란-id');
+    // var styleEl = document.getElementById('내-스타일-입력란-id');
+
+    // 예시 2: textarea나 input에서 가져오기
+    // var titleEl = document.querySelector('input[name="title"]');
+    // var lyricsEl = document.querySelector('textarea[name="lyrics"]');
+    // var styleEl = document.querySelector('input[name="style"]');
+
+    // if (titleEl) title = titleEl.value;
+    // if (lyricsEl) lyrics = lyricsEl.value;
+    // if (styleEl) style = styleEl.value;
+
+    // ─── 테스트용 더미 데이터 (실제로는 위의 방법으로 가져오기) ───
+    title = '테스트 노래';
+    lyrics = '[Verse]\n하늘은 맑고 바람은 부드럽고\n오늘도 좋은 하루가 시작되네\n\n[Chorus]\n라라라 행복한 노래\n라라라 즐거운 하루';
+    style = 'K-pop, upbeat, female vocal, energetic';
+
+    // 확인
+    if (!lyrics && !style) {
+      alert('가사 또는 스타일을 먼저 입력해주세요.');
+      return;
+    }
+
+    // 확장프로그램에 메시지 전송
+    window.postMessage({
+      type: 'SUNO_GENERATE',
+      title: title,
+      lyrics: lyrics,
+      style: style
+    }, '*');
+
+    // 결과 대기
+    alert('Suno 페이지가 열리면서 자동으로 입력됩니다.\n잠시 기다려주세요!');
+  });
+
+  // 확장프로그램에서 결과 응답 수신
+  window.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'SUNO_GENERATE_STARTED') {
+      if (event.data.success) {
+        console.log('Suno 곡 생성 시작됨!');
+      } else {
+        alert('오류: ' + event.data.error);
+      }
+    }
+  });
+</script>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Service Connector</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 340px;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    .header {
+      background: #222;
+      padding: 14px 18px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-logo {
+      width: 26px; height: 26px; background: #e8930c;
+      border-radius: 7px; display: flex; align-items: center;
+      justify-content: center; font-size: 12px; font-weight: 700; color: #1a1a1a;
+    }
+    .header h1 { font-size: 14px; font-weight: 700; color: #fff; }
+    .header-ver { font-size: 10px; color: #888; background: #2a2a2a; padding: 2px 7px; border-radius: 10px; }
+    .section-title {
+      padding: 12px 18px 6px; font-size: 11px; color: #999;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .service-list { padding: 0 18px 12px; display: flex; flex-direction: column; gap: 8px; }
+    .service-card {
+      background: #252525; border: 1px solid #333; border-radius: 10px;
+      padding: 12px 14px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .service-info { display: flex; align-items: center; gap: 10px; }
+    .service-icon {
+      width: 34px; height: 34px; border-radius: 8px; display: flex;
+      align-items: center; justify-content: center; font-size: 15px;
+      font-weight: 700; color: #fff;
+    }
+    .service-icon.suno { background: #8b5cf6; }
+    .service-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .service-domain { font-size: 11px; color: #777; }
+    .service-right { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+    .dot.on { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.4); }
+    .dot.off { background: #f87171; }
+    .btn {
+      border: 1px solid #444; border-radius: 6px; padding: 6px 12px;
+      font-size: 11px; font-weight: 500; cursor: pointer;
+      background: #333; color: #e0e0e0; transition: all 0.2s;
+    }
+    .btn:hover { background: #e8930c; color: #1a1a1a; border-color: #e8930c; }
+    .btn.on { background: rgba(74,222,128,0.1); color: #4ade80; border-color: rgba(74,222,128,0.3); }
+
+    .info-box {
+      margin: 0 18px 12px; padding: 12px 14px; background: #222;
+      border: 1px solid #333; border-radius: 8px; font-size: 12px; line-height: 1.6;
+    }
+    .info-box .label { color: #999; font-size: 11px; }
+    .info-box .value { color: #fff; font-weight: 600; }
+    .info-box .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+
+    .guide {
+      margin: 0 18px 12px; padding: 12px 14px; background: #1e2a1e;
+      border: 1px solid #2d4a2d; border-radius: 8px; font-size: 11px;
+      color: #8eca8e; line-height: 1.7;
+    }
+    .guide.warn { background: #2a1e1e; border-color: #4a2d2d; color: #ca8e8e; }
+    .guide strong { color: #fff; }
+
+    .footer {
+      padding: 10px 18px; border-top: 1px solid #333;
+      background: #1e1e1e; text-align: center;
+    }
+    .footer-msg { font-size: 11px; color: #777; min-height: 16px; }
+    .footer-msg.ok { color: #4ade80; }
+    .footer-msg.err { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">AI</div>
+      <h1>AI Service Connector</h1>
+    </div>
+    <span class="header-ver">v2.0</span>
+  </div>
+
+  <div class="section-title">Suno AI 연결 상태</div>
+  <div class="service-list">
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-icon suno">S</div>
+        <div>
+          <div class="service-name">Suno AI</div>
+          <div class="service-domain">suno.com</div>
+        </div>
+      </div>
+      <div class="service-right">
+        <div class="dot" id="dotSuno"></div>
+        <button class="btn" id="btnCheck">확인 중...</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연결됐을 때 보이는 정보 -->
+  <div id="infoArea" style="display:none;">
+    <div class="info-box">
+      <div class="row">
+        <span class="label">로그인 상태</span>
+        <span class="value" id="loginStatus">-</span>
+      </div>
+      <div class="row">
+        <span class="label">쿠키 개수</span>
+        <span class="value" id="cookieCount">-</span>
+      </div>
+      <div class="row">
+        <span class="label">마지막 확인</span>
+        <span class="value" id="lastChecked">-</span>
+      </div>
+    </div>
+    <div class="guide">
+      ✅ Suno 연결됨!<br>
+      내 프로그램(<strong>localhost:8080</strong>)에서<br>
+      <strong>"Suno 곡 생성"</strong> 버튼을 누르면 자동으로 음악이 생성됩니다.
+    </div>
+  </div>
+
+  <!-- 연결 안 됐을 때 보이는 가이드 -->
+  <div id="guideArea" style="display:none;">
+    <div class="guide warn">
+      ❌ Suno에 로그인되어 있지 않습니다.<br><br>
+      <strong>1.</strong> 새 탭에서 <strong>suno.com</strong> 접속<br>
+      <strong>2.</strong> 로그인 완료<br>
+      <strong>3.</strong> 이 확장프로그램에서 <strong>"다시 확인"</strong> 클릭
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-msg" id="footerMsg">Suno 로그인 상태를 확인하는 중...</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

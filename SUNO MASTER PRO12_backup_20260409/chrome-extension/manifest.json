@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "AI Service Connector",
+  "version": "2.1.0",
+  "description": "Suno AI 등 AI 서비스를 자동으로 조작하는 크롬 확장프로그램",
+  "permissions": [
+    "cookies",
+    "storage",
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://suno.com/*",
+    "https://*.suno.com/*",
+    "https://studio-api.suno.ai/*",
+    "http://localhost:*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:*/*"],
+      "js": ["content-localhost.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://suno.com/create*", "https://www.suno.com/create*"],
+      "js": ["content-suno.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
