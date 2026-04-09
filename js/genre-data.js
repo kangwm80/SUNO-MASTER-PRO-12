@@ -620,10 +620,20 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     }
 
     // === ⑤ 보컬 (사용자 선택 우선 → DB 보컬 + 장르별 강화) ===
+    // 듀엣/남녀 혼합 보컬 절대 금지: 단일 보컬만 허용
     if (vocalOptions && vocalOptions.type) {
         const vParts = [];
         if (vocalOptions.type !== 'instrumental') {
-            vParts.push(vocalOptions.type);
+            // duet vocals → 사용하지 않고 단일 보컬로 대체
+            let vocalType = vocalOptions.type;
+            if (/duet|male and female|남녀/i.test(vocalType)) {
+                vocalType = 'female vocals';
+            }
+            // male + female 동시 포함 방지
+            if (/male.*female|female.*male/i.test(vocalType)) {
+                vocalType = vocalType.replace(/,?\s*(fe)?male\s*vocals?\s*/i, '').trim() || 'female vocals';
+            }
+            vParts.push(vocalType);
             if (vocalOptions.age) vParts.push(vocalOptions.age);
             if (vocalOptions.range) vParts.push(vocalOptions.range);
             if (vocalOptions.styles && vocalOptions.styles.length > 0) {
@@ -636,8 +646,10 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
             parts.push('instrumental, no vocals');
         }
     } else if (mainData.vocal) {
-        const dbVocal = mainData.vocal.split(', ').slice(0, 3).join(', ');
-        parts.push(`${dbVocal}, ${vocalEnhance.technique}`);
+        // DB 보컬에서도 듀엣/남녀 혼합 제거
+        let dbVocal = mainData.vocal.split(', ').slice(0, 3).join(', ');
+        dbVocal = dbVocal.replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim();
+        parts.push(`${dbVocal || vocalEnhance.style}, ${vocalEnhance.technique}`);
     } else {
         parts.push(`${vocalEnhance.style}, ${vocalEnhance.technique}`);
     }

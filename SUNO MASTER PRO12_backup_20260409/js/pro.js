@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dawn: '새벽', sunset: '일몰', running: '달릴때'
     };
 
-    const vocalGenderMap = { male: 'male vocals', female: 'female vocals', duet: 'male and female duet', group: 'group vocals', instrumental: 'instrumental, no vocals' };
+    const vocalGenderMap = { male: 'male vocals', female: 'female vocals', group: 'group vocals', instrumental: 'instrumental, no vocals' };
     const vocalStyleMap = { 'chest-voice': 'chest voice', 'head-voice': 'head voice', falsetto: 'falsetto', belting: 'belting', vibrato: 'vibrato', breathy: 'breathy', grit: 'grit raspy', whisper: 'whisper', rap: 'rap flow', autotune: 'auto-tuned' };
     const vocalRangeMap = { bass: 'bass range', baritone: 'baritone', tenor: 'tenor', alto: 'alto', mezzo: 'mezzo-soprano', soprano: 'soprano' };
     const instrumentMap = { piano: 'piano', 'acoustic-guitar': 'acoustic guitar', 'electric-guitar': 'electric guitar', 'bass-guitar': 'bass guitar', drums: 'drums', synth: 'synthesizer', strings: 'strings', brass: 'brass section', saxophone: 'saxophone', violin: 'violin', cello: 'cello', organ: 'organ', '808': '808 bass', 'drum-machine': 'drum machine', percussion: 'percussion', choir: 'choir harmonies', orchestra: 'full orchestra' };
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupToggleGroup('moodBtns', 'mood');
     setupToggleGroup('keyBtns', 'key');
     setupToggleGroup('timeSigBtns', 'timeSig');
-    setupToggleGroup('vocalGenderBtns', 'vocalGender');
+    setupSingleToggleGroup('vocalGenderBtns', 'vocalGender');
     setupToggleGroup('vocalStyleBtns', 'vocalStyle');
     setupToggleGroup('vocalRangeBtns', 'vocalRange');
     setupToggleGroup('instrumentBtns', 'instruments');
@@ -719,7 +719,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function initExcludeToggles() {
         if (excludeInit) return; excludeInit = true;
         document.querySelectorAll('.exclude-tag-btn').forEach(btn => {
-            btn.addEventListener('click', () => { btn.classList.toggle('active'); const v = btn.dataset.value; if (btn.classList.contains('active')) { if (!userExcludeTags.includes(v)) userExcludeTags.push(v); } else userExcludeTags = userExcludeTags.filter(t => t !== v); updateExclude(); });
+            const v = btn.dataset.value;
+            // 이미 generatedExcludeBase에 있는 항목은 활성화 상태로 표시
+            if (generatedExcludeBase) {
+                const baseParts = generatedExcludeBase.split(', ').map(p => p.trim().toLowerCase());
+                if (baseParts.includes(v.toLowerCase())) btn.classList.add('active');
+            }
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                if (btn.classList.contains('active')) { if (!userExcludeTags.includes(v)) userExcludeTags.push(v); }
+                else {
+                    userExcludeTags = userExcludeTags.filter(t => t !== v);
+                    if (generatedExcludeBase) { const bp = generatedExcludeBase.split(', ').filter(Boolean); generatedExcludeBase = bp.filter(p => p.toLowerCase() !== v.toLowerCase()).join(', '); }
+                }
+                updateExclude();
+            });
             btn.title = btn.dataset.kor;
         });
         document.getElementById('btnAddExclude').addEventListener('click', () => addExcl());

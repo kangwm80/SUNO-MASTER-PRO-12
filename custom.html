@@ -436,7 +436,6 @@
                     <div class="vocal-options" id="vocalTypeOptions">
                         <button class="vocal-option-btn" data-value="male vocals">&#129489; 남성 (Male)</button>
                         <button class="vocal-option-btn" data-value="female vocals">&#128105; 여성 (Female)</button>
-                        <button class="vocal-option-btn" data-value="duet vocals">&#128107; 듀엣 (Duet)</button>
                         <button class="vocal-option-btn" data-value="instrumental">&#127929; 연주곡 (Instrumental)</button>
                     </div>
                 </div>
@@ -495,7 +494,7 @@
                     <h3 class="prompt-label">&#127925; Style Prompt <span class="vocal-type-badge" id="vocalTypeBadge"></span></h3>
                     <button class="btn-copy" data-target="stylePromptText">복사하기</button>
                 </div>
-                <div class="prompt-box" id="stylePromptText"></div>
+                <textarea class="prompt-box prompt-editable" id="stylePromptText" rows="6"></textarea>
                 <div class="prompt-desc-kor" id="stylePromptKor"></div>
             </div>
 
@@ -505,7 +504,7 @@
                     <h3 class="prompt-label">&#127925; Simple Prompt <span class="simple-badge">Simple 모드용 · 500자 미만</span></h3>
                     <button class="btn-copy" data-target="simplePromptText">복사하기</button>
                 </div>
-                <div class="prompt-box" id="simplePromptText"></div>
+                <textarea class="prompt-box prompt-editable" id="simplePromptText" rows="4"></textarea>
                 <div class="prompt-desc-kor" id="simplePromptKor"></div>
             </div>
 
@@ -515,7 +514,7 @@
                     <h3 class="prompt-label">&#128683; Exclude Styles</h3>
                     <button class="btn-copy" data-target="excludeStylesText">복사하기</button>
                 </div>
-                <div class="prompt-box" id="excludeStylesText"></div>
+                <textarea class="prompt-box prompt-editable" id="excludeStylesText" rows="2"></textarea>
 
                 <div class="exclude-toggles">
                     <p class="exclude-toggles-title">&#9888; 음질 문제 방지 항목 (클릭하면 추가/제거)</p>

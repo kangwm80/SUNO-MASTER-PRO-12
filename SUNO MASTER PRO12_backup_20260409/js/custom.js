@@ -1380,7 +1380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (importedPromptData) {
             const data = importedPromptData;
             document.getElementById('promptExplanation').textContent = data.explanation || '불러온 프롬프트입니다. 아래에서 수정 후 사용하세요.';
-            document.getElementById('stylePromptText').textContent = data.stylePrompt;
+            document.getElementById('stylePromptText').value = data.stylePrompt;
             document.getElementById('stylePromptKor').innerHTML = '📌 <strong>한국어 설명:</strong> 이전에 저장한 프롬프트를 불러왔습니다.';
             generatedExcludeBase = data.excludeStyles; userExcludeTags = [];
             updateExcludeStylesText();
@@ -1391,7 +1391,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('styleInfluenceFill').style.width = s + '%'; document.getElementById('styleInfluenceValue').textContent = s + '%';
             document.getElementById('moreOptionsKor').innerHTML = buildMoreOptionsKorDesc(w, s);
             initExcludeToggles(); updateVocalTypeBadge(data.stylePrompt);
-            document.getElementById('simplePromptText').textContent = data.simplePrompt || data.stylePrompt.substring(0, 490);
+            document.getElementById('simplePromptText').value = data.simplePrompt || data.stylePrompt.substring(0, 490);
             document.getElementById('simplePromptKor').innerHTML = '📌 <strong>Simple 모드용:</strong> 불러온 프롬프트의 Simple 버전입니다.';
             importedPromptData = null; return;
         }
@@ -1400,9 +1400,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = generatePrompt(selections.genres, selections.target, selections.place, selections.mood, vocalOpts);
 
         document.getElementById('promptExplanation').textContent = result.korExplanation;
-        document.getElementById('stylePromptText').textContent = result.stylePrompt;
+        document.getElementById('stylePromptText').value = result.stylePrompt;
         document.getElementById('stylePromptKor').innerHTML = buildStyleKorDesc(result);
-        document.getElementById('simplePromptText').textContent = result.simplePrompt;
+        document.getElementById('simplePromptText').value = result.simplePrompt;
         document.getElementById('simplePromptKor').innerHTML = '📌 <strong>Simple 모드용:</strong> Suno AI Simple 모드에서 바로 사용할 수 있는 500자 미만 프롬프트입니다. (' + result.simplePrompt.length + '자)';
 
         generatedExcludeBase = result.excludeStyles; userExcludeTags = [];
@@ -1462,11 +1462,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (excludeTogglesInitialized) return;
         excludeTogglesInitialized = true;
         document.querySelectorAll('.exclude-tag-btn').forEach(btn => {
+            const value = btn.dataset.value;
+
+            // 이미 generatedExcludeBase에 있는 항목은 활성화 상태로 표시
+            if (generatedExcludeBase) {
+                const baseParts = generatedExcludeBase.split(', ').map(p => p.trim().toLowerCase());
+                if (baseParts.includes(value.toLowerCase())) {
+                    btn.classList.add('active');
+                }
+            }
+
             btn.addEventListener('click', () => {
                 btn.classList.toggle('active');
-                const value = btn.dataset.value;
                 if (btn.classList.contains('active')) { if (!userExcludeTags.includes(value)) userExcludeTags.push(value); }
-                else { userExcludeTags = userExcludeTags.filter(t => t !== value); }
+                else {
+                    userExcludeTags = userExcludeTags.filter(t => t !== value);
+                    // 기본 생성 항목에서도 제거
+                    if (generatedExcludeBase) {
+                        const baseParts = generatedExcludeBase.split(', ').filter(Boolean);
+                        generatedExcludeBase = baseParts.filter(p => p.toLowerCase() !== value.toLowerCase()).join(', ');
+                    }
+                }
                 updateExcludeStylesText();
             });
             btn.title = btn.dataset.kor;
@@ -1498,7 +1514,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseParts = generatedExcludeBase ? generatedExcludeBase.split(', ').filter(Boolean) : [];
         const allParts = [...new Set([...baseParts, ...userExcludeTags])];
         const fullText = allParts.join(', ');
-        document.getElementById('excludeStylesText').textContent = fullText;
+        document.getElementById('excludeStylesText').value = fullText;
         document.getElementById('excludeStylesKor').innerHTML = buildExcludeKorDesc(fullText);
     }
 
@@ -1590,7 +1606,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 복사 기능
     document.querySelectorAll('.btn-copy').forEach(btn => {
         btn.addEventListener('click', () => {
-            const text = document.getElementById(btn.dataset.target).textContent;
+            const el = document.getElementById(btn.dataset.target);
+            const text = el.value !== undefined ? el.value : el.textContent;
             navigator.clipboard.writeText(text).then(() => {
                 btn.textContent = '✓ 복사됨!'; btn.classList.add('copied');
                 setTimeout(() => { btn.textContent = '복사하기'; btn.classList.remove('copied'); }, 2000);
@@ -1599,8 +1616,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('btnCopyAll').addEventListener('click', () => {
-        const style = document.getElementById('stylePromptText').textContent;
-        const exclude = document.getElementById('excludeStylesText').textContent;
+        const style = document.getElementById('stylePromptText').value;
+        const exclude = document.getElementById('excludeStylesText').value;
         const weirdness = document.getElementById('weirdnessValue').textContent;
         const influence = document.getElementById('styleInfluenceValue').textContent;
         navigator.clipboard.writeText(`[Style Prompt]\n${style}\n\n[Exclude Styles]\n${exclude}\n\n[More Options]\nWeirdness: ${weirdness}\nStyle Influence: ${influence}`).then(() => {
@@ -1612,8 +1629,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 전체 저장
     document.getElementById('btnSaveAll').addEventListener('click', () => {
-        const style = document.getElementById('stylePromptText').textContent;
-        const exclude = document.getElementById('excludeStylesText').textContent;
+        const style = document.getElementById('stylePromptText').value;
+        const exclude = document.getElementById('excludeStylesText').value;
         const weirdness = document.getElementById('weirdnessValue').textContent;
         const influence = document.getElementById('styleInfluenceValue').textContent;
         const explanation = document.getElementById('promptExplanation').textContent;
@@ -1633,11 +1650,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnApply = document.getElementById('btnApply');
     const btnGotoLyrics = document.getElementById('btnGotoLyrics');
     btnApply.addEventListener('click', () => {
-        const style = document.getElementById('stylePromptText').textContent || '';
+        const style = document.getElementById('stylePromptText').value || '';
         if (!style.trim()) { alert('먼저 프롬프트를 생성해주세요.'); return; }
         const pipelineData = {
             stylePrompt: style,
-            excludeStyles: document.getElementById('excludeStylesText').textContent || '',
+            excludeStyles: document.getElementById('excludeStylesText').value || '',
             weirdness: parseInt(document.getElementById('weirdnessValue').textContent) || null,
             styleInfluence: parseInt(document.getElementById('styleInfluenceValue').textContent) || null,
             explanation: document.getElementById('promptExplanation').textContent || '',

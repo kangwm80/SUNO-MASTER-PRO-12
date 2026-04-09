@@ -2043,7 +2043,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = importedPromptData;
 
             document.getElementById('promptExplanation').textContent = data.explanation || '\uBD88\uB7EC\uC628 \uD504\uB86C\uD504\uD2B8\uC785\uB2C8\uB2E4. \uC544\uB798\uC5D0\uC11C \uC218\uC815 \uD6C4 \uC0AC\uC6A9\uD558\uC138\uC694.';
-            document.getElementById('stylePromptText').textContent = data.stylePrompt;
+            document.getElementById('stylePromptText').value = data.stylePrompt;
             document.getElementById('stylePromptKor').innerHTML =
                 '\uD83D\uDCCC <strong>\uD55C\uAD6D\uC5B4 \uC124\uBA85:</strong> \uC774\uC804\uC5D0 \uC800\uC7A5\uD55C \uD504\uB86C\uD504\uD2B8\uB97C \uBD88\uB7EC\uC654\uC2B5\uB2C8\uB2E4. \uC218\uC815 \uD6C4 \uBCF5\uC0AC\uD558\uAC70\uB098 \uBC14\uB85C \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.';
 
@@ -2068,7 +2068,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateVocalTypeBadge(data.stylePrompt);
 
             // 불러온 프롬프트의 Simple 버전 생성
-            document.getElementById('simplePromptText').textContent = data.simplePrompt || data.stylePrompt.substring(0, 490);
+            document.getElementById('simplePromptText').value = data.simplePrompt || data.stylePrompt.substring(0, 490);
             document.getElementById('simplePromptKor').innerHTML =
                 '\uD83D\uDCCC <strong>Simple \uBAA8\uB4DC\uC6A9:</strong> \uBD88\uB7EC\uC628 \uD504\uB86C\uD504\uD2B8\uC758 Simple \uBC84\uC804\uC785\uB2C8\uB2E4.';
 
@@ -2085,11 +2085,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = generatePrompt(selections.genres, selections.target, selections.place, selections.mood, vocalOpts);
 
         document.getElementById('promptExplanation').textContent = result.korExplanation;
-        document.getElementById('stylePromptText').textContent = result.stylePrompt;
+        document.getElementById('stylePromptText').value = result.stylePrompt;
         document.getElementById('stylePromptKor').innerHTML = buildStyleKorDesc(result);
 
         // Simple Prompt 렌더링
-        document.getElementById('simplePromptText').textContent = result.simplePrompt;
+        document.getElementById('simplePromptText').value = result.simplePrompt;
         document.getElementById('simplePromptKor').innerHTML =
             '\uD83D\uDCCC <strong>Simple \uBAA8\uB4DC\uC6A9:</strong> Suno AI Simple \uBAA8\uB4DC\uC5D0\uC11C \uBC14\uB85C \uC0AC\uC6A9\uD560 \uC218 \uC788\uB294 500\uC790 \uBBF8\uB9CC \uD504\uB86C\uD504\uD2B8\uC785\uB2C8\uB2E4. Full \uD504\uB86C\uD504\uD2B8\uC640 \uB3D9\uC77C\uD55C \uC74C\uC545\uC801 \uC758\uB3C4\uB97C \uC555\uCD95\uD55C \uBC84\uC804\uC785\uB2C8\uB2E4. (' + result.simplePrompt.length + '\uC790)';
 
@@ -2184,10 +2184,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 토글 버튼 클릭
         document.querySelectorAll('.exclude-tag-btn').forEach(btn => {
+            const value = btn.dataset.value;
+
+            // 이미 generatedExcludeBase에 있는 항목은 활성화 상태로 표시
+            if (generatedExcludeBase) {
+                const baseParts = generatedExcludeBase.split(', ').map(p => p.trim().toLowerCase());
+                if (baseParts.includes(value.toLowerCase())) {
+                    btn.classList.add('active');
+                }
+            }
+
             btn.addEventListener('click', () => {
                 btn.classList.toggle('active');
-                const value = btn.dataset.value;
-                const kor = btn.dataset.kor;
 
                 if (btn.classList.contains('active')) {
                     if (!userExcludeTags.includes(value)) {
@@ -2195,6 +2203,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else {
                     userExcludeTags = userExcludeTags.filter(t => t !== value);
+                    // 기본 생성 항목에서도 제거
+                    if (generatedExcludeBase) {
+                        const baseParts = generatedExcludeBase.split(', ').filter(Boolean);
+                        generatedExcludeBase = baseParts.filter(p => p.toLowerCase() !== value.toLowerCase()).join(', ');
+                    }
                 }
 
                 updateExcludeStylesText();
@@ -2251,7 +2264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseParts = generatedExcludeBase ? generatedExcludeBase.split(', ').filter(Boolean) : [];
         const allParts = [...new Set([...baseParts, ...userExcludeTags])];
         const fullText = allParts.join(', ');
-        document.getElementById('excludeStylesText').textContent = fullText;
+        document.getElementById('excludeStylesText').value = fullText;
         document.getElementById('excludeStylesKor').innerHTML = buildExcludeKorDesc(fullText);
     }
 
@@ -2378,7 +2391,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-copy').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetId = btn.dataset.target;
-            const text = document.getElementById(targetId).textContent;
+            const el = document.getElementById(targetId);
+            const text = el.value !== undefined ? el.value : el.textContent;
             navigator.clipboard.writeText(text).then(() => {
                 btn.textContent = '✓ \uBCF5\uC0AC\uB428!';
                 btn.classList.add('copied');
@@ -2391,8 +2405,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('btnCopyAll').addEventListener('click', () => {
-        const style = document.getElementById('stylePromptText').textContent;
-        const exclude = document.getElementById('excludeStylesText').textContent;
+        const style = document.getElementById('stylePromptText').value;
+        const exclude = document.getElementById('excludeStylesText').value;
         const weirdness = document.getElementById('weirdnessValue').textContent;
         const influence = document.getElementById('styleInfluenceValue').textContent;
 
@@ -2414,8 +2428,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === 전체 저장하기 (txt 파일 다운로드) ===
     document.getElementById('btnSaveAll').addEventListener('click', () => {
-        const style = document.getElementById('stylePromptText').textContent;
-        const exclude = document.getElementById('excludeStylesText').textContent;
+        const style = document.getElementById('stylePromptText').value;
+        const exclude = document.getElementById('excludeStylesText').value;
         const weirdness = document.getElementById('weirdnessValue').textContent;
         const influence = document.getElementById('styleInfluenceValue').textContent;
         const explanation = document.getElementById('promptExplanation').textContent;
@@ -2477,12 +2491,12 @@ Generated by SUNO MASTER PRO 12
     const btnGotoLyrics = document.getElementById('btnGotoLyrics');
 
     btnApply.addEventListener('click', () => {
-        const style = document.getElementById('stylePromptText').textContent || '';
+        const style = document.getElementById('stylePromptText').value || '';
         if (!style.trim()) {
             alert('먼저 프롬프트를 생성해주세요.');
             return;
         }
-        const excludeStyles = document.getElementById('excludeStylesText').textContent || '';
+        const excludeStyles = document.getElementById('excludeStylesText').value || '';
         const weirdnessText = document.getElementById('weirdnessValue').textContent || '';
         const styleInfluenceText = document.getElementById('styleInfluenceValue').textContent || '';
         const explanation = document.getElementById('promptExplanation').textContent || '';
