@@ -21,47 +21,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const genBtns = document.getElementById('generationBtns');
     const lyricsGenBtns = document.getElementById('lyricsGenBtns');
 
-    // 세대별 언어 완전 가이드 (첨부 자료 기반)
+    // 세대별 언어 완전 가이드 (세대별 언어 완전 가이드 & 노래 가사·제목 적용법 + 연령대별 장르 선호도 반영)
     const GEN_GUIDE = {
         teens: {
             label: '10대',
-            keywords: '헐, 진짜, 완전, 존잼, 갓, 레전드, 인정, 킹받다',
-            emotion: '설렘, 인정욕구, 소속감, 꿈, 도전',
+            keywords: '헐, 진짜, 완전, 존잼, 갓, 레전드, 인정, 킹받다, 미쳤다, 갑통알, 현타, 최애',
+            emotion: '설렘, 인정욕구, 소속감, 꿈, 도전, 자기표현',
             tip: '짧은 훅 + 감탄사 활용, 학교/첫사랑/친구 소재, TikTok 바이럴 가능한 중독성 있는 후렴구',
             avoid: '훈계 어투, 어른 시선의 조언, 교훈적 메시지 금지',
             want: '"네가 제일 특별해", "넌 할 수 있어", "너만 보여"',
             platform: 'TikTok > YouTube > Spotify',
-            hookTip: '코러스에 세대 언어 + 감탄사 넣기, 따라 부르기 쉬운 멜로디'
+            hookTip: '코러스에 세대 언어 + 감탄사 넣기, 따라 부르기 쉬운 멜로디',
+            preferredGenres: ['Pop', 'K-Pop', 'Hip Hop / Rap', 'Trap', 'EDM', 'Phonk'],
+            titleStyle: '짧고 강렬한 1~3단어, 영어 믹스 OK',
+            verseTip: '3~4줄, 구체적 학교/SNS 상황',
+            chorusTip: '따라 부르기 쉬운 반복 훅, 감탄사 포함'
         },
         'young-adults': {
             label: '2030세대',
-            keywords: '번아웃, 현타, 갓생, 워라밸, 소확행, 혼술, 자존감',
-            emotion: '공감, 위로, 현실 인정, 자립, 성장통',
+            keywords: '번아웃, 현타, 갓생, 워라밸, 소확행, 혼술, 자존감, 손절, 혼밥',
+            emotion: '공감, 위로, 현실 인정, 자립, 성장통, 외로움',
             tip: '현실적인 버스(구체적 상황) + 보편적 위로 코러스, 카톡에서 쓸 수 있는 자연스러운 문장',
             avoid: '"다 때가 있어", "젊으니까 괜찮아" 같은 무시하는 어투 금지',
             want: '"그래 힘든 게 당연해", "천천히 가도 괜찮아", "넌 충분해"',
             platform: 'Spotify > YouTube > Apple Music',
-            hookTip: '현실 공감 버스 + 위로 코러스 구조, 공유하고 싶은 가사'
+            hookTip: '현실 공감 버스 + 위로 코러스 구조, 공유하고 싶은 가사',
+            preferredGenres: ['Hip Hop / Rap', 'R&B / Soul', 'Pop', 'K-Pop', 'Indie', 'Lo-Fi'],
+            titleStyle: '감성적 문장형 or 직관적 단어, 공유하고 싶은 제목',
+            verseTip: '구체적 현실 상황(출근/번아웃/혼밥), 4~6줄',
+            chorusTip: '보편적 위로 메시지, 따뜻하지만 현실적'
         },
         'middle-aged': {
             label: '5060세대',
-            keywords: '수고했어, 고생 많았어, 힘내, 괜찮아, 최고야',
-            emotion: '인정, 위로, 존재 증명, 그리움, 책임감',
+            keywords: '수고했어, 고생 많았어, 힘내, 괜찮아, 최고야, 건강, 워라밸',
+            emotion: '인정, 위로, 존재 증명, 그리움, 책임감, 노스탤지어',
             tip: '수고/인정 훅, 젊은 시절 추억 + 현재 감사 대비, 두 세대 언어를 모두 이해하는 가사',
             avoid: '"라떼는 말이야" 같은 꼰대 어투, 젊은 세대 비하 금지',
             want: '"당신은 대단한 사람이에요", "수고했어 오늘도", "당신 덕분이에요"',
             platform: 'YouTube > Spotify > 멜론',
-            hookTip: '인정과 수고의 메시지를 코러스에, 구체적 일상(직장/가족) 버스에'
+            hookTip: '인정과 수고의 메시지를 코러스에, 구체적 일상(직장/가족) 버스에',
+            preferredGenres: ['Pop', 'Rock', 'Ballad', 'R&B / Soul', 'Country / Folk', 'Jazz'],
+            titleStyle: '따뜻하고 공감되는 문장형, 쉬운 단어',
+            verseTip: '직장/가족/건강 등 구체적 일상, 4~5줄',
+            chorusTip: '인정과 위로의 반복 메시지'
         },
         seniors: {
             label: '시니어세대',
-            keywords: '감사합니다, 건강하세요, 행복하세요, 축하합니다, 사랑합니다',
-            emotion: '감사, 가족 사랑, 건강 소망, 세월의 지혜, 추억',
+            keywords: '감사합니다, 건강하세요, 행복하세요, 축하합니다, 사랑합니다, 세월, 정',
+            emotion: '감사, 가족 사랑, 건강 소망, 세월의 지혜, 추억, 그리움',
             tip: '느린 리듬, 완성된 문장, 쉬운 단어, 구체적이고 따뜻한 표현, 존댓말도 자연스럽게 활용',
             avoid: '세대 갈등 강조, 늙었다는 표현, 동정하는 어투 금지',
             want: '"건강하게 오래오래", "함께해서 행복해요", "당신이 있어 감사해요"',
             platform: 'YouTube(절대적 1위) > 라디오 > 멜론',
-            hookTip: '반복이 쉬운 단순한 코러스, 가족/건강/감사 키워드 중심'
+            hookTip: '반복이 쉬운 단순한 코러스, 가족/건강/감사 키워드 중심',
+            preferredGenres: ['Ballad', 'Trot', 'Classical', 'Jazz', 'Country / Folk', 'Pop'],
+            titleStyle: '따뜻하고 쉬운 완성된 문장형',
+            verseTip: '가족/건강/추억 소재, 3~4줄, 쉬운 단어',
+            chorusTip: '반복이 쉬운 단순한 구조, 감사/사랑 키워드'
         }
     };
 

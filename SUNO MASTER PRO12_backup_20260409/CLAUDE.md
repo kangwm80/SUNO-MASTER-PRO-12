@@ -6,8 +6,8 @@
 - 3가지 모드(쉽게/직접/전문가) + 가사작업 + 보관함
 
 ## 참고 자료 경로
-모든 자료는 아래 폴더에 있다:
-`C:\Users\kangw\Downloads\시니어음악플리\programing Reference\`
+모든 자료는 GitHub 저장소 루트에 업로드되어 있다.
+추가 자료: `이것만보면_음악장르마스터Ver3.pdf` (196개 장르 · 406개 프롬프트 예시)
 
 ## 자료별 용도 — 작업할 때 해당 파일을 읽어서 반영할 것
 
@@ -52,15 +52,18 @@
 ## 프롬프트 생성 규칙 (generatePrompt 함수 — genre-data.js)
 모든 프롬프트 생성 메뉴(쉽게/직접/전문가)에 동일 적용. 아래 참고 자료를 반드시 반영할 것.
 
-### Style Prompt 구조 (v5 프론트로드 원칙)
-1. **장르** (1~2개, 맨 앞 배치) → 프롬프트 가이드
+### Style Prompt 구조 (v5 프론트로드 원칙 + 10000 Prompts 패턴)
+1. **장르** (1~2개, 맨 앞 배치) → 프롬프트 가이드 + 장르 분류 체계
 2. **BPM + 조성(Key) + 박자** → 프롬프트 가이드
-3. **감정 서술형 문장** (단어 나열 ❌ → 장면 묘사 ✅) → 프롬프트 가이드
-4. **악기** (주악기 2~3개 + 블렌딩 1개) → 장르 분류 체계
-5. **보컬** (DB 필드 + 장르별 창법 강화) → 보컬 완전 가이드
-6. **빌보드 구조 요소** (hook + rhythm + energy build) → 히트곡 구조 가이드
-7. **프로덕션 스타일** (장르별 맞춤 믹싱) → 음질 최적화 공식
-8. **품질 보호 블록** (노이즈/리버브/피치 방지, 맨 마지막 배치) → 음질 문제 해결 가이드
+3. **Mood Atmosphere** (2~3개 무드 형용사 조합) → 10000 Prompts 패턴
+4. **감정 서술형 문장** (단어 나열 ❌ → 장면 묘사 ✅) → 프롬프트 가이드
+5. **악기** (주악기 2~3개 + 블렌딩 1개) → 장르 분류 체계 + 장르마스터 PDF
+6. **보컬** (DB 필드 + 장르별 창법 강화) → 보컬 완전 가이드
+7. **빌보드 구조 요소** (hook + rhythm + energy build) → 히트곡 구조 가이드
+8. **프로덕션 스타일** (장르별 맞춤 믹싱/마스터링) → 음질 최적화 공식
+9. **퍼포먼스 노트** (breath, phrasing, micro-timing 등) → 프롬프트 가이드 + 10000 Prompts
+10. **품질 보호 블록** (shimmer/noise/reverb/pitch 방지) → 음질 문제 해결 가이드
+11. **스토리 테마** ("song about X" 엔딩) → 10000 Prompts 패턴
 
 ### Exclude Styles 규칙
 - 장르 분위기 상반 스타일 제외 → 음질 문제 해결 가이드
@@ -71,7 +74,27 @@
 - **Weirdness**: 팝/발라드 10~25 / 록 20~40 / 재즈 40~60 / 실험적 60~80 → 프롬프트 가이드
 - **Style Influence**: 정확한 재현 70~85% / 탐색 40~60% → 프롬프트 가이드
 
+## 참고 자료 반영 상태 (2026-04-10 기준)
+| 자료 | 반영 위치 | 상태 |
+|------|-----------|------|
+| SUNO_Genre_Classification_v4.pdf | genre-data.js GENRE_DATABASE (202개 장르) | ✅ |
+| 프롬프트 완전 가이드 | genre-data.js (프롬프트 구조, Performance Notes) | ✅ |
+| 메타태그 가이드 | lyrics.js buildMetaTagsForSection() | ✅ |
+| 10000_SUNO_Prompts 1~3 | genre-data.js (MOOD_ATMOSPHERE_MAP, STORY_THEME_MAP, PERFORMANCE_NOTES) | ✅ |
+| 음질 문제 해결 가이드 | genre-data.js (품질 보호 블록, getExcludeStyles) | ✅ |
+| 음질 최적화 프롬프트 공식 | genre-data.js PRODUCTION_STYLE_MAP (14개 장르) | ✅ |
+| 보컬 완전 가이드 | genre-data.js VOCAL_ENHANCEMENT_MAP (15개 장르) | ✅ |
+| 히트곡 구조 분석가이드 | genre-data.js BILLBOARD_ELEMENTS | ✅ |
+| 송폼 구조 가이드 | lyrics.js GENRE_SONGFORM (24개 장르) | ✅ |
+| 작사 완전 가이드 | lyrics.js BILLBOARD_TITLE_PATTERNS, LYRICS_DENSITY | ✅ |
+| 세대별 언어 가이드 | lyrics.js GEN_GUIDE (4세대 + 선호장르/작사팁) | ✅ |
+| Song_Themes_FINAL_v5.pdf | song-themes.js (22주제 600스토리) | ✅ |
+| 연령대별 장르 선호도 | genre-data.js AGE_GENRE_PREFERENCE (10개 타겟) | ✅ |
+| 이것만보면_음악장르마스터Ver3.pdf | genre-data.js (196개 장르 커버 확인, 프롬프트 패턴 반영) | ✅ |
+
 ## 작업 규칙
 - 구현 시 1-2개 빠뜨리는 실수 절대 금지 (빠짐없이 작업할 것)
 - 장소/상황은 템플릿 조합 금지, 진심·공감 담긴 장면 직접 창작
 - 코드 수정 완료 후 반드시 시나리오 시뮬레이션 + 엣지케이스 검증 후 결과 제공
+- 수정/추가 요청 시 더 좋은 의견이나 아이디어가 있으면 먼저 제안할 것
+- 업그레이드된 내용은 CLAUDE.md에 반영할 것

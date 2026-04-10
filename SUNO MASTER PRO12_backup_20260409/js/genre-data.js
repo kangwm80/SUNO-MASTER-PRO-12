@@ -581,6 +581,70 @@ const BILLBOARD_ELEMENTS = {
     ]
 };
 
+// 퍼포먼스 노트 (v5 프롬프트 완전 가이드 + 10000 Prompts 패턴 반영)
+const PERFORMANCE_NOTES = {
+    'pop': 'breath pickups, natural phrasing, polished pitch-corrected tone, intimate verses, soaring belted chorus',
+    'ballad': 'rubato phrasing, controlled vibrato, gentle dynamics, soft confessional verses, huge belted choruses',
+    'rock': 'raw energy delivery, ghost notes on drums, sharp accents, dynamic belting, less quantized timing',
+    'hip hop': 'tight staccato delivery, aggressive rap flow, melodic rap flow, half-sung half-spoken delivery',
+    'r&b': 'breathy tone, conversational delivery, melodic storytelling, call-and-response phrases, subtle rubato',
+    'jazz': 'rubato pulls, expressive phrasing, floating tempo, scat improvisation, behind-the-beat timing',
+    'folk': 'natural unprocessed delivery, gentle rubato, storytelling phrasing, honest expression',
+    'electronic': 'processed vocal texture, layered vocal chops, clean articulation, filtered delivery',
+    'metal': 'aggressive articulation, sharp accents, sudden dynamic shifts, controlled screaming',
+    'gospel': 'passionate belting, melismatic runs, call-and-response, dynamic crescendo',
+    'country': 'twang inflection, storytelling phrasing, natural vibrato, honest tone',
+    'latin': 'passionate rhythmic delivery, percussive vocal attack, sensual breathy moments',
+    '_default': 'natural phrasing, breath pickups, micro-timing variation, subtle pitch imperfection for human feel'
+};
+
+// 프롬프트 스토리 테마 엔딩 (10000 Prompts 패턴: 거의 모든 프롬프트가 "song about X"로 끝남)
+const STORY_THEME_MAP = {
+    'comfortable': 'song about finding peace in simple moments',
+    'healing': 'song about healing and renewal after difficult times',
+    'cozy': 'song about warmth and comfort of being home',
+    'emotional': 'song about unspoken feelings and deep emotions',
+    'dreamy': 'song about drifting through a beautiful dream',
+    'calm': 'song about finding stillness in a noisy world',
+    'lonely': 'song about walking alone and finding strength in solitude',
+    'sentimental': 'song about bittersweet memories that shaped who you are',
+    'nostalgic': 'song about longing for days that will never return',
+    'flutter': 'song about the excitement of a new beginning',
+    'love': 'song about complicated love and choosing to stay',
+    'breakup': 'song about letting go and finding yourself after heartbreak',
+    'exciting': 'song about living in the moment and chasing the thrill',
+    'groovy': 'song about moving your body and feeling the rhythm',
+    'powerful': 'song about rising above and reclaiming your voice',
+    'confidence': 'song about owning who you are without apology',
+    'anger': 'song about channeling raw fury into something beautiful',
+    'focus': 'song about blocking out the noise and finding clarity',
+    'comfort': 'song about being there for someone who needs it most',
+    'rainy': 'song about rain washing away yesterday and starting fresh',
+    '_default': 'song about real life moments that matter'
+};
+
+// 무드별 Atmosphere 조합 (10000 Prompts 패턴: 항상 2~3개 무드 형용사 조합)
+const MOOD_ATMOSPHERE_MAP = {
+    'comfortable': 'warm, cozy',
+    'healing': 'gentle, soothing',
+    'emotional': 'emotional, vulnerable',
+    'dreamy': 'dreamy, ethereal',
+    'calm': 'serene, peaceful',
+    'lonely': 'melancholic, introspective',
+    'sentimental': 'bittersweet, nostalgic',
+    'nostalgic': 'cinematic, nostalgic',
+    'flutter': 'romantic, playful',
+    'love': 'romantic, tender',
+    'breakup': 'emotional, reflective',
+    'exciting': 'euphoric, energetic',
+    'groovy': 'confident, catchy',
+    'powerful': 'bombastic, anthemic',
+    'confidence': 'bold, triumphant',
+    'anger': 'intense, aggressive',
+    'focus': 'minimal, focused',
+    '_default': 'emotional, cinematic'
+};
+
 function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions) {
     // vocalOptions = { type: 'male vocals', range: 'tenor', styles: ['belting', 'vibrato'] } (선택적)
     const mainGenre = selectedGenres[0];
@@ -630,7 +694,11 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     parts.push(selectedKey);
     parts.push('4/4 time');
 
-    // === ③ 감정 서술형 문장 (v5 핵심: 장면묘사) ===
+    // === ③ 무드 Atmosphere 조합 (10000 Prompts 패턴: 2~3개 무드 형용사) ===
+    const moodAtmosphere = moods.map(m => MOOD_ATMOSPHERE_MAP[m]).filter(Boolean)[0] || MOOD_ATMOSPHERE_MAP['_default'];
+    parts.push(moodAtmosphere);
+
+    // === ③-2 감정 서술형 문장 (v5 핵심: 장면묘사) ===
     const moodSentences = moods.slice(0, 2).map(m => MOOD_SENTENCE_MAP[m]).filter(Boolean);
     if (moodSentences.length > 0) {
         parts.push(moodSentences[0]);
@@ -682,12 +750,19 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     parts.push(billboardRhythm);
     parts.push(billboardEnergy);
 
-    // === ⑧ 프로덕션 스타일 (장르별 맞춤) ===
+    // === ⑧ 프로덕션 스타일 (장르별 맞춤 믹싱/마스터링) ===
     parts.push(productionStyle);
 
-    // === ⑨ 품질 보호 블록 (프론트로드: 마지막=높은 가중치) ===
-    // 음질 최적화 가이드 반영: 보컬 안전 + 노이즈 방지 + 라디오 레디
-    parts.push('professional studio quality, clean and polished production, consistent tonal balance throughout, cohesive mix from start to finish, no background noise or shimmer, controlled reverb, pitch-perfect and in-tune vocals, natural phrasing and delivery, vocals upfront and clear, warm and grounded vocal tone, clean dynamic range, radio-ready sound');
+    // === ⑨ 퍼포먼스 노트 (v5 프롬프트 가이드: 인간적 표현) ===
+    const perfNote = PERFORMANCE_NOTES[mainCategory] || PERFORMANCE_NOTES['_default'];
+    parts.push(perfNote);
+
+    // === ⑩ 품질 보호 블록 (음질 최적화 가이드: 보컬 안전 + 노이즈 방지) ===
+    parts.push('professional studio quality, clean and polished production, consistent tonal balance throughout, cohesive mix, no background noise or shimmer, controlled reverb, pitch-perfect vocals, vocals upfront and clear, clean dynamic range, radio-ready sound');
+
+    // === ⑪ 스토리 테마 엔딩 (10000 Prompts 패턴: "song about X"로 마무리) ===
+    const storyTheme = moods.map(m => STORY_THEME_MAP[m]).filter(Boolean)[0] || STORY_THEME_MAP['_default'];
+    parts.push(storyTheme);
 
     // === 최종 보컬 충돌 방지: 사용자가 남성/여성 단독 선택 시 반대 성별 제거 ===
     // 듀엣 선택 시에는 필터링하지 않음
@@ -708,16 +783,19 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     // === 950자 제한 적용 (우선순위 기반 축소) ===
     let stylePrompt = parts.join(', ');
     if (stylePrompt.length > MAX_PROMPT_LENGTH) {
-        // 우선순위: 장르 > BPM/Key > 감정묘사 > 보컬 > 악기 > 품질보호
+        // 우선순위: 장르 > BPM/Key > Atmosphere > 감정묘사 > 악기 > 보컬 > 훅 > 퍼포먼스 > 품질 > 스토리
         const qualityBlock = 'professional studio quality, clean production, consistent tonal balance, no background noise, radio-ready sound';
         const coreParts = [parts[0]]; // 장르
         if (subData) coreParts.push(`${subData.genre} fusion`);
         coreParts.push(`${bpm} BPM`);
         coreParts.push(selectedKey);
+        coreParts.push(moodAtmosphere);
         if (moodSentences[0]) coreParts.push(moodSentences[0]);
-        if (mainData.vocal) {
-            let fallbackVocal = mainData.vocal.split(', ').slice(0, 3).join(', ');
-            // 사용자가 남성/여성 단독 선택 시 반대 성별 + duet 제거 (듀엣 선택 시에는 유지)
+        if (mainData.instruments) coreParts.push(mainData.instruments.split(', ').slice(0, 3).join(', '));
+        if (vocalOptions && vocalOptions.type && vocalOptions.type !== 'instrumental') {
+            coreParts.push(vocalOptions.type);
+        } else if (mainData.vocal) {
+            let fallbackVocal = mainData.vocal.split(', ').slice(0, 2).join(', ');
             if (vocalOptions && vocalOptions.type && !/duet/i.test(vocalOptions.type)) {
                 fallbackVocal = fallbackVocal.replace(/,?\s*(male and female duet|duet vocals?)/gi, '').trim();
                 if (/^male\b/i.test(vocalOptions.type)) fallbackVocal = fallbackVocal.replace(/,?\s*female\s*vocals?/gi, '').trim();
@@ -725,9 +803,10 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
             }
             if (fallbackVocal) coreParts.push(fallbackVocal);
         }
-        if (mainData.instruments) coreParts.push(mainData.instruments.split(', ').slice(0, 2).join(', '));
         coreParts.push(billboardHook);
+        coreParts.push(perfNote);
         coreParts.push(qualityBlock);
+        coreParts.push(storyTheme);
         stylePrompt = coreParts.join(', ');
 
         if (stylePrompt.length > MAX_PROMPT_LENGTH) {
