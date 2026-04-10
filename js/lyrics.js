@@ -65,18 +65,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 장르별 기본 송폼
+    // 장르별 기본 송폼 (음악 장르별 송폼 구조 완전 가이드 반영)
     const GENRE_SONGFORM = {
         'pop': ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Verse', 'Pre-Chorus', 'Chorus', 'Bridge', 'Chorus', 'Outro'],
         'ballad': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Key Change', 'Chorus', 'Outro'],
         'kpop': ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Rap', 'Pre-Chorus', 'Chorus', 'Bridge', 'Chorus', 'Outro'],
+        'jpop': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Interlude', 'Chorus', 'Outro'],
         'hiphop': ['Intro', 'Hook', 'Verse', 'Hook', 'Verse', 'Hook', 'Bridge', 'Hook', 'Outro'],
+        'trap': ['Intro', 'Verse', 'Hook', 'Verse', 'Hook', 'Verse', 'Hook', 'Outro'],
         'edm': ['Intro', 'Build Up', 'Drop', 'Breakdown', 'Build Up', 'Drop', 'Outro'],
         'rnb': ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Verse', 'Pre-Chorus', 'Chorus', 'Bridge', 'Ad-lib', 'Chorus', 'Outro'],
         'rock': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Solo', 'Bridge', 'Chorus', 'Outro'],
+        'metal': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Solo', 'Bridge', 'Chorus', 'Outro'],
+        'punk': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Chorus', 'Outro'],
+        'alternative': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Outro'],
         'jazz': ['Intro', 'Verse', 'Chorus', 'Interlude', 'Verse', 'Chorus', 'Solo', 'Outro'],
         'latin': ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Verse', 'Pre-Chorus', 'Chorus', 'Instrumental', 'Chorus', 'Outro'],
+        'reggae': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Instrumental', 'Verse', 'Chorus', 'Outro'],
         'folk': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Fade Out'],
+        'country': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Outro'],
+        'gospel': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Ad-lib', 'Outro'],
+        'funk': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Instrumental', 'Chorus', 'Outro'],
+        'classical': ['Intro', 'Verse', 'Interlude', 'Verse', 'Bridge', 'Verse', 'Outro'],
+        'ambient': ['Intro', 'Verse', 'Interlude', 'Verse', 'Outro'],
+        'indie': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Fade Out'],
+        'trot': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Outro'],
         'default': ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Outro']
     };
 
