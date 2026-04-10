@@ -96,6 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // 무보컬 섹션
     const NO_LYRICS_SECTIONS = ['Intro', 'Outro', 'Solo', 'Drop', 'Breakdown', 'Instrumental', 'Interlude', 'Build Up', 'Fade Out', 'End', 'Callback', 'Key Change'];
 
+    // 장르별 가사 밀도 (빌보드급 작사 완전 가이드 반영)
+    const LYRICS_DENSITY = {
+        'ballad': { linesPerSection: 4, syllablesPerLine: '8-12', tip: '멜로디 중심, 은유적 표현, 멜리스마 단어 배치' },
+        'pop': { linesPerSection: 6, syllablesPerLine: '8-14', tip: '단순하고 캐치한 표현, 코러스=제목=훅' },
+        'kpop': { linesPerSection: 6, syllablesPerLine: '8-16', tip: '한영 믹스, 랩 구간은 밀도 높게' },
+        'hiphop': { linesPerSection: 8, syllablesPerLine: '10-18', tip: '라임 밀도 높게, 16마디 기준 100-180음절' },
+        'rock': { linesPerSection: 6, syllablesPerLine: '8-14', tip: '파워풀한 동사, 저항/자유 테마' },
+        'rnb': { linesPerSection: 5, syllablesPerLine: '8-12', tip: '그루브 우선, 멜리스마 활용' },
+        'edm': { linesPerSection: 3, syllablesPerLine: '6-10', tip: '반복이 훅, 최소한의 가사' },
+        'jazz': { linesPerSection: 4, syllablesPerLine: '8-12', tip: '세련된 어휘, 즉흥적 프레이징' },
+        'folk': { linesPerSection: 6, syllablesPerLine: '8-14', tip: '스토리텔링 중심, 서사적 전개' },
+        'default': { linesPerSection: 5, syllablesPerLine: '8-14', tip: '자연스러운 대화체' }
+    };
+
     // === 단계 이동 ===
     function goToStep(step) {
         document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
