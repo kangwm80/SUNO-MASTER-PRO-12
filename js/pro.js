@@ -464,6 +464,205 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnGeneratePrompt').addEventListener('click', () => goToStep(3));
     document.getElementById('btnPrevStep').addEventListener('click', () => goToStep(2));
 
+    // ============================================
+    // 장르 무제한 선택 (드롭다운 + 태그)
+    // ============================================
+    (function setupGenreUnlimited() {
+        const trigger = document.getElementById('genreTrigger');
+        const filter = document.getElementById('genreFilter');
+        const dropdown = document.getElementById('genreDropdown');
+        const display = document.getElementById('selectedGenresDisplay');
+        let isOpen = false;
+
+        // 대분류별 그룹핑
+        const grouped = {};
+        GENRE_DATABASE.forEach(g => {
+            if (!grouped[g.main]) grouped[g.main] = [];
+            grouped[g.main].push(g);
+        });
+
+        function renderDropdown(query) {
+            dropdown.innerHTML = '';
+            const q = (query || '').toLowerCase();
+            for (const [mainCat, genres] of Object.entries(grouped)) {
+                const filtered = q ? genres.filter(g =>
+                    g.genre.toLowerCase().includes(q) ||
+                    g.main.toLowerCase().includes(q) ||
+                    (g.sub || '').toLowerCase().includes(q)
+                ) : genres;
+                if (filtered.length === 0) continue;
+
+                const header = document.createElement('div');
+                header.className = 'genre-dropdown-header';
+                header.textContent = mainCat;
+                dropdown.appendChild(header);
+
+                filtered.forEach(g => {
+                    const item = document.createElement('div');
+                    item.className = 'genre-dropdown-item';
+                    if (selections.genres.includes(g.genre)) item.classList.add('selected');
+                    item.innerHTML = `<strong>${g.genre}</strong> <span class="genre-dd-main">${g.sub || ''}</span>`;
+                    item.addEventListener('click', () => {
+                        if (selections.genres.includes(g.genre)) {
+                            removeGenre(g.genre);
+                            item.classList.remove('selected');
+                        } else {
+                            selections.genres.push(g.genre);
+                            item.classList.add('selected');
+                        }
+                        renderGenreTags();
+                        updateChordDropdown();
+                        updateTriggerText();
+                    });
+                    dropdown.appendChild(item);
+                });
+            }
+        }
+
+        function renderGenreTags() {
+            display.innerHTML = '';
+            selections.genres.forEach((genre, idx) => {
+                const tag = document.createElement('span');
+                tag.className = 'selected-genre-tag' + (idx === 0 ? ' main-tag' : '');
+                tag.innerHTML = `${idx === 0 ? '&#11088;' : '&#127912;'} ${genre} <button class="genre-remove-btn" data-genre="${genre}">&times;</button>`;
+                tag.querySelector('.genre-remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeGenre(genre);
+                    renderGenreTags();
+                    updateChordDropdown();
+                    updateTriggerText();
+                    // 드롭다운 열려있으면 갱신
+                    if (isOpen) renderDropdown(filter.value);
+                });
+                display.appendChild(tag);
+            });
+        }
+
+        function removeGenre(genre) {
+            selections.genres = selections.genres.filter(g => g !== genre);
+        }
+
+        function updateTriggerText() {
+            if (selections.genres.length === 0) {
+                trigger.textContent = '클릭하여 장르 추가 \u25BC';
+            } else {
+                trigger.textContent = selections.genres.length + '개 장르 선택됨 \u25BC';
+            }
+        }
+
+        function openDropdown() {
+            isOpen = true;
+            trigger.classList.add('open');
+            filter.style.display = 'block';
+            filter.value = '';
+            filter.focus();
+            renderDropdown('');
+            dropdown.classList.add('active');
+        }
+
+        function closeDropdown() {
+            isOpen = false;
+            trigger.classList.remove('open');
+            filter.style.display = 'none';
+            dropdown.classList.remove('active');
+        }
+
+        trigger.addEventListener('click', () => { isOpen ? closeDropdown() : openDropdown(); });
+        filter.addEventListener('input', () => renderDropdown(filter.value));
+        document.addEventListener('click', (e) => {
+            if (isOpen && !trigger.contains(e.target) && !filter.contains(e.target) && !dropdown.contains(e.target)) closeDropdown();
+        });
+
+        // 외부에서 장르 추가할 수 있도록 노출
+        window._proAddGenre = function(genre) {
+            if (!selections.genres.includes(genre)) {
+                selections.genres.push(genre);
+                renderGenreTags();
+                updateChordDropdown();
+                updateTriggerText();
+            }
+        };
+    })();
+
+    // ============================================
+    // 머니코드 진행 드롭다운
+    // ============================================
+    const chordSelect = document.getElementById('chordProgressionSelect');
+    const chordDisplay = document.getElementById('chordDisplay');
+
+    function updateChordDropdown() {
+        chordSelect.innerHTML = '';
+
+        if (selections.genres.length === 0) {
+            chordSelect.innerHTML = '<option value="">-- 장르를 먼저 선택하면 코드 진행이 표시됩니다 --</option>';
+            chordDisplay.innerHTML = '';
+            selections.chordProgression = '';
+            return;
+        }
+
+        // 선택된 장르들의 카테고리 수집 (중복 제거)
+        const categories = new Set();
+        selections.genres.forEach(genre => {
+            // 정확한 매핑 먼저
+            if (GENRE_TO_CHORD_CATEGORY[genre]) {
+                categories.add(GENRE_TO_CHORD_CATEGORY[genre]);
+            } else {
+                // DB에서 main 카테고리로 매핑 시도
+                const dbEntry = GENRE_DATABASE.find(g => g.genre === genre);
+                if (dbEntry && dbEntry.main) {
+                    const mainLower = dbEntry.main.toLowerCase();
+                    for (const [key, cat] of Object.entries(GENRE_TO_CHORD_CATEGORY)) {
+                        if (key.toLowerCase() === mainLower) { categories.add(cat); break; }
+                    }
+                }
+                // 못 찾으면 pop 기본
+                if (categories.size === 0) categories.add('pop');
+            }
+        });
+
+        // 기본 옵션
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = '-- 코드 진행을 선택하세요 --';
+        chordSelect.appendChild(defaultOpt);
+
+        // 카테고리별 코드 진행 추가
+        categories.forEach(cat => {
+            const data = MONEY_CHORD_PROGRESSIONS[cat];
+            if (!data) return;
+
+            const optGroup = document.createElement('optgroup');
+            optGroup.label = data.label;
+
+            data.chords.forEach(chord => {
+                const opt = document.createElement('option');
+                opt.value = chord.value;
+                opt.textContent = `${chord.name}: ${chord.value}`;
+                opt.title = chord.desc;
+                optGroup.appendChild(opt);
+            });
+
+            chordSelect.appendChild(optGroup);
+        });
+    }
+
+    chordSelect.addEventListener('change', () => {
+        selections.chordProgression = chordSelect.value;
+        if (chordSelect.value) {
+            // 선택한 코드 진행 상세 표시
+            let found = null;
+            for (const cat of Object.values(MONEY_CHORD_PROGRESSIONS)) {
+                found = cat.chords.find(c => c.value === chordSelect.value);
+                if (found) break;
+            }
+            if (found) {
+                chordDisplay.innerHTML = `<div class="chord-info"><strong>${found.name}</strong><br><span class="chord-value">${found.value}</span><br><span class="chord-desc">${found.desc}</span></div>`;
+            }
+        } else {
+            chordDisplay.innerHTML = '';
+        }
+    });
+
     // === placeholder: 이후 섹션에서 채울 함수들 ===
     function showAnalysis() { /* 섹션 4에서 구현 */ }
     function buildFinalPrompt() { /* 섹션 5에서 구현 */ }
