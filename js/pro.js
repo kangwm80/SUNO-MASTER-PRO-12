@@ -282,13 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === 상태 관리 ===
     let currentStep = 1;
-    let isUpgradeMode = false;   // false=새로만들기, true=프롬프트 업그레이드
+    let isUpgradeMode = false;   // 입력 내용이 기존 프롬프트인지 자동 감지
     let analysisInitialized = false;
     let importedPromptData = null;
 
     const selections = {
         freeText: '',
-        upgradeText: '',        // 업그레이드 모드 원본 프롬프트
+        upgradeText: '',        // 업그레이드 감지 시 원본 프롬프트
         mood: [],
         genres: [],             // 무제한 배열 (제한 없음)
         chordProgression: '',   // 선택한 머니코드
@@ -305,64 +305,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === DOM 참조 ===
     const freeInput = document.getElementById('freeInput');
-    const upgradeInput = document.getElementById('upgradeInput');
     const btnAnalyze = document.getElementById('btnAnalyze');
     const bpmSlider = document.getElementById('bpmSlider');
     const bpmValue = document.getElementById('bpmValue');
 
-    // === 모드 전환 탭 ===
-    document.querySelectorAll('.mode-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            const mode = tab.dataset.mode;
-            isUpgradeMode = (mode === 'upgrade');
+    // === 기존 프롬프트 자동 감지 ===
+    function detectExistingPrompt(text) {
+        const lower = text.toLowerCase();
+        let score = 0;
+        if (/\d{2,3}\s*bpm/i.test(lower)) score += 2;
+        if (/[A-G][b#]?\s*(major|minor)/i.test(text)) score += 2;
+        if (/(vocal|baritone|tenor|soprano|alto|mezzo|breathy|belting|falsetto)/i.test(lower)) score += 1;
+        if (/(piano|guitar|drums|synth|bass|strings|brass|saxophone)/i.test(lower)) score += 1;
+        const commaCount = (text.match(/,/g) || []).length;
+        if (commaCount >= 3) score += 1;
+        // 영어 비중이 높으면 기존 프롬프트일 가능성
+        const engRatio = (text.match(/[a-zA-Z]/g) || []).length / text.length;
+        if (engRatio > 0.5) score += 1;
+        return score >= 4; // 4점 이상이면 기존 프롬프트로 판단
+    }
 
-            document.getElementById('modeNewCreate').style.display = isUpgradeMode ? 'none' : '';
-            document.getElementById('modeUpgrade').style.display = isUpgradeMode ? '' : 'none';
-
-            const hint = document.getElementById('analyzeHint');
-            hint.textContent = isUpgradeMode
-                ? '기존 프롬프트를 분석하여 v5 구조로 자동 업그레이드합니다'
-                : '만들고 싶은 음악을 입력하면 AI가 자동으로 설정합니다';
-
-            // 활성 입력의 내용으로 버튼 활성화 판단
-            const activeInput = isUpgradeMode ? upgradeInput : freeInput;
-            btnAnalyze.disabled = activeInput.value.trim().length === 0;
-        });
-    });
-
-    // === 자유 입력 핸들러 (새로 만들기) ===
+    // === 자유 입력 핸들러 ===
     freeInput.addEventListener('input', () => {
         document.getElementById('charCount').textContent = freeInput.value.length + '자';
-        if (!isUpgradeMode) btnAnalyze.disabled = freeInput.value.trim().length === 0;
+        btnAnalyze.disabled = freeInput.value.trim().length === 0;
     });
     document.getElementById('btnClearInput').addEventListener('click', () => {
         freeInput.value = '';
         document.getElementById('charCount').textContent = '0자';
-        if (!isUpgradeMode) btnAnalyze.disabled = true;
-    });
-
-    // === 업그레이드 입력 핸들러 ===
-    upgradeInput.addEventListener('input', () => {
-        document.getElementById('upgradeCharCount').textContent = upgradeInput.value.length + '자';
-        if (isUpgradeMode) btnAnalyze.disabled = upgradeInput.value.trim().length === 0;
-    });
-    document.getElementById('btnClearUpgrade').addEventListener('click', () => {
-        upgradeInput.value = '';
-        document.getElementById('upgradeCharCount').textContent = '0자';
-        if (isUpgradeMode) btnAnalyze.disabled = true;
+        btnAnalyze.disabled = true;
     });
 
     // === 분석 버튼 ===
     btnAnalyze.addEventListener('click', () => {
+        const text = freeInput.value.trim();
+        if (!text) return;
+
+        // 기존 프롬프트 자동 감지
+        isUpgradeMode = detectExistingPrompt(text);
         if (isUpgradeMode) {
-            selections.upgradeText = upgradeInput.value.trim();
-            selections.freeText = selections.upgradeText;
-        } else {
-            selections.freeText = freeInput.value.trim();
+            selections.upgradeText = text;
         }
-        if (!selections.freeText) return;
+        selections.freeText = text;
         analysisInitialized = false;
         goToStep(2);
     });
