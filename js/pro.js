@@ -274,3 +274,198 @@ const GENRE_TO_CHORD_CATEGORY = {
     'Metal': 'metal', 'Heavy Metal': 'metal', 'Punk': 'metal', 'Metalcore': 'metal',
     'Disco': 'blues'
 };
+
+// ============================================
+// DOMContentLoaded — 메인 실행
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+
+    // === 상태 관리 ===
+    let currentStep = 1;
+    let isUpgradeMode = false;   // false=새로만들기, true=프롬프트 업그레이드
+    let analysisInitialized = false;
+    let importedPromptData = null;
+
+    const selections = {
+        freeText: '',
+        upgradeText: '',        // 업그레이드 모드 원본 프롬프트
+        mood: [],
+        genres: [],             // 무제한 배열 (제한 없음)
+        chordProgression: '',   // 선택한 머니코드
+        key: '',
+        timeSig: '',
+        bpm: 110,
+        vocalGender: [],
+        vocalStyle: [],
+        vocalRange: [],
+        customVocal: '',        // 보컬 직접 입력 텍스트
+        instruments: [],
+        production: []
+    };
+
+    // === DOM 참조 ===
+    const freeInput = document.getElementById('freeInput');
+    const upgradeInput = document.getElementById('upgradeInput');
+    const btnAnalyze = document.getElementById('btnAnalyze');
+    const bpmSlider = document.getElementById('bpmSlider');
+    const bpmValue = document.getElementById('bpmValue');
+
+    // === 모드 전환 탭 ===
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const mode = tab.dataset.mode;
+            isUpgradeMode = (mode === 'upgrade');
+
+            document.getElementById('modeNewCreate').style.display = isUpgradeMode ? 'none' : '';
+            document.getElementById('modeUpgrade').style.display = isUpgradeMode ? '' : 'none';
+
+            const hint = document.getElementById('analyzeHint');
+            hint.textContent = isUpgradeMode
+                ? '기존 프롬프트를 분석하여 v5 구조로 자동 업그레이드합니다'
+                : '만들고 싶은 음악을 입력하면 AI가 자동으로 설정합니다';
+
+            // 활성 입력의 내용으로 버튼 활성화 판단
+            const activeInput = isUpgradeMode ? upgradeInput : freeInput;
+            btnAnalyze.disabled = activeInput.value.trim().length === 0;
+        });
+    });
+
+    // === 자유 입력 핸들러 (새로 만들기) ===
+    freeInput.addEventListener('input', () => {
+        document.getElementById('charCount').textContent = freeInput.value.length + '자';
+        if (!isUpgradeMode) btnAnalyze.disabled = freeInput.value.trim().length === 0;
+    });
+    document.getElementById('btnClearInput').addEventListener('click', () => {
+        freeInput.value = '';
+        document.getElementById('charCount').textContent = '0자';
+        if (!isUpgradeMode) btnAnalyze.disabled = true;
+    });
+
+    // === 업그레이드 입력 핸들러 ===
+    upgradeInput.addEventListener('input', () => {
+        document.getElementById('upgradeCharCount').textContent = upgradeInput.value.length + '자';
+        if (isUpgradeMode) btnAnalyze.disabled = upgradeInput.value.trim().length === 0;
+    });
+    document.getElementById('btnClearUpgrade').addEventListener('click', () => {
+        upgradeInput.value = '';
+        document.getElementById('upgradeCharCount').textContent = '0자';
+        if (isUpgradeMode) btnAnalyze.disabled = true;
+    });
+
+    // === 분석 버튼 ===
+    btnAnalyze.addEventListener('click', () => {
+        if (isUpgradeMode) {
+            selections.upgradeText = upgradeInput.value.trim();
+            selections.freeText = selections.upgradeText;
+        } else {
+            selections.freeText = freeInput.value.trim();
+        }
+        if (!selections.freeText) return;
+        analysisInitialized = false;
+        goToStep(2);
+    });
+
+    // === 토글 그룹 (복수 선택) ===
+    function setupToggleGroup(id, key) {
+        const c = document.getElementById(id);
+        if (!c) return;
+        c.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                const active = c.querySelectorAll('.toggle-btn.active');
+                selections[key] = Array.from(active).map(b => b.dataset.value);
+            });
+        });
+    }
+
+    // === 단일 선택 토글 (Key, 박자, 보컬성별, 음역대) ===
+    function setupSingleToggle(id, key) {
+        const c = document.getElementById(id);
+        if (!c) return;
+        c.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const wasActive = btn.classList.contains('active');
+                c.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                if (!wasActive) btn.classList.add('active');
+                const active = c.querySelectorAll('.toggle-btn.active');
+                selections[key] = Array.from(active).map(b => b.dataset.value);
+            });
+        });
+    }
+
+    // === 자동 활성화 헬퍼 ===
+    function autoActivate(id, key, value) {
+        const c = document.getElementById(id);
+        if (!c) return;
+        const btn = c.querySelector(`[data-value="${value}"]`);
+        if (btn && !btn.classList.contains('active')) btn.classList.add('active');
+        const active = c.querySelectorAll('.toggle-btn.active');
+        selections[key] = Array.from(active).map(b => b.dataset.value);
+    }
+
+    // 토글 그룹 초기화
+    setupToggleGroup('moodBtns', 'mood');
+    setupToggleGroup('vocalStyleBtns', 'vocalStyle');
+    setupToggleGroup('instrumentBtns', 'instruments');
+    setupToggleGroup('productionBtns', 'production');
+    setupSingleToggle('keyBtns', 'key');
+    setupSingleToggle('timeSigBtns', 'timeSig');
+    setupSingleToggle('vocalGenderBtns', 'vocalGender');
+    setupSingleToggle('vocalRangeBtns', 'vocalRange');
+
+    // === BPM 슬라이더 + 프리셋 ===
+    bpmSlider.addEventListener('input', () => {
+        selections.bpm = parseInt(bpmSlider.value);
+        bpmValue.textContent = bpmSlider.value + ' BPM';
+    });
+    document.querySelectorAll('.bpm-preset').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const b = parseInt(btn.dataset.bpm);
+            bpmSlider.value = b;
+            selections.bpm = b;
+            bpmValue.textContent = b + ' BPM';
+        });
+    });
+
+    // === 보컬 직접 입력 ===
+    const customVocalInput = document.getElementById('customVocalInput');
+    if (customVocalInput) {
+        customVocalInput.addEventListener('input', () => {
+            selections.customVocal = customVocalInput.value.trim();
+        });
+    }
+
+    // === 단계 이동 ===
+    function goToStep(step) {
+        document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+        const target = document.getElementById('step' + step);
+        if (target) target.classList.add('active');
+
+        document.querySelectorAll('.step-item').forEach((item, i) => {
+            const n = i + 1;
+            item.classList.remove('active', 'done');
+            if (n < step) item.classList.add('done');
+            else if (n === step) item.classList.add('active');
+        });
+        document.querySelectorAll('.step-line').forEach((line, i) => {
+            line.classList.toggle('done', i < step - 1);
+        });
+
+        if (step === 2) showAnalysis();
+        if (step === 3) buildFinalPrompt();
+        currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 네비게이션 버튼
+    document.getElementById('btnPrevStep2').addEventListener('click', () => goToStep(1));
+    document.getElementById('btnGeneratePrompt').addEventListener('click', () => goToStep(3));
+    document.getElementById('btnPrevStep').addEventListener('click', () => goToStep(2));
+
+    // === placeholder: 이후 섹션에서 채울 함수들 ===
+    function showAnalysis() { /* 섹션 4에서 구현 */ }
+    function buildFinalPrompt() { /* 섹션 5에서 구현 */ }
+
+}); // DOMContentLoaded 끝
