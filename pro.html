@@ -22,6 +22,10 @@
         </div>
     </header>
 
+<<<<<<< HEAD
+=======
+    <!-- 진행 단계: 3단계 -->
+>>>>>>> claude/retrieve-project-work-WiSXe
     <div class="step-bar">
         <div class="step-item active" data-step="1"><div class="step-circle">1</div><span class="step-label">입력</span></div>
         <div class="step-line"></div>
@@ -36,6 +40,7 @@
             <div class="step-header">
                 <div class="step-title-row">
                     <h1 class="step-title">전문가 모드</h1>
+<<<<<<< HEAD
                     <button class="btn-collapse-step">숨기기</button>
                 </div>
                 <p class="step-desc">만들고 싶은 음악을 설명하거나, 기존 프롬프트를 입력하세요.</p>
@@ -57,15 +62,55 @@
 - 비 오는 새벽 감성적인 Neo Soul + Lo-fi 느낌의 음악
 - Acoustic Pop, 95 BPM, D major, 4/4, warm vocals, piano, soft drums
 - 기존에 만든 Suno 프롬프트를 붙여넣기 해도 됩니다"></textarea>
+=======
+                </div>
+                <p class="step-desc">만들고 싶은 음악을 설명하거나, 기존 프롬프트를 입력하면 빌보드급 v5 프롬프트로 업그레이드합니다.</p>
+            </div>
+
+            <!-- 파일 불러오기 -->
+            <div class="import-area">
+                <div class="import-box" id="importBox">
+                    <span class="import-icon">&#128193;</span>
+                    <p class="import-title">이전에 만든 자료가 있나요?</p>
+                    <p class="import-desc">저장한 파일을 불러오면 모든 설정이 자동으로 복원됩니다</p>
+                    <label class="btn-import" for="fileImport"><span>&#128196;</span> 파일 선택</label>
+                    <input type="file" id="fileImport" accept=".txt" style="display: none;">
+                    <p id="importFilename" style="display:none; margin-top:10px; font-size:var(--font-sm); color:var(--primary);"></p>
+                </div>
+            </div>
+
+            <div class="or-divider"><span>또는 아래에 직접 입력하세요</span></div>
+
+            <!-- 자유 입력 -->
+            <div class="free-input-area">
+                <textarea class="free-input" id="freeInput" rows="6" placeholder="방법 1: 만들고 싶은 음악을 자유롭게 설명하세요.
+예) 비 오는 새벽 감성적인 Neo Soul + Lo-fi 느낌의 음악
+
+방법 2: 기존 Suno 프롬프트를 붙여넣기 하세요.
+예) Acoustic Pop, 95 BPM, D major, warm vocals, piano...
+→ 빌보드급 v5 프롬프트로 자동 업그레이드됩니다."></textarea>
+>>>>>>> claude/retrieve-project-work-WiSXe
                 <div class="input-tools">
                     <span class="char-count" id="charCount">0자</span>
                     <button class="btn-clear-input" id="btnClearInput">지우기</button>
                 </div>
             </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> claude/retrieve-project-work-WiSXe
             <div class="analyze-area">
                 <button class="btn-analyze holo-btn" id="btnAnalyze" disabled>
                     <span>&#128300;</span> 분석하고 다음 단계로
                 </button>
+<<<<<<< HEAD
+=======
+                <p class="analyze-hint">기존 프롬프트를 입력하면 v5 구조로 자동 업그레이드됩니다</p>
+            </div>
+
+            <div class="step-nav-row">
+                <button class="step-nav-btn step-nav-prev holo-btn" onclick="location.href='index.html'"><span>&#8592;</span> 메인으로</button>
+>>>>>>> claude/retrieve-project-work-WiSXe
             </div>
         </section>
 
@@ -74,12 +119,16 @@
             <div class="step-header">
                 <div class="step-title-row">
                     <h1 class="step-title">전문가 설정</h1>
+<<<<<<< HEAD
                     <button class="btn-collapse-step">숨기기</button>
+=======
+>>>>>>> claude/retrieve-project-work-WiSXe
                 </div>
                 <p class="step-desc">모든 항목을 자유롭게 설정하세요. AI가 분석한 결과를 기반으로 추천합니다.</p>
             </div>
             <div class="original-input-box" id="originalInput"></div>
 
+<<<<<<< HEAD
             <!-- 타겟층 -->
             <div class="setting-group">
                 <h3 class="setting-title">&#128100; 타겟층 <span class="auto-badge">AI 추천</span></h3>
@@ -121,6 +170,8 @@
                 </div>
             </div>
 
+=======
+>>>>>>> claude/retrieve-project-work-WiSXe
             <!-- 분위기 -->
             <div class="setting-group">
                 <h3 class="setting-title">&#127925; 분위기 <span class="auto-badge">AI 추천</span></h3>
@@ -158,6 +209,7 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <!-- ======= 전문가 전용 섹션 ======= -->
             <div class="pro-divider"><span>&#9881; 전문가 전용 설정</span></div>
 
@@ -181,6 +233,30 @@
                     <div class="genre-dropdown" id="subGenreDropdown"></div>
                 </div>
                 <div class="selected-genre-display" id="subGenreDisplay"></div>
+=======
+            <div class="pro-divider"><span>&#9881; 전문가 전용 설정</span></div>
+
+            <!-- 장르 선택 (무제한) -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127925; 장르 <span class="pro-badge">무제한 선택</span></h3>
+                <p class="setting-hint">전문가 모드에서는 장르 개수 제한 없이 자유롭게 조합할 수 있습니다.</p>
+                <div class="genre-direct-input">
+                    <button class="genre-select-trigger" id="genreTrigger">클릭하여 장르 추가 &#9660;</button>
+                    <input type="text" class="genre-filter-input" id="genreFilter" placeholder="장르 검색..." style="display:none;">
+                    <div class="genre-dropdown" id="genreDropdown"></div>
+                </div>
+                <div class="selected-genres-display" id="selectedGenresDisplay"></div>
+            </div>
+
+            <!-- 머니코드 진행 -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127929; 머니코드 진행 (Chord Progression) <span class="pro-badge">전문가</span></h3>
+                <p class="setting-hint">장르별 히트곡에서 검증된 코드 진행을 선택하세요.</p>
+                <select class="chord-select" id="chordProgressionSelect">
+                    <option value="">-- 장르를 먼저 선택하면 코드 진행이 표시됩니다 --</option>
+                </select>
+                <div class="chord-display" id="chordDisplay"></div>
+>>>>>>> claude/retrieve-project-work-WiSXe
             </div>
 
             <!-- 조성 (Key) -->
@@ -212,12 +288,21 @@
             <div class="setting-group">
                 <h3 class="setting-title">&#127932; 박자 <span class="pro-badge">전문가</span></h3>
                 <div class="btn-grid" id="timeSigBtns">
+<<<<<<< HEAD
                     <button class="toggle-btn" data-value="4/4" title="가장 일반적인 박자. 팝, 록, 힙합 등 대부분의 음악">4/4 (기본)</button>
                     <button class="toggle-btn" data-value="3/4" title="왈츠 박자. 우아하고 흐르는 느낌">3/4 (왈츠)</button>
                     <button class="toggle-btn" data-value="6/8" title="부드럽게 흐르는 느낌. 발라드, 아이리시 음악">6/8 (발라드)</button>
                     <button class="toggle-btn" data-value="2/4" title="행진곡 느낌. 강한 리듬감">2/4 (행진곡)</button>
                     <button class="toggle-btn" data-value="5/4" title="독특한 리듬. 실험적인 음악">5/4 (실험적)</button>
                     <button class="toggle-btn" data-value="7/8" title="복잡한 리듬. 프로그레시브, 재즈">7/8 (프로그레시브)</button>
+=======
+                    <button class="toggle-btn" data-value="4/4" title="팝, 록, 힙합 등 대부분의 음악">4/4 (기본)</button>
+                    <button class="toggle-btn" data-value="3/4" title="왈츠 박자">3/4 (왈츠)</button>
+                    <button class="toggle-btn" data-value="6/8" title="발라드, 아이리시 음악">6/8 (발라드)</button>
+                    <button class="toggle-btn" data-value="2/4" title="행진곡 느낌">2/4 (행진곡)</button>
+                    <button class="toggle-btn" data-value="5/4" title="실험적인 음악">5/4 (실험적)</button>
+                    <button class="toggle-btn" data-value="7/8" title="프로그레시브, 재즈">7/8 (프로그레시브)</button>
+>>>>>>> claude/retrieve-project-work-WiSXe
                 </div>
             </div>
 
@@ -240,7 +325,11 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <!-- 보컬 -->
+=======
+            <!-- 보컬 성별 -->
+>>>>>>> claude/retrieve-project-work-WiSXe
             <div class="setting-group">
                 <h3 class="setting-title">&#127908; 보컬 성별 <span class="auto-badge">AI 추천</span></h3>
                 <div class="btn-grid" id="vocalGenderBtns">
@@ -252,6 +341,10 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
+=======
+            <!-- 보컬 스타일 -->
+>>>>>>> claude/retrieve-project-work-WiSXe
             <div class="setting-group">
                 <h3 class="setting-title">&#127924; 보컬 스타일 <span class="auto-badge">AI 추천</span></h3>
                 <div class="btn-grid" id="vocalStyleBtns">
@@ -268,6 +361,10 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
+=======
+            <!-- 보컬 음역대 -->
+>>>>>>> claude/retrieve-project-work-WiSXe
             <div class="setting-group">
                 <h3 class="setting-title">&#127926; 음역대 <span class="auto-badge">AI 추천</span></h3>
                 <div class="btn-grid" id="vocalRangeBtns">
@@ -280,7 +377,18 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <!-- 주요 악기 구성 -->
+=======
+            <!-- 보컬 직접 입력 (전문가 전용) -->
+            <div class="setting-group">
+                <h3 class="setting-title">&#127908; 보컬 스타일 직접 입력 <span class="pro-badge">전문가</span></h3>
+                <p class="setting-hint">원하는 보컬 스타일을 직접 입력하면 v5 프롬프트에 자동 반영됩니다.</p>
+                <textarea class="free-input" id="customVocalInput" rows="2" placeholder="예) warm soulful vocals with gentle vibrato, intimate close-mic delivery, soft R&B phrasing"></textarea>
+            </div>
+
+            <!-- 주요 악기 -->
+>>>>>>> claude/retrieve-project-work-WiSXe
             <div class="setting-group">
                 <h3 class="setting-title">&#127929; 주요 악기 구성 <span class="auto-badge">AI 추천</span></h3>
                 <div class="btn-grid" id="instrumentBtns">
@@ -315,6 +423,7 @@
                 <p class="setting-hint">음질과 사운드 텍스처를 세밀하게 조절합니다.</p>
                 <div class="btn-grid" id="productionBtns">
                     <button class="toggle-btn" data-value="tape saturation" title="아날로그 테이프 특유의 따뜻한 포화감">테이프 새츄레이션</button>
+<<<<<<< HEAD
                     <button class="toggle-btn" data-value="plate reverb" title="금속판 리버브. 부드럽고 자연스러운 울림">플레이트 리버브</button>
                     <button class="toggle-btn" data-value="room reverb" title="작은 공간의 자연스러운 울림">룸 리버브</button>
                     <button class="toggle-btn" data-value="hall reverb" title="큰 홀의 웅장한 울림">홀 리버브</button>
@@ -339,6 +448,36 @@
                 <div class="step-title-row">
                     <h1 class="step-title">최고 퀄리티 프롬프트 완성!</h1>
                     <button class="btn-collapse-step">숨기기</button>
+=======
+                    <button class="toggle-btn" data-value="plate reverb" title="부드럽고 자연스러운 울림">플레이트 리버브</button>
+                    <button class="toggle-btn" data-value="room reverb" title="작은 공간의 자연스러운 울림">룸 리버브</button>
+                    <button class="toggle-btn" data-value="hall reverb" title="큰 홀의 웅장한 울림">홀 리버브</button>
+                    <button class="toggle-btn" data-value="dry and direct" title="리버브 최소화">드라이 (리버브 없음)</button>
+                    <button class="toggle-btn" data-value="vinyl crackle" title="LP 레코드 느낌">바이닐 크랙클</button>
+                    <button class="toggle-btn" data-value="lo-fi texture" title="의도적 저음질 텍스처">로파이 텍스처</button>
+                    <button class="toggle-btn" data-value="clean vocal upfront" title="보컬을 깨끗하게 앞으로">보컬 전면 배치</button>
+                    <button class="toggle-btn" data-value="wide stereo" title="넓은 스테레오">와이드 스테레오</button>
+                    <button class="toggle-btn" data-value="sidechain pump" title="EDM 펌핑 효과">사이드체인 펌프</button>
+                    <button class="toggle-btn" data-value="analog warmth" title="아날로그 따뜻한 사운드">아날로그 따뜻함</button>
+                    <button class="toggle-btn" data-value="crisp highs" title="선명한 고음역대">선명한 고음</button>
+                    <button class="toggle-btn" data-value="deep sub bass" title="깊고 묵직한 서브 베이스">깊은 서브 베이스</button>
+                    <button class="toggle-btn" data-value="gated reverb" title="80년대 스타일 리버브">게이트 리버브</button>
+                </div>
+            </div>
+
+            <!-- 네비게이션 -->
+            <div class="step-nav-row">
+                <button class="step-nav-btn step-nav-prev holo-btn" id="btnPrevStep2"><span>&#8592;</span> 이전</button>
+                <button class="step-nav-btn step-nav-next holo-btn" id="btnGeneratePrompt">&#9834; 프롬프트 생성 <span>&#8594;</span></button>
+            </div>
+        </section>
+
+        <!-- ========== STEP 3: 완성 ========== -->
+        <section class="step-page" id="step3">
+            <div class="step-header">
+                <div class="step-title-row">
+                    <h1 class="step-title">&#127775; 최고 퀄리티 프롬프트 완성!</h1>
+>>>>>>> claude/retrieve-project-work-WiSXe
                 </div>
                 <p class="step-desc">전문가 설정이 반영된 Suno v5 프롬프트입니다. 직접 수정도 가능합니다.</p>
             </div>
@@ -355,15 +494,36 @@
 
             <div class="prompt-explanation" id="promptExplanation"></div>
 
+<<<<<<< HEAD
             <div class="prompt-section">
                 <div class="prompt-header">
                     <h3 class="prompt-label">&#127925; Style Prompt</h3>
+=======
+            <!-- Style Prompt -->
+            <div class="prompt-section">
+                <div class="prompt-header">
+                    <h3 class="prompt-label">&#127925; Style Prompt <span class="vocal-type-badge" id="vocalTypeBadge"></span></h3>
+>>>>>>> claude/retrieve-project-work-WiSXe
                     <button class="btn-copy" data-target="stylePromptText">복사하기</button>
                 </div>
                 <textarea class="prompt-box prompt-editable" id="stylePromptText" rows="6"></textarea>
                 <div class="prompt-desc-kor" id="stylePromptKor"></div>
             </div>
 
+<<<<<<< HEAD
+=======
+            <!-- Simple Prompt -->
+            <div class="prompt-section simple-prompt-section">
+                <div class="prompt-header">
+                    <h3 class="prompt-label">&#127925; Simple Prompt <span class="simple-badge">Simple 모드용 · 500자 미만</span></h3>
+                    <button class="btn-copy" data-target="simplePromptText">복사하기</button>
+                </div>
+                <textarea class="prompt-box prompt-editable" id="simplePromptText" rows="4"></textarea>
+                <div class="prompt-desc-kor" id="simplePromptKor"></div>
+            </div>
+
+            <!-- Exclude Styles -->
+>>>>>>> claude/retrieve-project-work-WiSXe
             <div class="prompt-section">
                 <div class="prompt-header">
                     <h3 class="prompt-label">&#128683; Exclude Styles</h3>
@@ -371,7 +531,11 @@
                 </div>
                 <textarea class="prompt-box prompt-editable" id="excludeStylesText" rows="2"></textarea>
                 <div class="exclude-toggles">
+<<<<<<< HEAD
                     <p class="exclude-toggles-title">&#9888; 음질 문제 방지 항목</p>
+=======
+                    <p class="exclude-toggles-title">&#9888; 음질 문제 방지 항목 (클릭하면 추가/제거)</p>
+>>>>>>> claude/retrieve-project-work-WiSXe
                     <div class="exclude-btn-grid">
                         <button class="exclude-tag-btn" data-value="intro" data-kor="인트로 방지">intro</button>
                         <button class="exclude-tag-btn" data-value="reverb" data-kor="리버브 방지">reverb</button>
@@ -383,18 +547,31 @@
                         <button class="exclude-tag-btn" data-value="echo" data-kor="에코 방지">echo</button>
                         <button class="exclude-tag-btn" data-value="choir" data-kor="합창 방지">choir</button>
                         <button class="exclude-tag-btn" data-value="sound effects" data-kor="효과음 방지">sound effects</button>
+<<<<<<< HEAD
                         <button class="exclude-tag-btn" data-value="four-on-the-floor kick" data-kor="반복적인 4비트 킥 방지">four-on-the-floor kick</button>
                     </div>
                     <div class="exclude-custom-row">
                         <input type="text" class="exclude-custom-input" id="excludeCustomInput" placeholder="직접 입력..." maxlength="30">
+=======
+                        <button class="exclude-tag-btn" data-value="four-on-the-floor kick" data-kor="4비트 킥 방지">four-on-the-floor kick</button>
+                    </div>
+                    <div class="exclude-custom-row">
+                        <input type="text" class="exclude-custom-input" id="excludeCustomInput" placeholder="직접 입력 (예: autotune, whisper...)" maxlength="30">
+>>>>>>> claude/retrieve-project-work-WiSXe
                         <button class="btn-add-exclude" id="btnAddExclude">추가</button>
                     </div>
                 </div>
                 <div class="prompt-desc-kor" id="excludeStylesKor"></div>
             </div>
 
+<<<<<<< HEAD
             <div class="prompt-section">
                 <div class="prompt-header"><h3 class="prompt-label">&#9881; More Options</h3></div>
+=======
+            <!-- More Options -->
+            <div class="prompt-section">
+                <div class="prompt-header"><h3 class="prompt-label">&#9881; More Options 설정값</h3></div>
+>>>>>>> claude/retrieve-project-work-WiSXe
                 <div class="more-options-box">
                     <div class="option-slider-row">
                         <span class="slider-label">Weirdness</span>
@@ -410,24 +587,37 @@
                 <div class="prompt-desc-kor" id="moreOptionsKor"></div>
             </div>
 
+<<<<<<< HEAD
+=======
+            <!-- 액션 버튼 -->
+>>>>>>> claude/retrieve-project-work-WiSXe
             <div class="result-actions">
                 <button class="action-btn action-prev-step" id="btnPrevStep"><span>&#8592;</span> 이전 단계</button>
                 <button class="action-btn action-copy-all holo-btn" id="btnCopyAll"><span>&#128203;</span> 전체 복사</button>
                 <button class="action-btn action-save-all holo-btn" id="btnSaveAll"><span>&#128190;</span> 전체 저장하기</button>
+<<<<<<< HEAD
                 <button class="action-btn action-apply" id="btnApply"><span>✅</span> 적용하기</button>
                 <button class="action-btn action-goto-lyrics" id="btnGotoLyrics" disabled><span>🎵</span> 노래제목&amp;가사생성</button>
+=======
+                <button class="action-btn action-apply" id="btnApply"><span>&#9989;</span> 적용하기</button>
+                <button class="action-btn action-goto-lyrics" id="btnGotoLyrics" disabled><span>&#127925;</span> 노래제목&amp;가사생성</button>
+>>>>>>> claude/retrieve-project-work-WiSXe
                 <button class="action-btn action-home" id="btnHome"><span>&#127968;</span> 메인으로</button>
             </div>
             <div class="apply-complete-msg" id="applyCompleteMsg"></div>
         </section>
     </main>
 
+<<<<<<< HEAD
     <div class="nav-buttons" id="navButtons" style="display: none;">
         <button class="nav-btn nav-prev" id="btnPrev" style="visibility: hidden;"><span>&#8592;</span> 이전</button>
         <div class="nav-info" id="navInfo">1 / 2 단계</div>
         <button class="nav-btn nav-next holo-btn" id="btnNext">&#9834; 프롬프트 생성 <span>&#8594;</span></button>
     </div>
 
+=======
+    <!-- 글자 크기 팝업 -->
+>>>>>>> claude/retrieve-project-work-WiSXe
     <div class="popup-overlay" id="textSizePopup">
         <div class="popup">
             <h3 class="popup-title">글자 크기 조절</h3>
