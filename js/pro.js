@@ -1332,10 +1332,314 @@ document.addEventListener('DOMContentLoaded', () => {
             (c.pass ? '\u2705' : '\u274C') + ' ' + c.name + ' <span style="opacity:0.7">(' + c.detail + ')</span></div>'
         ).join('');
     }
-    // placeholder: Exclude 토글 (섹션 7에서 구현)
+    // ============================================
+    // Exclude 토글
+    // ============================================
+    const excludeEngToKor = {
+        'metal': '메탈', 'hardcore': '하드코어', 'screamo': '스크리모', 'thrash': '스래쉬',
+        'deathcore': '데스코어', 'industrial': '인더스트리얼', 'aggressive': '공격적인',
+        'distorted': '왜곡된', 'screaming': '비명', 'harsh noise': '거친 노이즈',
+        'heavy metal': '헤비메탈', 'ambient': '앰비언트', 'meditation': '명상',
+        'lullaby': '자장가', 'drone': '드론', 'spa': '스파', 'sleepy': '졸린',
+        'intro': '인트로', 'reverb': '리버브', 'distortion': '디스토션', 'noise': '노이즈',
+        'echo': '에코', 'choir': '합창', 'sound effects': '효과음',
+        'four-on-the-floor kick': '4비트 킥', 'fade in': '페이드인', 'falsetto': '극단고음'
+    };
+
+    function buildExcludeKorDesc(text) {
+        if (!text) return '';
+        const parts = text.split(', ').filter(Boolean);
+        const kor = parts.map(eng => {
+            const k = Object.keys(excludeEngToKor).find(key => eng.toLowerCase().includes(key));
+            return k ? excludeEngToKor[k] + '(' + eng + ')' : eng;
+        });
+        return '\uD83D\uDCCC <strong>한국어 번역:</strong> ' + kor.join(', ') + ' \u2014 이 스타일들을 제외하면 AI가 더 정확한 음악을 만들어줍니다.';
+    }
+
     let excludeInit = false;
-    function initExcludeToggles() { /* 섹션 7 */ }
-    function buildExcludeKorDesc(text) { return ''; /* 섹션 7 */ }
-    function autoSaveToLibrary() { /* 섹션 7 */ }
+    function initExcludeToggles() {
+        if (excludeInit) return;
+        excludeInit = true;
+
+        document.querySelectorAll('.exclude-tag-btn').forEach(btn => {
+            const v = btn.dataset.value;
+            if (generatedExcludeBase) {
+                const baseParts = generatedExcludeBase.split(', ').map(p => p.trim().toLowerCase());
+                if (baseParts.includes(v.toLowerCase())) btn.classList.add('active');
+            }
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                if (btn.classList.contains('active')) {
+                    if (!userExcludeTags.includes(v)) userExcludeTags.push(v);
+                } else {
+                    userExcludeTags = userExcludeTags.filter(t => t !== v);
+                    if (generatedExcludeBase) {
+                        const bp = generatedExcludeBase.split(', ').filter(Boolean);
+                        generatedExcludeBase = bp.filter(p => p.toLowerCase() !== v.toLowerCase()).join(', ');
+                    }
+                }
+                updateExclude();
+            });
+            if (btn.dataset.kor) btn.title = btn.dataset.kor;
+        });
+
+        document.getElementById('btnAddExclude').addEventListener('click', () => addExcl());
+        document.getElementById('excludeCustomInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addExcl(); });
+    }
+
+    function addExcl() {
+        const input = document.getElementById('excludeCustomInput');
+        const v = input.value.trim().toLowerCase();
+        if (!v || userExcludeTags.includes(v)) { input.value = ''; return; }
+        userExcludeTags.push(v);
+        const grid = document.querySelector('.exclude-btn-grid');
+        const btn = document.createElement('button');
+        btn.className = 'exclude-tag-btn active';
+        btn.dataset.value = v;
+        btn.textContent = v;
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            if (btn.classList.contains('active')) { if (!userExcludeTags.includes(v)) userExcludeTags.push(v); }
+            else userExcludeTags = userExcludeTags.filter(t => t !== v);
+            updateExclude();
+        });
+        grid.appendChild(btn);
+        input.value = '';
+        updateExclude();
+    }
+
+    function updateExclude() {
+        const base = generatedExcludeBase ? generatedExcludeBase.split(', ').filter(Boolean) : [];
+        const full = [...new Set([...base, ...userExcludeTags])].join(', ');
+        document.getElementById('excludeStylesText').value = full;
+        document.getElementById('excludeStylesKor').innerHTML = buildExcludeKorDesc(full);
+    }
+
+    // ============================================
+    // 복사 / 저장 / 적용 / 홈
+    // ============================================
+
+    // 개별 복사
+    document.querySelectorAll('.btn-copy').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const el = document.getElementById(btn.dataset.target);
+            const text = el.value !== undefined ? el.value : el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = '\u2713 복사됨!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = '복사하기'; btn.classList.remove('copied'); }, 2000);
+            });
+        });
+    });
+
+    // 전체 복사
+    document.getElementById('btnCopyAll').addEventListener('click', () => {
+        const s = document.getElementById('stylePromptText').value;
+        const e = document.getElementById('excludeStylesText').value;
+        const w = document.getElementById('weirdnessValue').textContent;
+        const si = document.getElementById('styleInfluenceValue').textContent;
+        navigator.clipboard.writeText('[Style Prompt]\n' + s + '\n\n[Exclude Styles]\n' + e + '\n\n[More Options]\nWeirdness: ' + w + '\nStyle Influence: ' + si);
+        const b = document.getElementById('btnCopyAll');
+        b.innerHTML = '<span>\u2713</span> 복사완료!';
+        setTimeout(() => { b.innerHTML = '<span>\uD83D\uDCCB</span> 전체 복사'; }, 2000);
+    });
+
+    // 전체 저장
+    document.getElementById('btnSaveAll').addEventListener('click', () => {
+        const s = document.getElementById('stylePromptText').value;
+        const e = document.getElementById('excludeStylesText').value;
+        const w = document.getElementById('weirdnessValue').textContent;
+        const si = document.getElementById('styleInfluenceValue').textContent;
+        const exp = document.getElementById('promptExplanation').textContent;
+        const now = new Date();
+        const d = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + '_' + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+
+        const content = '========================================\n'
+            + 'SUNO MASTER PRO 12 - 전문가 모드\n'
+            + '생성일시: ' + now.toLocaleString('ko-KR') + '\n'
+            + '========================================\n\n'
+            + '[한국어 설명]\n' + exp + '\n\n'
+            + '========================================\n'
+            + '[Style Prompt]\n' + s + '\n\n'
+            + '========================================\n'
+            + '[Exclude Styles]\n' + e + '\n\n'
+            + '========================================\n'
+            + '[More Options]\nWeirdness: ' + w + '\nStyle Influence: ' + si + '\n\n'
+            + '========================================\n'
+            + '선택 정보:\n'
+            + '- 모드: ' + (isUpgradeMode ? '프롬프트 업그레이드' : '새로 만들기') + '\n'
+            + '- 분위기: ' + selections.mood.map(v => labelMap[v] || v).join(', ') + '\n'
+            + '- 장르: ' + selections.genres.join(' + ') + '\n'
+            + (selections.chordProgression ? '- 코드 진행: ' + selections.chordProgression + '\n' : '')
+            + (selections.customVocal ? '- 보컬 (직접입력): ' + selections.customVocal + '\n' : '')
+            + '========================================\n'
+            + 'Generated by SUNO MASTER PRO 12\n';
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'SUNO_Pro_' + d + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        const btn = document.getElementById('btnSaveAll');
+        btn.innerHTML = '<span>\u2713</span> 저장완료!';
+        setTimeout(() => { btn.innerHTML = '<span>\uD83D\uDCBE</span> 전체 저장하기'; }, 2000);
+    });
+
+    // 적용하기
+    document.getElementById('btnApply').addEventListener('click', () => {
+        const style = document.getElementById('stylePromptText').value || '';
+        const excludeStyles = document.getElementById('excludeStylesText').value || '';
+        const weirdness = parseInt(document.getElementById('weirdnessValue').textContent) || null;
+        const styleInfluence = parseInt(document.getElementById('styleInfluenceValue').textContent) || null;
+        const explanation = document.getElementById('promptExplanation').textContent || '';
+        if (!style.trim()) { alert('먼저 프롬프트를 생성해주세요.'); return; }
+
+        const genreName = selections.genres.join(' + ') || '전문가 모드';
+        const fileName = (importedPromptData && importedPromptData.fileName)
+            || genreName + ' - 전문가 모드';
+
+        const pipelineData = {
+            stylePrompt: style, excludeStyles, weirdness, styleInfluence, explanation,
+            genres: selections.genres.slice(),
+            mood: selections.mood.slice(),
+            chordProgression: selections.chordProgression,
+            customVocal: selections.customVocal,
+            createdAt: new Date().toISOString(), source: 'pro', fileName
+        };
+        localStorage.setItem('suno-pipeline-pro', JSON.stringify(pipelineData));
+
+        const msgEl = document.getElementById('applyCompleteMsg');
+        if (msgEl) {
+            msgEl.textContent = '\u2705 스타일 프롬프트 적용 완료! 다음 단계에 반영됩니다.';
+            msgEl.classList.add('visible');
+        }
+
+        const btnLyrics = document.getElementById('btnGotoLyrics');
+        btnLyrics.disabled = false;
+        btnLyrics.classList.add('active');
+    });
+
+    // 노래제목&가사 이동
+    document.getElementById('btnGotoLyrics').addEventListener('click', () => { window.location.href = 'lyrics.html'; });
+
+    // 메인으로
+    document.getElementById('btnHome').addEventListener('click', () => { window.location.href = 'index.html'; });
+
+    // ============================================
+    // 자동 보관함 저장
+    // ============================================
+    function autoSaveToLibrary(sp, result, moreOpt) {
+        const K = 'suno-master-library';
+        let lib = [];
+        try { lib = JSON.parse(localStorage.getItem(K)) || []; } catch (e) { lib = []; }
+        lib.push({
+            id: 'pro_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            createdAt: new Date().toISOString(),
+            mood: selections.mood.map(v => labelMap[v] || v),
+            genres: selections.genres.slice(),
+            stylePrompt: sp,
+            excludeStyles: result.excludeStyles,
+            weirdness: moreOpt.weirdness,
+            styleInfluence: moreOpt.styleInfluence,
+            explanation: document.getElementById('promptExplanation').textContent,
+            favorite: false, memo: ''
+        });
+        localStorage.setItem(K, JSON.stringify(lib));
+    }
+
+    // ============================================
+    // 파일 불러오기
+    // ============================================
+    document.getElementById('fileImport').addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const c = ev.target.result;
+            const sm = c.match(/\[Style Prompt\]\s*\n([\s\S]*?)(?=\n={3,})/);
+            if (sm) {
+                importedPromptData = { stylePrompt: sm[1].trim(), fileName: f.name.replace('.txt', '') };
+                const em = c.match(/\[Exclude Styles\]\s*\n([\s\S]*?)(?=\n={3,})/);
+                if (em) importedPromptData.excludeStyles = em[1].trim();
+
+                // 업그레이드 모드로 자동 전환
+                document.getElementById('tabUpgrade').click();
+                upgradeInput.value = sm[1].trim();
+                document.getElementById('upgradeCharCount').textContent = upgradeInput.value.length + '자';
+                btnAnalyze.disabled = false;
+
+                document.getElementById('importBox').classList.add('success');
+                document.getElementById('importBox').querySelector('.import-title').textContent = '\u2713 불러오기 완료!';
+                const fnEl = document.getElementById('importFilename');
+                if (fnEl) { fnEl.textContent = f.name; fnEl.style.display = ''; }
+            }
+        };
+        reader.readAsText(f, 'UTF-8');
+        e.target.value = '';
+    });
+
+    // ============================================
+    // UI 유틸: 다크모드 / 글자크기 / textarea 리사이즈
+    // ============================================
+
+    // 글자 크기
+    const tsp = document.getElementById('textSizePopup');
+    document.getElementById('btnTextSize').addEventListener('click', () => tsp.classList.add('active'));
+    document.getElementById('closeTextSize').addEventListener('click', () => tsp.classList.remove('active'));
+    tsp.addEventListener('click', (e) => { if (e.target === tsp) tsp.classList.remove('active'); });
+
+    const sizeBtns = document.querySelectorAll('.size-btn');
+    const savedSize = localStorage.getItem('suno-text-size') || 'medium';
+    applySize(savedSize);
+    sizeBtns.forEach(b => {
+        b.addEventListener('click', () => {
+            applySize(b.dataset.size);
+            localStorage.setItem('suno-text-size', b.dataset.size);
+            sizeBtns.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+        });
+    });
+    function applySize(s) {
+        document.body.classList.remove('text-small', 'text-large', 'text-xlarge');
+        if (s !== 'medium') document.body.classList.add('text-' + s);
+        sizeBtns.forEach(b => b.classList.toggle('active', b.dataset.size === s));
+    }
+
+    // 다크 모드
+    const bd = document.getElementById('btnDarkMode');
+    if (localStorage.getItem('suno-dark-mode') === 'true') {
+        document.body.classList.add('dark-mode');
+        bd.querySelector('.dark-mode-icon').textContent = '\u2600';
+    }
+    bd.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        bd.querySelector('.dark-mode-icon').textContent = isDark ? '\u2600' : '\u263E';
+        localStorage.setItem('suno-dark-mode', isDark);
+    });
+
+    // ESC로 팝업 닫기
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tsp.classList.remove('active'); });
+
+    // textarea 자동 리사이즈
+    function autoResizeAll() {
+        document.querySelectorAll('textarea').forEach(ta => {
+            ta.classList.add('auto-resize');
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+            ta.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+    }
+    autoResizeAll();
+    new MutationObserver(() => autoResizeAll()).observe(document.body, { childList: true, subtree: true });
+
+    // 섹션 토글 (genre-data.js)
+    if (typeof initSectionToggles === 'function') initSectionToggles();
 
 }); // DOMContentLoaded 끝
