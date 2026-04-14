@@ -919,7 +919,272 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // === placeholder: 이후 섹션에서 채울 함수 ===
-    function buildFinalPrompt() { /* 섹션 5에서 구현 */ }
+    // ============================================
+    // 프롬프트 업그레이드 — 기존 프롬프트 파싱 → v5 재구성
+    // ============================================
+    function upgradeExistingPrompt(originalPrompt) {
+        const text = originalPrompt.toLowerCase();
+        const parsed = { genres: [], bpm: '', key: '', timeSig: '', mood: '', instruments: [], vocal: [], production: [] };
+
+        // 장르 감지
+        const sortedG = [...GENRE_DATABASE].sort((a, b) => b.genre.length - a.genre.length);
+        sortedG.forEach(g => {
+            if (text.includes(g.genre.toLowerCase()) && !parsed.genres.includes(g.genre)) parsed.genres.push(g.genre);
+        });
+
+        // BPM 감지
+        const bpmM = text.match(/(\d{2,3})\s*bpm/i);
+        if (bpmM) parsed.bpm = bpmM[1] + ' BPM';
+
+        // 조성 감지
+        const keyM = originalPrompt.match(/([A-G][b#]?)\s*(major|minor)/i);
+        if (keyM) parsed.key = keyM[0];
+
+        // 박자 감지
+        const tsM = text.match(/([2-7]\/[4-8])/);
+        if (tsM) parsed.timeSig = tsM[1] + ' time';
+
+        // 악기 감지
+        const instrWords = ['piano','guitar','bass','drums','synth','synthesizer','strings','brass','saxophone','violin','cello','organ','808','percussion','orchestra','flute','harmonica','ukulele','trumpet','harp','rhodes','choir'];
+        instrWords.forEach(w => { if (text.includes(w)) parsed.instruments.push(w); });
+
+        // 보컬 감지
+        const vocalWords = ['male vocal','female vocal','male and female','duet','group vocal','baritone','tenor','soprano','alto','mezzo','breathy','belting','falsetto','grit','raspy','whisper','rap','chest voice','vibrato','auto-tuned','autotune'];
+        vocalWords.forEach(w => { if (text.includes(w)) parsed.vocal.push(w); });
+
+        // 프로덕션 감지
+        const prodWords = ['reverb','delay','tape','analog','vinyl','lo-fi','stereo','sidechain','warm','crisp','clean','compressed'];
+        prodWords.forEach(w => { if (text.includes(w)) parsed.production.push(w); });
+
+        // 감정/분위기 감지 (원본에서 추출)
+        const moodWords = ['warm','dark','bright','melancholic','upbeat','chill','energetic','dreamy','nostalgic','emotional','groovy','soulful','haunting','ethereal','aggressive','gentle','intimate','epic'];
+        const detectedMoods = moodWords.filter(w => text.includes(w));
+
+        // === v5 8단계 구조로 재조립 ===
+        const parts = [];
+
+        // ① 장르 (프론트로드)
+        if (parsed.genres.length) parts.push(parsed.genres.slice(0, 3).join(', '));
+        else parts.push('Pop');
+
+        // ② BPM + 조성 + 박자
+        const techParts = [];
+        if (parsed.bpm) techParts.push(parsed.bpm);
+        if (parsed.key) techParts.push(parsed.key);
+        if (parsed.timeSig) techParts.push(parsed.timeSig);
+        if (techParts.length) parts.push(techParts.join(', '));
+
+        // ③ 감정 서술형 문장
+        if (detectedMoods.length) {
+            const moodKey = detectedMoods[0];
+            const sentence = (typeof MOOD_SENTENCE_MAP !== 'undefined' && MOOD_SENTENCE_MAP[moodKey])
+                ? MOOD_SENTENCE_MAP[moodKey]
+                : 'like a perfect moment captured in sound';
+            parts.push(sentence);
+        }
+
+        // ④ 악기
+        if (parsed.instruments.length) parts.push(parsed.instruments.slice(0, 4).join(', '));
+
+        // ⑤ 보컬
+        if (parsed.vocal.length) parts.push(parsed.vocal.slice(0, 4).join(', '));
+
+        // ⑥ 빌보드 구조 요소
+        if (typeof BILLBOARD_ELEMENTS !== 'undefined') {
+            const hook = BILLBOARD_ELEMENTS.hook[Math.floor(Math.random() * BILLBOARD_ELEMENTS.hook.length)];
+            const rhythm = BILLBOARD_ELEMENTS.rhythm[Math.floor(Math.random() * BILLBOARD_ELEMENTS.rhythm.length)];
+            parts.push(hook + ', ' + rhythm);
+        }
+
+        // ⑦ 프로덕션
+        if (parsed.production.length) parts.push(parsed.production.slice(0, 3).join(', '));
+
+        // ⑧ 품질 보호 블록
+        parts.push('professional studio quality, clean and polished production, radio-ready sound');
+
+        let upgraded = parts.join(', ');
+        if (upgraded.length > 950) upgraded = upgraded.substring(0, 947) + '...';
+
+        return { upgraded, parsed };
+    }
+
+    // ============================================
+    // buildFinalPrompt — Step 3 최종 프롬프트 생성
+    // ============================================
+    let generatedExcludeBase = '';
+    let userExcludeTags = [];
+
+    function buildFinalPrompt() {
+        // === 업그레이드 모드 ===
+        if (isUpgradeMode && selections.upgradeText) {
+            const { upgraded, parsed } = upgradeExistingPrompt(selections.upgradeText);
+
+            document.getElementById('stylePromptText').value = upgraded;
+
+            // 한국어 설명
+            let explanation = '\u25B6 모드: 프롬프트 업그레이드\n';
+            explanation += '\u25B6 원본: ' + selections.upgradeText.substring(0, 100) + (selections.upgradeText.length > 100 ? '...' : '') + '\n';
+            explanation += '\u25B6 감지된 장르: ' + (parsed.genres.length ? parsed.genres.join(', ') : '자동 추정') + '\n';
+            explanation += '\u25B6 글자수: ' + upgraded.length + ' / 950자';
+            document.getElementById('promptExplanation').textContent = explanation;
+
+            // Exclude / More Options
+            const genres = parsed.genres.length ? parsed.genres : ['Pop'];
+            finishPromptGeneration(upgraded, genres);
+            return;
+        }
+
+        // === 새로 만들기 모드 ===
+        const genres = selections.genres.length ? selections.genres : ['Pop'];
+        const mainG = genres[0];
+        const mainData = GENRE_DATABASE.find(g => g.genre === mainG) || { genre: mainG, bpm: '100-120', instruments: '', vocal: '', desc: '', main: '', sub: '', mood: [] };
+
+        // 서술형 분위기 문장
+        const moodSentences = selections.mood.slice(0, 2).map(m => MOOD_SENTENCE_MAP[m]).filter(Boolean);
+
+        // 보컬 조합 (커스텀 보컬 우선)
+        const vocalParts = [];
+        if (selections.customVocal) {
+            vocalParts.push(selections.customVocal);
+        } else {
+            selections.vocalGender.forEach(v => vocalParts.push(vocalGenderMap[v]));
+            selections.vocalRange.forEach(v => vocalParts.push(vocalRangeMap[v]));
+            selections.vocalStyle.forEach(v => vocalParts.push(vocalStyleMap[v]));
+        }
+
+        const instrParts = selections.instruments.map(i => instrumentMap[i] || i);
+
+        // === v5 8단계 구조 ===
+        const promptParts = [];
+
+        // ① 장르 (프론트로드, 무제한)
+        promptParts.push(genres.join(', '));
+
+        // ② BPM + 조성 + 박자
+        let techLine = selections.bpm + ' BPM';
+        if (selections.key.length) techLine += ', ' + selections.key[0];
+        if (selections.timeSig.length) techLine += ', ' + selections.timeSig[0] + ' time';
+        promptParts.push(techLine);
+
+        // 머니코드 진행 (선택된 경우)
+        if (selections.chordProgression) {
+            promptParts.push('chord progression: ' + selections.chordProgression);
+        }
+
+        // ③ 감정 서술형 문장
+        if (moodSentences[0]) promptParts.push(moodSentences[0]);
+
+        // ④ 악기
+        if (instrParts.length) promptParts.push(instrParts.slice(0, 4).join(', '));
+
+        // ⑤ 보컬 4요소
+        if (vocalParts.length) promptParts.push(vocalParts.slice(0, 4).join(', '));
+
+        // ⑥ 프로덕션 노트
+        if (selections.production.length) promptParts.push(selections.production.slice(0, 3).join(', '));
+
+        // ⑦ 두 번째 분위기 (공간 있으면)
+        if (moodSentences[1]) promptParts.push(moodSentences[1]);
+
+        // ⑧ 품질 보호 블록
+        promptParts.push('professional studio quality, clean and polished production, radio-ready sound');
+
+        // 950자 제한
+        let sp = promptParts.join(', ');
+        if (sp.length > 950) {
+            const coreParts = [genres.join(', '), techLine];
+            if (selections.chordProgression) coreParts.push('chord progression: ' + selections.chordProgression);
+            if (moodSentences[0]) coreParts.push(moodSentences[0]);
+            if (instrParts.length) coreParts.push(instrParts.slice(0, 3).join(', '));
+            if (vocalParts.length) coreParts.push(vocalParts.slice(0, 3).join(', '));
+            coreParts.push('professional studio quality, clean production, radio-ready sound');
+            sp = coreParts.join(', ');
+            if (sp.length > 950) sp = sp.substring(0, 947) + '...';
+        }
+
+        document.getElementById('stylePromptText').value = sp;
+
+        // 한국어 설명
+        const moodKor = selections.mood.map(v => labelMap[v]).filter(Boolean);
+        let explanation = '\u25B6 장르: ' + genres.join(' + ');
+        if (mainData.desc) explanation += '\n\u25B6 설명: ' + mainData.desc;
+        explanation += '\n\u25B6 분위기: ' + moodKor.join(', ');
+        explanation += '\n\u25B6 템포: ' + selections.bpm + ' BPM';
+        if (selections.key.length) explanation += ' | 조성: ' + selections.key[0];
+        if (selections.timeSig.length) explanation += ' | 박자: ' + selections.timeSig[0];
+        if (selections.chordProgression) explanation += '\n\u25B6 코드 진행: ' + selections.chordProgression;
+        if (selections.customVocal) explanation += '\n\u25B6 보컬 (직접입력): ' + selections.customVocal;
+        if (selections.production.length) explanation += '\n\u25B6 프로덕션: ' + selections.production.join(', ');
+        document.getElementById('promptExplanation').textContent = explanation;
+
+        // Style Prompt 한국어 번역
+        let korHtml = '\uD83D\uDCCC <strong>한국어 번역:</strong><br>';
+        korHtml += '\u2022 장르: ' + genres.join(' + ') + '<br>';
+        korHtml += '\u2022 템포: ' + selections.bpm + ' BPM';
+        if (selections.key.length) korHtml += ' | 조성: ' + selections.key[0];
+        if (selections.timeSig.length) korHtml += ' | 박자: ' + selections.timeSig[0];
+        korHtml += '<br>';
+        if (selections.chordProgression) korHtml += '\u2022 코드 진행: ' + selections.chordProgression + '<br>';
+        korHtml += '\u2022 분위기: ' + moodKor.join(', ') + '<br>';
+        if (instrParts.length) korHtml += '\u2022 악기: ' + instrParts.join(', ') + '<br>';
+        if (vocalParts.length) korHtml += '\u2022 보컬: ' + vocalParts.join(', ') + '<br>';
+        if (selections.production.length) korHtml += '\u2022 프로덕션: ' + selections.production.join(', ') + '<br>';
+        korHtml += '\u2022 품질: 프로페셔널 스튜디오 품질, 라디오 방송 수준';
+        document.getElementById('stylePromptKor').innerHTML = korHtml;
+
+        finishPromptGeneration(sp, genres);
+    }
+
+    // === 공통 마무리: Exclude + Simple + More Options ===
+    function finishPromptGeneration(stylePrompt, genres) {
+        // Exclude Styles (genre-data.js의 generatePrompt 활용)
+        const result = generatePrompt(genres, [], [], selections.mood);
+        generatedExcludeBase = result.excludeStyles;
+        userExcludeTags = [];
+        document.getElementById('excludeStylesText').value = result.excludeStyles;
+        document.getElementById('excludeStylesKor').innerHTML = buildExcludeKorDesc(result.excludeStyles);
+
+        // Simple Prompt
+        const mainG = genres[0];
+        const mainData = GENRE_DATABASE.find(g => g.genre === mainG) || { genre: mainG, main: '', sub: '' };
+        const subData = genres[1] ? (GENRE_DATABASE.find(g => g.genre === genres[1]) || null) : null;
+        if (typeof generateSimplePrompt === 'function') {
+            const simple = generateSimplePrompt(stylePrompt, mainData, subData, selections.mood, selections.bpm, selections.key[0] || '');
+            document.getElementById('simplePromptText').value = simple;
+            document.getElementById('simplePromptKor').innerHTML = '\uD83D\uDCCC Suno Simple 모드에 바로 붙여넣기 가능한 축약 버전입니다.';
+        }
+
+        // More Options
+        const moreOpt = getMoreOptions(mainData, subData, selections.mood, stylePrompt);
+        document.getElementById('weirdnessFill').style.width = moreOpt.weirdness + '%';
+        document.getElementById('weirdnessValue').textContent = moreOpt.weirdness + '%';
+        document.getElementById('styleInfluenceFill').style.width = moreOpt.styleInfluence + '%';
+        document.getElementById('styleInfluenceValue').textContent = moreOpt.styleInfluence + '%';
+
+        // 보컬 타입 배지
+        const badge = document.getElementById('vocalTypeBadge');
+        if (badge) {
+            if (selections.vocalGender.includes('instrumental')) badge.textContent = 'Instrumental';
+            else if (selections.vocalGender.length) badge.textContent = vocalGenderMap[selections.vocalGender[0]] || '';
+            else badge.textContent = '';
+        }
+
+        initExcludeToggles();
+
+        // v5 검증은 섹션 6에서 구현 — 여기서는 호출만 준비
+        if (typeof validateV5Prompt === 'function') {
+            runV5Validation(stylePrompt);
+        }
+
+        autoSaveToLibrary(stylePrompt, result, moreOpt);
+    }
+
+    // placeholder: v5 검증 실행 (섹션 6에서 구현)
+    function runV5Validation(prompt) { /* 섹션 6 */ }
+    // placeholder: Exclude 토글 (섹션 7에서 구현)
+    let excludeInit = false;
+    function initExcludeToggles() { /* 섹션 7 */ }
+    function buildExcludeKorDesc(text) { return ''; /* 섹션 7 */ }
+    function autoSaveToLibrary() { /* 섹션 7 */ }
 
 }); // DOMContentLoaded 끝
