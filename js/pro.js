@@ -663,8 +663,263 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // === placeholder: 이후 섹션에서 채울 함수들 ===
-    function showAnalysis() { /* 섹션 4에서 구현 */ }
+    // ============================================
+    // 악기 추가 드롭다운
+    // ============================================
+    const extraInstruments = [
+        { name: 'harmonica', label: '하모니카' }, { name: 'ukulele', label: '우쿨렐레' },
+        { name: 'banjo', label: '밴조' }, { name: 'mandolin', label: '만돌린' },
+        { name: 'harp', label: '하프' }, { name: 'accordion', label: '아코디언' },
+        { name: 'trumpet', label: '트럼펫' }, { name: 'trombone', label: '트롬본' },
+        { name: 'french horn', label: '프렌치 호른' }, { name: 'clarinet', label: '클라리넷' },
+        { name: 'oboe', label: '오보에' }, { name: 'bassoon', label: '바순' },
+        { name: 'sitar', label: '시타르' }, { name: 'tabla', label: '타블라' },
+        { name: 'erhu', label: '얼후 (이호)' }, { name: 'kalimba', label: '칼림바' },
+        { name: 'steel drums', label: '스틸 드럼' }, { name: 'marimba', label: '마림바' },
+        { name: 'xylophone', label: '실로폰' }, { name: 'glockenspiel', label: '글로켄슈필' },
+        { name: 'wind chimes', label: '윈드 차임' }, { name: 'singing bowls', label: '싱잉볼' },
+        { name: 'electric piano', label: '일렉트릭 피아노' }, { name: 'rhodes', label: '로즈 피아노' },
+        { name: 'clavinet', label: '클라비넷' }, { name: 'mellotron', label: '멜로트론' },
+        { name: 'vocoder', label: '보코더' }, { name: 'theremin', label: '테레민' },
+        { name: 'arpeggiator', label: '아르페지에이터' }, { name: 'pad synth', label: '패드 신스' },
+        { name: 'lead synth', label: '리드 신스' }, { name: 'sub bass', label: '서브 베이스' },
+        { name: 'slap bass', label: '슬랩 베이스' }, { name: 'fingerstyle guitar', label: '핑거스타일 기타' },
+        { name: 'wah guitar', label: '와 기타' }, { name: 'distorted guitar', label: '디스토션 기타' },
+        { name: 'hi-hats', label: '하이햇' }, { name: 'snare', label: '스네어' },
+        { name: 'kick drum', label: '킥 드럼' }, { name: 'tom drums', label: '톰' },
+        { name: 'claps', label: '클랩' }, { name: 'tambourine', label: '탬버린' },
+        { name: 'shaker', label: '셰이커' }, { name: 'cowbell', label: '카우벨' },
+        { name: 'congas', label: '콩가' }, { name: 'bongos', label: '봉고' }
+    ];
+
+    (function setupInstrumentDropdown() {
+        const trigger = document.getElementById('instrumentAddTrigger');
+        const filter = document.getElementById('instrumentAddFilter');
+        const dropdown = document.getElementById('instrumentAddDropdown');
+        if (!trigger || !filter || !dropdown) return;
+        let isOpen = false;
+
+        function renderList(query) {
+            dropdown.innerHTML = '';
+            const q = (query || '').toLowerCase();
+            const filtered = q ? extraInstruments.filter(i => i.name.includes(q) || i.label.includes(q)) : extraInstruments;
+            filtered.forEach(instr => {
+                const item = document.createElement('div');
+                item.className = 'genre-dropdown-item';
+                item.innerHTML = `<strong>${instr.label}</strong> <span class="genre-dd-main">${instr.name}</span>`;
+                item.addEventListener('click', () => {
+                    instrumentMap[instr.name] = instr.name;
+                    const grid = document.getElementById('instrumentBtns');
+                    if (grid.querySelector(`[data-value="${instr.name}"]`)) { closeDD(); return; }
+                    const btn = document.createElement('button');
+                    btn.className = 'toggle-btn active';
+                    btn.dataset.value = instr.name;
+                    btn.textContent = instr.label;
+                    btn.addEventListener('click', () => {
+                        btn.classList.toggle('active');
+                        selections.instruments = Array.from(grid.querySelectorAll('.toggle-btn.active')).map(b => b.dataset.value);
+                    });
+                    grid.appendChild(btn);
+                    selections.instruments.push(instr.name);
+                    closeDD();
+                });
+                dropdown.appendChild(item);
+            });
+        }
+
+        function openDD() { isOpen = true; trigger.classList.add('open'); filter.style.display = 'block'; filter.value = ''; filter.focus(); renderList(''); dropdown.classList.add('active'); }
+        function closeDD() { isOpen = false; trigger.classList.remove('open'); filter.style.display = 'none'; dropdown.classList.remove('active'); }
+
+        trigger.addEventListener('click', () => { isOpen ? closeDD() : openDD(); });
+        filter.addEventListener('input', () => renderList(filter.value));
+        document.addEventListener('click', (e) => { if (isOpen && !trigger.contains(e.target) && !filter.contains(e.target) && !dropdown.contains(e.target)) closeDD(); });
+    })();
+
+    // ============================================
+    // showAnalysis — Step 2 진입 시 텍스트 자동 분석
+    // ============================================
+    function autoSelect(containerId, selKey, keywordMap, text) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        for (const [value, keywords] of Object.entries(keywordMap)) {
+            if (keywords.some(kw => text.includes(kw))) {
+                const btn = container.querySelector(`[data-value="${value}"]`);
+                if (btn) btn.classList.add('active');
+            }
+        }
+        selections[selKey] = Array.from(container.querySelectorAll('.toggle-btn.active')).map(b => b.dataset.value);
+    }
+
+    function showAnalysis() {
+        document.getElementById('originalInput').textContent = '\uD83D\uDCDD 입력: ' + selections.freeText;
+        if (analysisInitialized) return;
+        analysisInitialized = true;
+
+        const text = selections.freeText.toLowerCase();
+
+        // 기존 활성 초기화
+        document.querySelectorAll('#step2 .toggle-btn.active').forEach(b => b.classList.remove('active'));
+
+        // === 분위기 ===
+        const moodKw = {
+            'comfortable': ['편안','릴렉스','relaxing'], 'healing': ['힐링','치유','healing'],
+            'cozy': ['포근','cozy'], 'warm': ['따뜻','warm'],
+            'emotional': ['감성','감동','서정','emotional'], 'dreamy': ['몽환','꿈같','dreamy'],
+            'calm': ['잔잔','평화','고요','차분','calm'], 'lonely': ['쓸쓸','외로','lonely'],
+            'sentimental': ['센치','센티','sentimental'], 'dawn-mood': ['새벽감성'],
+            'nostalgic': ['그리운','추억','향수','nostalgic'], 'flutter': ['설레','두근','flutter'],
+            'love': ['사랑','러브','love','로맨스'], 'breakup': ['이별','헤어','breakup','슬픈','눈물'],
+            'feel-good': ['기분좋','즐거','feel good'], 'refreshing': ['상쾌','시원','refreshing'],
+            'exciting': ['신나','활기','밝은','exciting','경쾌'], 'groovy': ['그루브','groove','groovy'],
+            'tension-up': ['텐션','열정','tension'], 'powerful': ['파워','강렬','힘찬','powerful'],
+            'confidence': ['자신감','당당','confidence'], 'focus': ['집중','focus'],
+            'immersive': ['몰입','immersive'], 'sleep': ['잠','수면','자장가','sleep'],
+            'sleep-aid': ['수면유도','sleep aid'], 'comfort': ['위로','위안','comfort'],
+            'rainy': ['비','비오는','rainy','빗소리'], 'dawn': ['새벽','dawn'],
+            'sunset': ['일몰','노을','sunset'], 'running': ['달리','러닝','조깅','running']
+        };
+        autoSelect('moodBtns', 'mood', moodKw, text);
+
+        // === 보컬 성별 ===
+        const vgKw = {
+            'male': ['남성','남자','male','형','오빠'], 'female': ['여성','여자','female','누나','언니'],
+            'duet': ['듀엣','듀오','duet'], 'group': ['그룹','합창','group'],
+            'instrumental': ['연주','무보컬','bgm','배경음악','instrumental','no vocal']
+        };
+        autoSelect('vocalGenderBtns', 'vocalGender', vgKw, text);
+
+        // === 보컬 스타일 ===
+        const vsKw = {
+            'chest-voice': ['자연스러운','자연 목소리'], 'breathy': ['부드러운','숨소리','soft','breathy'],
+            'belting': ['파워','힘찬','고음 폭발','belting'], 'falsetto': ['가성','falsetto','하이톤'],
+            'vibrato': ['비브라토','떨림','vibrato'], 'grit': ['허스키','거친','raspy','grit'],
+            'whisper': ['속삭','whisper'], 'rap': ['랩','rap','힙합'], 'autotune': ['오토튠','autotune']
+        };
+        autoSelect('vocalStyleBtns', 'vocalStyle', vsKw, text);
+
+        // === 악기 ===
+        const instrKw = {
+            'piano': ['피아노','piano','건반'], 'acoustic-guitar': ['어쿠스틱','통기타','acoustic guitar'],
+            'electric-guitar': ['일렉기타','electric guitar'], 'bass-guitar': ['베이스기타','bass guitar'],
+            'drums': ['드럼','drums','비트'], 'synth': ['신디','synth','신스','전자음'],
+            'strings': ['스트링','현악','strings'], 'brass': ['관악','브라스','brass'],
+            'saxophone': ['색소폰','sax'], 'violin': ['바이올린','violin'],
+            'cello': ['첼로','cello'], 'organ': ['오르간','organ'],
+            '808': ['808'], 'drum-machine': ['드럼머신','drum machine'],
+            'percussion': ['퍼커션','타악기'], 'choir': ['합창','코러스','choir'],
+            'orchestra': ['오케스트라','orchestra']
+        };
+        autoSelect('instrumentBtns', 'instruments', instrKw, text);
+
+        // === 프로덕션 ===
+        const prodKw = {
+            'tape saturation': ['테이프','tape','아날로그'], 'plate reverb': ['플레이트','plate reverb'],
+            'room reverb': ['룸 리버브','room reverb'], 'hall reverb': ['홀 리버브','hall reverb','웅장'],
+            'dry and direct': ['드라이','dry','리버브 없'], 'vinyl crackle': ['바이닐','vinyl','lp'],
+            'lo-fi texture': ['로파이','lo-fi','lo fi'], 'clean vocal upfront': ['보컬 전면','clean vocal'],
+            'wide stereo': ['와이드','wide stereo','넓은'], 'sidechain pump': ['사이드체인','sidechain'],
+            'analog warmth': ['아날로그 따뜻','analog warmth'], 'crisp highs': ['선명한 고음','crisp'],
+            'deep sub bass': ['서브 베이스','sub bass'], 'gated reverb': ['게이트 리버브','gated reverb','80년대']
+        };
+        autoSelect('productionBtns', 'production', prodKw, text);
+
+        // === 장르 자동 감지 ===
+        const korGenreMap = {
+            '팝': 'Mainstream Pop', '발라드': 'Pop Ballad', '록': 'Classic Rock',
+            '힙합': 'Boom Bap', '재즈': 'Smooth Jazz', '클래식': 'Classical',
+            '하우스': 'House', '펑크': 'Funk', '컨트리': 'Classic Country',
+            '블루스': 'Blues', '소울': 'Soul', '알앤비': 'Contemporary R&B',
+            'r&b': 'Contemporary R&B', '레게': 'Reggae', '라틴': 'Reggaeton',
+            '보사노바': 'Bossa Nova', '케이팝': 'K-Pop', 'k-pop': 'K-Pop',
+            '인디': 'Indie Pop', '어쿠스틱': 'Acoustic Pop', '로파이': 'Lo-fi Hip Hop',
+            'lo-fi': 'Lo-fi Hip Hop', '트랩': 'Trap', '트랜스': 'Trance',
+            '메탈': 'Metal', '디스코': 'Disco', '앰비언트': 'New Age',
+            '뉴에이지': 'New Age', '시티팝': 'City Pop', '신스팝': 'Synth Pop',
+            '네오소울': 'Neo Soul', '트로트': 'Trot', '가스펠': 'Gospel'
+        };
+
+        // 영어 장르명 직접 감지 (긴 이름 우선)
+        const detected = [];
+        const sortedGenres = [...GENRE_DATABASE].sort((a, b) => b.genre.length - a.genre.length);
+        sortedGenres.forEach(g => {
+            if (text.includes(g.genre.toLowerCase()) && !detected.includes(g.genre)) {
+                detected.push(g.genre);
+            }
+        });
+        // 한글 장르명 감지
+        if (detected.length === 0) {
+            for (const [kor, eng] of Object.entries(korGenreMap)) {
+                if (text.includes(kor) && !detected.includes(eng)) detected.push(eng);
+            }
+        }
+        // 감지된 장르 추가
+        detected.forEach(g => {
+            if (window._proAddGenre) window._proAddGenre(g);
+        });
+
+        // === 기본값 ===
+        if (!selections.mood.length) autoActivate('moodBtns', 'mood', 'feel-good');
+        if (!selections.vocalGender.length) autoActivate('vocalGenderBtns', 'vocalGender', 'female');
+        if (!selections.vocalStyle.length) autoActivate('vocalStyleBtns', 'vocalStyle', 'breathy');
+        if (!selections.instruments.length) {
+            autoActivate('instrumentBtns', 'instruments', 'piano');
+            autoActivate('instrumentBtns', 'instruments', 'drums');
+        }
+        if (!selections.vocalRange.length) {
+            if (selections.vocalGender.includes('male')) autoActivate('vocalRangeBtns', 'vocalRange', 'baritone');
+            else autoActivate('vocalRangeBtns', 'vocalRange', 'mezzo');
+        }
+
+        // === BPM 자동 추정 ===
+        const bpmMatch = text.match(/(\d{2,3})\s*bpm/i);
+        if (bpmMatch) {
+            const b = parseInt(bpmMatch[1]);
+            bpmSlider.value = b; selections.bpm = b; bpmValue.textContent = b + ' BPM';
+        } else {
+            let b = 110;
+            if (selections.mood.some(m => ['sleep','sleep-aid','calm','comfortable','healing'].includes(m))) b = 70;
+            else if (selections.mood.some(m => ['emotional','love','breakup','lonely','comfort','warm'].includes(m))) b = 80;
+            else if (selections.mood.some(m => ['nostalgic','cozy','rainy','sunset'].includes(m))) b = 90;
+            else if (selections.mood.some(m => ['feel-good','refreshing','flutter'].includes(m))) b = 110;
+            else if (selections.mood.some(m => ['exciting','groovy','confidence'].includes(m))) b = 120;
+            else if (selections.mood.some(m => ['tension-up','running'].includes(m))) b = 135;
+            else if (selections.mood.some(m => ['powerful'].includes(m))) b = 145;
+            bpmSlider.value = b; selections.bpm = b; bpmValue.textContent = b + ' BPM';
+        }
+
+        // === 조성/박자 자동 감지 ===
+        const keyMatch = text.match(/([A-G][b#]?)\s*(major|minor)/i);
+        if (keyMatch) autoActivate('keyBtns', 'key', keyMatch[0]);
+        else {
+            if (selections.mood.some(m => ['calm','healing','comfortable','warm','cozy'].includes(m))) autoActivate('keyBtns', 'key', 'C major');
+            else if (selections.mood.some(m => ['emotional','lonely','breakup','sentimental'].includes(m))) autoActivate('keyBtns', 'key', 'A minor');
+            else if (selections.mood.some(m => ['exciting','feel-good','confidence'].includes(m))) autoActivate('keyBtns', 'key', 'G major');
+            else if (selections.mood.some(m => ['dreamy','nostalgic','sunset'].includes(m))) autoActivate('keyBtns', 'key', 'D minor');
+            else if (selections.mood.some(m => ['powerful','tension-up'].includes(m))) autoActivate('keyBtns', 'key', 'E minor');
+        }
+
+        const tsMatch = text.match(/([2-7]\/[4-8])/);
+        if (tsMatch) autoActivate('timeSigBtns', 'timeSig', tsMatch[1]);
+        else {
+            if (selections.mood.some(m => ['calm','healing','sleep','dreamy'].includes(m))) autoActivate('timeSigBtns', 'timeSig', '6/8');
+            else autoActivate('timeSigBtns', 'timeSig', '4/4');
+        }
+
+        // 프로덕션 기본값
+        if (!selections.production.length) {
+            if (selections.mood.some(m => ['calm','healing','comfortable','warm'].includes(m))) {
+                autoActivate('productionBtns', 'production', 'plate reverb');
+                autoActivate('productionBtns', 'production', 'clean vocal upfront');
+            } else if (selections.mood.some(m => ['exciting','groovy','tension-up'].includes(m))) {
+                autoActivate('productionBtns', 'production', 'crisp highs');
+                autoActivate('productionBtns', 'production', 'wide stereo');
+            } else {
+                autoActivate('productionBtns', 'production', 'clean vocal upfront');
+            }
+        }
+    }
+
+    // === placeholder: 이후 섹션에서 채울 함수 ===
     function buildFinalPrompt() { /* 섹션 5에서 구현 */ }
 
 }); // DOMContentLoaded 끝
