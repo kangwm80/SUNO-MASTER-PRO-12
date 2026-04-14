@@ -53,19 +53,35 @@
                 </div>
             </div>
 
-            <div class="or-divider"><span>또는 아래에 직접 입력하세요</span></div>
+            <div class="or-divider"><span>또는 아래에서 모드를 선택하세요</span></div>
 
-            <!-- 자유 입력 -->
-            <div class="free-input-area">
-                <textarea class="free-input" id="freeInput" rows="6" placeholder="방법 1: 만들고 싶은 음악을 자유롭게 설명하세요.
+            <!-- 모드 전환 탭 -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" id="tabNewCreate" data-mode="new">&#127925; 새로 만들기</button>
+                <button class="mode-tab" id="tabUpgrade" data-mode="upgrade">&#128640; 프롬프트 업그레이드</button>
+            </div>
+
+            <!-- 새로 만들기 모드 -->
+            <div class="free-input-area" id="modeNewCreate">
+                <textarea class="free-input" id="freeInput" rows="6" placeholder="만들고 싶은 음악을 자유롭게 설명하세요.
+
 예) 비 오는 새벽 감성적인 Neo Soul + Lo-fi 느낌의 음악
-
-방법 2: 기존 Suno 프롬프트를 붙여넣기 하세요.
-예) Acoustic Pop, 95 BPM, D major, warm vocals, piano...
-→ 빌보드급 v5 프롬프트로 자동 업그레이드됩니다."></textarea>
+예) 어쿠스틱 기타 + 피아노, 잔잔한 발라드, 남자 저음 보컬"></textarea>
                 <div class="input-tools">
                     <span class="char-count" id="charCount">0자</span>
                     <button class="btn-clear-input" id="btnClearInput">지우기</button>
+                </div>
+            </div>
+
+            <!-- 프롬프트 업그레이드 모드 -->
+            <div class="free-input-area" id="modeUpgrade" style="display:none;">
+                <p class="upgrade-guide">기존에 사용하던 Suno 프롬프트를 붙여넣으면<br>빌보드급 v5 프롬프트로 자동 업그레이드합니다.</p>
+                <textarea class="free-input" id="upgradeInput" rows="6" placeholder="기존 Suno 프롬프트를 여기에 붙여넣기 하세요.
+
+예) Acoustic Pop, 95 BPM, D major, warm female vocals, piano, soft drums, gentle melody"></textarea>
+                <div class="input-tools">
+                    <span class="char-count" id="upgradeCharCount">0자</span>
+                    <button class="btn-clear-input" id="btnClearUpgrade">지우기</button>
                 </div>
             </div>
 
@@ -73,7 +89,7 @@
                 <button class="btn-analyze holo-btn" id="btnAnalyze" disabled>
                     <span>&#128300;</span> 분석하고 다음 단계로
                 </button>
-                <p class="analyze-hint">기존 프롬프트를 입력하면 v5 구조로 자동 업그레이드됩니다</p>
+                <p class="analyze-hint" id="analyzeHint">만들고 싶은 음악을 입력하면 AI가 자동으로 설정합니다</p>
             </div>
 
             <div class="step-nav-row">
