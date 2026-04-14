@@ -1179,8 +1179,159 @@ document.addEventListener('DOMContentLoaded', () => {
         autoSaveToLibrary(stylePrompt, result, moreOpt);
     }
 
-    // placeholder: v5 검증 실행 (섹션 6에서 구현)
-    function runV5Validation(prompt) { /* 섹션 6 */ }
+    // ============================================
+    // v5 검증 + 자동수정 + 점수 렌더링
+    // ============================================
+    function runV5Validation(prompt) {
+        const maxIterations = 3;
+        let finalPrompt = prompt;
+        let score = 0;
+        let checks = [];
+
+        for (let i = 0; i < maxIterations; i++) {
+            const validation = validateV5Prompt(finalPrompt);
+            score = validation.score;
+            checks = validation.checks;
+            if (score >= 90) break;
+            finalPrompt = autoFixPrompt(finalPrompt, validation.checks);
+        }
+
+        // 최종 프롬프트 반영
+        document.getElementById('stylePromptText').value = finalPrompt;
+        renderV5Score(score, checks);
+
+        // 글자수 업데이트
+        const expEl = document.getElementById('promptExplanation');
+        expEl.textContent += '\n\u25B6 글자수: ' + finalPrompt.length + ' / 950자 | v5 인식률: ' + score + '%';
+    }
+
+    function validateV5Prompt(prompt) {
+        const checks = [];
+        let passed = 0;
+        const total = 10;
+
+        // 1. 장르 1개 이상
+        const genreCount = selections.genres.length || 1;
+        const c1 = genreCount >= 1;
+        checks.push({ name: '장르 포함', pass: c1, detail: c1 ? genreCount + '개 적용' : '장르 없음' });
+        if (c1) passed++;
+
+        // 2. BPM 명시
+        const c2 = /\d+\s*BPM/i.test(prompt);
+        checks.push({ name: 'BPM 명시', pass: c2, detail: c2 ? '\u2713' : 'BPM 없음' });
+        if (c2) passed++;
+
+        // 3. 조성 명시
+        const c3 = /[A-G][b#]?\s*(major|minor)/i.test(prompt);
+        checks.push({ name: '조성(Key) 명시', pass: c3, detail: c3 ? '\u2713' : '조성 없음' });
+        if (c3) passed++;
+
+        // 4. 감정 서술형 문장
+        const c4 = prompt.length > 80 && /like |as if |the |a |an |with /i.test(prompt);
+        checks.push({ name: '감정 서술형 문장', pass: c4, detail: c4 ? '\u2713' : '단어 나열 방식' });
+        if (c4) passed++;
+
+        // 5. 악기 2~6개
+        const instrDetect = ['piano','guitar','bass','drums','synth','strings','brass','saxophone','violin','cello','organ','percussion','orchestra','808','flute','harmonica','ukulele'];
+        const instrCount = instrDetect.filter(w => prompt.toLowerCase().includes(w)).length;
+        const c5 = instrCount >= 2 && instrCount <= 6;
+        checks.push({ name: '악기 2~6개', pass: c5, detail: instrCount + '개 감지' });
+        if (c5) passed++;
+
+        // 6. 보컬 요소 포함
+        const vocalDetect = ['male','female','vocal','baritone','tenor','soprano','alto','mezzo','breathy','belting','falsetto','grit','whisper','rap','chest voice','instrumental'];
+        const vocalCount = vocalDetect.filter(w => prompt.toLowerCase().includes(w)).length;
+        const c6 = vocalCount >= 2;
+        checks.push({ name: '보컬 요소 포함', pass: c6, detail: vocalCount + '개 감지' });
+        if (c6) passed++;
+
+        // 7. 상충 태그 없음
+        const hasConflict = (prompt.includes('sad') && prompt.includes('upbeat')) ||
+                           (prompt.includes('sleepy') && prompt.includes('energetic')) ||
+                           (prompt.includes('calm') && prompt.includes('aggressive'));
+        const c7 = !hasConflict;
+        checks.push({ name: '상충 태그 없음', pass: c7, detail: c7 ? '\u2713' : '충돌 발견' });
+        if (c7) passed++;
+
+        // 8. 품질 보호 블록
+        const c8 = prompt.toLowerCase().includes('professional studio') || prompt.toLowerCase().includes('radio-ready');
+        checks.push({ name: '품질 보호 블록', pass: c8, detail: c8 ? '\u2713' : '품질 보호 없음' });
+        if (c8) passed++;
+
+        // 9. 950자 이하
+        const c9 = prompt.length <= 950;
+        checks.push({ name: '950자 이하', pass: c9, detail: prompt.length + '자' });
+        if (c9) passed++;
+
+        // 10. 프론트로드 (장르가 앞에)
+        const firstPart = prompt.split(',')[0].trim();
+        const c10 = GENRE_DATABASE.some(g => firstPart.includes(g.genre)) || firstPart.length > 3;
+        checks.push({ name: '장르 프론트로드', pass: c10, detail: c10 ? '\u2713' : '장르가 앞에 없음' });
+        if (c10) passed++;
+
+        return { score: Math.round((passed / total) * 100), checks };
+    }
+
+    function autoFixPrompt(prompt, checks) {
+        let fixed = prompt;
+
+        checks.forEach(c => {
+            if (c.pass) return;
+
+            if (c.name.includes('BPM')) {
+                fixed = fixed.replace(/^([^,]+)/, '$1, ' + (selections.bpm || 110) + ' BPM');
+            }
+            if (c.name.includes('조성') && selections.key.length) {
+                fixed = fixed.replace(/BPM/, 'BPM, ' + selections.key[0]);
+            }
+            if (c.name.includes('감정')) {
+                const mood = selections.mood[0] || 'feel-good';
+                const sentence = MOOD_SENTENCE_MAP[mood] || 'like a perfect moment captured in sound';
+                fixed = fixed.replace(/BPM([^,]*)/, 'BPM$1, ' + sentence);
+            }
+            if (c.name.includes('보컬')) {
+                const hasV = /vocal|baritone|soprano|tenor|breathy|belting/i.test(fixed);
+                if (!hasV) {
+                    const userV = [];
+                    if (selections.customVocal) {
+                        userV.push(selections.customVocal);
+                    } else {
+                        if (selections.vocalGender.length) userV.push(vocalGenderMap[selections.vocalGender[0]] || 'female vocals');
+                        if (selections.vocalRange.length) userV.push(vocalRangeMap[selections.vocalRange[0]] || 'mezzo-soprano');
+                        if (selections.vocalStyle.length) userV.push(vocalStyleMap[selections.vocalStyle[0]] || 'breathy');
+                    }
+                    if (userV.length === 0) userV.push('female vocals', 'mezzo-soprano', 'breathy');
+                    fixed = fixed.replace(', professional', ', ' + userV.join(', ') + ', professional');
+                }
+            }
+            if (c.name.includes('품질')) {
+                fixed += ', professional studio quality, clean production, radio-ready sound';
+            }
+            if (c.name.includes('950')) {
+                const cut = fixed.lastIndexOf(', ', 947);
+                fixed = fixed.substring(0, cut > 0 ? cut : 947);
+                if (!fixed.includes('radio-ready')) fixed += ', radio-ready sound';
+            }
+        });
+
+        return fixed;
+    }
+
+    function renderV5Score(score, checks) {
+        document.getElementById('v5ScoreValue').textContent = score + '%';
+
+        const fill = document.getElementById('v5ScoreFill');
+        fill.style.width = score + '%';
+        fill.style.background = score >= 90 ? 'linear-gradient(90deg, #00B894, #55EFC4)' :
+                                score >= 70 ? 'linear-gradient(90deg, #FDCB6E, #F39C12)' :
+                                'linear-gradient(90deg, #FF6B6B, #E17055)';
+
+        const checklist = document.getElementById('v5Checklist');
+        checklist.innerHTML = checks.map(c =>
+            '<div class="v5-check-item ' + (c.pass ? 'v5-check-pass' : 'v5-check-fail') + '">' +
+            (c.pass ? '\u2705' : '\u274C') + ' ' + c.name + ' <span style="opacity:0.7">(' + c.detail + ')</span></div>'
+        ).join('');
+    }
     // placeholder: Exclude 토글 (섹션 7에서 구현)
     let excludeInit = false;
     function initExcludeToggles() { /* 섹션 7 */ }
