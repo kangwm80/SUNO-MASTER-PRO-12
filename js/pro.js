@@ -1543,22 +1543,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (ev) => {
             const c = ev.target.result;
+            if (!c || !c.trim()) return;
+
+            // SUNO MASTER PRO 저장 파일 형식 ([Style Prompt] 헤더 있음)
             const sm = c.match(/\[Style Prompt\]\s*\n([\s\S]*?)(?=\n={3,})/);
+            let loadedText = '';
+
             if (sm) {
-                importedPromptData = { stylePrompt: sm[1].trim(), fileName: f.name.replace('.txt', '') };
+                loadedText = sm[1].trim();
+                importedPromptData = { stylePrompt: loadedText, fileName: f.name.replace('.txt', '') };
                 const em = c.match(/\[Exclude Styles\]\s*\n([\s\S]*?)(?=\n={3,})/);
                 if (em) importedPromptData.excludeStyles = em[1].trim();
-
-                // 불러온 프롬프트를 자유입력에 반영
-                freeInput.value = sm[1].trim();
-                document.getElementById('charCount').textContent = freeInput.value.length + '자';
-                btnAnalyze.disabled = false;
-
-                document.getElementById('importBox').classList.add('success');
-                document.getElementById('importBox').querySelector('.import-title').textContent = '\u2713 불러오기 완료!';
-                const fnEl = document.getElementById('importFilename');
-                if (fnEl) { fnEl.textContent = f.name; fnEl.style.display = ''; }
+            } else {
+                // 일반 텍스트 파일 — 내용 전체를 프롬프트로 사용
+                loadedText = c.trim();
+                importedPromptData = { stylePrompt: loadedText, fileName: f.name.replace('.txt', '') };
             }
+
+            // 자유입력에 반영
+            freeInput.value = loadedText;
+            document.getElementById('charCount').textContent = freeInput.value.length + '자';
+            btnAnalyze.disabled = false;
+
+            document.getElementById('importBox').classList.add('success');
+            document.getElementById('importBox').querySelector('.import-title').textContent = '\u2713 불러오기 완료!';
+            const fnEl = document.getElementById('importFilename');
+            if (fnEl) { fnEl.textContent = f.name; fnEl.style.display = ''; }
         };
         reader.readAsText(f, 'UTF-8');
         e.target.value = '';
