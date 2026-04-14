@@ -1565,10 +1565,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const em = c.match(/\[Exclude Styles\]\s*\n([\s\S]*?)(?=\n={3,})/);
                 if (em) importedPromptData.excludeStyles = em[1].trim();
 
-                // 업그레이드 모드로 자동 전환
-                document.getElementById('tabUpgrade').click();
-                upgradeInput.value = sm[1].trim();
-                document.getElementById('upgradeCharCount').textContent = upgradeInput.value.length + '자';
+                // 불러온 프롬프트를 자유입력에 반영
+                freeInput.value = sm[1].trim();
+                document.getElementById('charCount').textContent = freeInput.value.length + '자';
                 btnAnalyze.disabled = false;
 
                 document.getElementById('importBox').classList.add('success');
