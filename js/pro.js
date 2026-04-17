@@ -296,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         timeSig: '',
         bpm: 110,
         vocalGender: [],
+        vocalAge: '',           // 보컬 연령대
         vocalStyle: [],
         vocalRange: [],
         customVocal: '',        // 보컬 직접 입력 텍스트
@@ -391,13 +392,153 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 토글 그룹 초기화
     setupToggleGroup('moodBtns', 'mood');
-    setupToggleGroup('vocalStyleBtns', 'vocalStyle');
     setupToggleGroup('instrumentBtns', 'instruments');
     setupToggleGroup('productionBtns', 'production');
     setupSingleToggle('keyBtns', 'key');
     setupSingleToggle('timeSigBtns', 'timeSig');
-    setupSingleToggle('vocalGenderBtns', 'vocalGender');
-    setupSingleToggle('vocalRangeBtns', 'vocalRange');
+
+    // ============================================
+    // 보컬 4단계 순차 선택 (직접만들기와 동일)
+    // ============================================
+    const MALE_RANGES = [
+        { value: 'bass', label: '베이스 (A1~E3)', title: '매우 낮고 깊은 저음' },
+        { value: 'baritone', label: '바리톤 (G2~F4)', title: '따뜻하고 안정적인 중저음' },
+        { value: 'tenor', label: '테너 (C3~B4)', title: '힘차고 밝은 고음' }
+    ];
+    const FEMALE_RANGES = [
+        { value: 'alto', label: '알토 (E3~E5)', title: '깊고 풍부한 저음' },
+        { value: 'mezzo', label: '메조소프라노 (A3~A5)', title: '풍부하고 따뜻한 중음' },
+        { value: 'soprano', label: '소프라노 (C4~C6)', title: '맑고 높은 고음' }
+    ];
+    const VOCAL_STYLE_OPTIONS = [
+        { value: 'chest-voice', label: '자연스러운 목소리' },
+        { value: 'head-voice', label: '맑은 고음' },
+        { value: 'falsetto', label: '가성' },
+        { value: 'belting', label: '파워 고음' },
+        { value: 'vibrato', label: '목소리 떨림' },
+        { value: 'breathy', label: '숨소리 섞인' },
+        { value: 'grit', label: '허스키한' },
+        { value: 'whisper', label: '속삭임' },
+        { value: 'rap', label: '랩' },
+        { value: 'autotune', label: '오토튠' }
+    ];
+
+    // 1) 보컬 선택 (성별)
+    document.querySelectorAll('#vocalTypeOptions .vocal-option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#vocalTypeOptions .vocal-option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const val = btn.dataset.value;
+            selections.vocalGender = [val];
+
+            const ageGroup = document.getElementById('vocalAgeGroup');
+            const rangeGroup = document.getElementById('vocalRangeGroup');
+            const styleGroup = document.getElementById('vocalStyleGroup');
+
+            if (val === 'instrumental') {
+                ageGroup.style.display = 'none';
+                rangeGroup.style.display = 'none';
+                styleGroup.style.display = 'none';
+                selections.vocalAge = '';
+                selections.vocalRange = [];
+                selections.vocalStyle = [];
+            } else {
+                ageGroup.style.display = '';
+                // 연령대 초기화
+                document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(b => b.classList.remove('active'));
+                rangeGroup.style.display = 'none';
+                styleGroup.style.display = 'none';
+                selections.vocalAge = '';
+                selections.vocalRange = [];
+                selections.vocalStyle = [];
+            }
+        });
+    });
+
+    // 2) 보컬 연령대
+    document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selections.vocalAge = btn.dataset.value;
+
+            // 성별에 따라 음역대 옵션 동적 생성
+            const gender = selections.vocalGender[0] || '';
+            const isMale = gender === 'male vocals';
+            const isFemale = gender === 'female vocals';
+            const isDuet = gender === 'duet vocals';
+            const ranges = isMale ? MALE_RANGES : (isFemale ? FEMALE_RANGES : [...MALE_RANGES, ...FEMALE_RANGES]);
+
+            const rangeContainer = document.getElementById('vocalRangeOptions');
+            rangeContainer.innerHTML = '';
+            ranges.forEach(r => {
+                const b = document.createElement('button');
+                b.className = 'vocal-option-btn';
+                b.dataset.value = r.value;
+                b.title = r.title;
+                b.textContent = r.label;
+                b.addEventListener('click', () => {
+                    rangeContainer.querySelectorAll('.vocal-option-btn').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    selections.vocalRange = [r.value];
+                    // 스타일 표시 + 장르 기반 추천
+                    showVocalStyles();
+                });
+                rangeContainer.appendChild(b);
+            });
+
+            document.getElementById('vocalRangeGroup').style.display = '';
+            document.getElementById('vocalStyleGroup').style.display = 'none';
+            selections.vocalRange = [];
+            selections.vocalStyle = [];
+        });
+    });
+
+    // 4) 보컬 스타일 — 장르 기반 자동 추천 + 추가 선택
+    function showVocalStyles() {
+        const container = document.getElementById('vocalStyleTags');
+        container.innerHTML = '';
+
+        // 장르 기반 추천 스타일 결정
+        const recommended = new Set();
+        if (typeof VOCAL_ENHANCEMENT_MAP !== 'undefined' && selections.genres.length) {
+            selections.genres.forEach(genre => {
+                const dbEntry = GENRE_DATABASE.find(g => g.genre === genre);
+                if (dbEntry) {
+                    const cat = (dbEntry.main || '').toLowerCase();
+                    for (const [key, val] of Object.entries(VOCAL_ENHANCEMENT_MAP)) {
+                        if (cat.includes(key) || key.includes(cat)) {
+                            const parts = val.split(',').map(s => s.trim().toLowerCase());
+                            parts.forEach(p => {
+                                VOCAL_STYLE_OPTIONS.forEach(opt => {
+                                    if (p.includes(opt.value) || p.includes(opt.label)) recommended.add(opt.value);
+                                });
+                            });
+                        }
+                    }
+                }
+            });
+        }
+        // 기본 추천이 없으면 breathy, vibrato
+        if (recommended.size === 0) { recommended.add('breathy'); recommended.add('vibrato'); }
+
+        VOCAL_STYLE_OPTIONS.forEach(opt => {
+            const tag = document.createElement('button');
+            tag.className = 'vocal-option-btn';
+            if (recommended.has(opt.value)) tag.classList.add('active', 'recommended');
+            tag.dataset.value = opt.value;
+            tag.textContent = opt.label + (recommended.has(opt.value) ? ' \u2605' : '');
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('active');
+                selections.vocalStyle = Array.from(container.querySelectorAll('.vocal-option-btn.active')).map(b => b.dataset.value);
+            });
+            container.appendChild(tag);
+        });
+
+        // 초기 선택 반영
+        selections.vocalStyle = Array.from(recommended);
+        document.getElementById('vocalStyleGroup').style.display = '';
+    }
 
     // === BPM 슬라이더 + 프리셋 ===
     bpmSlider.addEventListener('input', () => {
@@ -764,22 +905,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         autoSelect('moodBtns', 'mood', moodKw, text);
 
-        // === 보컬 성별 ===
+        // === 보컬 자동 감지 (순차 선택 구조) ===
         const vgKw = {
-            'male': ['남성','남자','male','형','오빠'], 'female': ['여성','여자','female','누나','언니'],
-            'duet': ['듀엣','듀오','duet'], 'group': ['그룹','합창','group'],
+            'male vocals': ['남성','남자','male','형','오빠'],
+            'female vocals': ['여성','여자','female','누나','언니'],
+            'duet vocals': ['듀엣','듀오','duet'],
             'instrumental': ['연주','무보컬','bgm','배경음악','instrumental','no vocal']
         };
-        autoSelect('vocalGenderBtns', 'vocalGender', vgKw, text);
-
-        // === 보컬 스타일 ===
-        const vsKw = {
-            'chest-voice': ['자연스러운','자연 목소리'], 'breathy': ['부드러운','숨소리','soft','breathy'],
-            'belting': ['파워','힘찬','고음 폭발','belting'], 'falsetto': ['가성','falsetto','하이톤'],
-            'vibrato': ['비브라토','떨림','vibrato'], 'grit': ['허스키','거친','raspy','grit'],
-            'whisper': ['속삭','whisper'], 'rap': ['랩','rap','힙합'], 'autotune': ['오토튠','autotune']
-        };
-        autoSelect('vocalStyleBtns', 'vocalStyle', vsKw, text);
+        let detectedVocal = '';
+        for (const [val, kws] of Object.entries(vgKw)) {
+            if (kws.some(kw => text.includes(kw))) { detectedVocal = val; break; }
+        }
+        if (detectedVocal) {
+            const btn = document.querySelector('#vocalTypeOptions [data-value="' + detectedVocal + '"]');
+            if (btn) btn.click();
+        }
 
         // === 악기 ===
         const instrKw = {
@@ -843,15 +983,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // === 기본값 ===
         if (!selections.mood.length) autoActivate('moodBtns', 'mood', 'feel-good');
-        if (!selections.vocalGender.length) autoActivate('vocalGenderBtns', 'vocalGender', 'female');
-        if (!selections.vocalStyle.length) autoActivate('vocalStyleBtns', 'vocalStyle', 'breathy');
+        if (!selections.vocalGender.length) {
+            const femaleBtn = document.querySelector('#vocalTypeOptions [data-value="female vocals"]');
+            if (femaleBtn) femaleBtn.click();
+        }
         if (!selections.instruments.length) {
             autoActivate('instrumentBtns', 'instruments', 'piano');
             autoActivate('instrumentBtns', 'instruments', 'drums');
-        }
-        if (!selections.vocalRange.length) {
-            if (selections.vocalGender.includes('male')) autoActivate('vocalRangeBtns', 'vocalRange', 'baritone');
-            else autoActivate('vocalRangeBtns', 'vocalRange', 'mezzo');
         }
 
         // === BPM 자동 추정 ===
@@ -1026,14 +1164,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // 서술형 분위기 문장
         const moodSentences = selections.mood.slice(0, 2).map(m => MOOD_SENTENCE_MAP[m]).filter(Boolean);
 
-        // 보컬 조합 (커스텀 보컬 우선)
+        // 보컬 조합 (커스텀 보컬 우선 → 4단계 순차 선택 결과)
         const vocalParts = [];
         if (selections.customVocal) {
             vocalParts.push(selections.customVocal);
         } else {
-            selections.vocalGender.forEach(v => vocalParts.push(vocalGenderMap[v]));
-            selections.vocalRange.forEach(v => vocalParts.push(vocalRangeMap[v]));
-            selections.vocalStyle.forEach(v => vocalParts.push(vocalStyleMap[v]));
+            // 성별
+            selections.vocalGender.forEach(v => vocalParts.push(v));
+            // 연령대
+            if (selections.vocalAge) vocalParts.push(selections.vocalAge);
+            // 음역대
+            selections.vocalRange.forEach(v => vocalParts.push(vocalRangeMap[v] || v));
+            // 스타일
+            selections.vocalStyle.forEach(v => vocalParts.push(vocalStyleMap[v] || v));
         }
 
         const instrParts = selections.instruments.map(i => instrumentMap[i] || i);
