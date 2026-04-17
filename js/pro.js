@@ -401,14 +401,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // 보컬 4단계 순차 선택 (직접만들기와 동일)
     // ============================================
     const MALE_RANGES = [
-        { value: 'bass', label: '베이스 (A1~E3)', title: '매우 낮고 깊은 저음' },
-        { value: 'baritone', label: '바리톤 (G2~F4)', title: '따뜻하고 안정적인 중저음' },
-        { value: 'tenor', label: '테너 (C3~B4)', title: '힘차고 밝은 고음' }
+        { value: 'low bass, G2~G3', label: '저음 (G2~G3)', title: '깊고 무게감 있는 저음' },
+        { value: 'mid baritone, C3~C4', label: '중음 (C3~C4)', title: '가장 자연스러운 남성 음역대' },
+        { value: 'high tenor, G3~G4', label: '중고음 (G3~G4)', title: '힘 있고 감동적인 중고음' },
+        { value: 'power tenor, C4~C5', label: '고음 (C4~C5)', title: '폭발적인 고음 파워' }
     ];
     const FEMALE_RANGES = [
-        { value: 'alto', label: '알토 (E3~E5)', title: '깊고 풍부한 저음' },
-        { value: 'mezzo', label: '메조소프라노 (A3~A5)', title: '풍부하고 따뜻한 중음' },
-        { value: 'soprano', label: '소프라노 (C4~C6)', title: '맑고 높은 고음' }
+        { value: 'low alto, A3~A4', label: '저음 (A3~A4)', title: '깊고 풍부한 여성 저음' },
+        { value: 'mid mezzo, C4~C5', label: '중저음 (C4~C5)', title: '따뜻하고 감성적인 중저음' },
+        { value: 'mezzo soprano, E4~E5', label: '중음 (E4~E5)', title: '밝고 선명한 중음역' },
+        { value: 'high soprano, G4~G5', label: '중고음 (G4~G5)', title: '투명하고 아름다운 중고음' },
+        { value: 'power soprano, C5~C6', label: '고음 (C5~C6)', title: '전율을 주는 초고음' }
     ];
     const VOCAL_STYLE_OPTIONS = [
         { value: 'chest-voice', label: '자연스러운 목소리' },
@@ -426,8 +429,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1) 보컬 선택 (성별)
     document.querySelectorAll('#vocalTypeOptions .vocal-option-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('#vocalTypeOptions .vocal-option-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            document.querySelectorAll('#vocalTypeOptions .vocal-option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
             const val = btn.dataset.value;
             selections.vocalGender = [val];
 
@@ -444,8 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selections.vocalStyle = [];
             } else {
                 ageGroup.style.display = '';
-                // 연령대 초기화
-                document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(b => b.classList.remove('selected'));
                 rangeGroup.style.display = 'none';
                 styleGroup.style.display = 'none';
                 selections.vocalAge = '';
@@ -458,15 +460,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2) 보컬 연령대
     document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            document.querySelectorAll('#vocalAgeOptions .vocal-option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
             selections.vocalAge = btn.dataset.value;
 
-            // 성별에 따라 음역대 옵션 동적 생성
             const gender = selections.vocalGender[0] || '';
             const isMale = gender === 'male vocals';
             const isFemale = gender === 'female vocals';
-            const isDuet = gender === 'duet vocals';
             const ranges = isMale ? MALE_RANGES : (isFemale ? FEMALE_RANGES : [...MALE_RANGES, ...FEMALE_RANGES]);
 
             const rangeContainer = document.getElementById('vocalRangeOptions');
@@ -478,10 +478,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 b.title = r.title;
                 b.textContent = r.label;
                 b.addEventListener('click', () => {
-                    rangeContainer.querySelectorAll('.vocal-option-btn').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active');
+                    rangeContainer.querySelectorAll('.vocal-option-btn').forEach(x => x.classList.remove('selected'));
+                    b.classList.add('selected');
                     selections.vocalRange = [r.value];
-                    // 스타일 표시 + 장르 기반 추천
                     showVocalStyles();
                 });
                 rangeContainer.appendChild(b);
@@ -499,7 +498,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('vocalStyleTags');
         container.innerHTML = '';
 
-        // 장르 기반 추천 스타일 결정
         const recommended = new Set();
         if (typeof VOCAL_ENHANCEMENT_MAP !== 'undefined' && selections.genres.length) {
             selections.genres.forEach(genre => {
@@ -519,23 +517,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        // 기본 추천이 없으면 breathy, vibrato
         if (recommended.size === 0) { recommended.add('breathy'); recommended.add('vibrato'); }
 
         VOCAL_STYLE_OPTIONS.forEach(opt => {
             const tag = document.createElement('button');
-            tag.className = 'vocal-option-btn';
-            if (recommended.has(opt.value)) tag.classList.add('active', 'recommended');
+            tag.className = 'vocal-style-tag';
+            if (recommended.has(opt.value)) tag.classList.add('selected', 'recommended');
             tag.dataset.value = opt.value;
             tag.textContent = opt.label + (recommended.has(opt.value) ? ' \u2605' : '');
             tag.addEventListener('click', () => {
-                tag.classList.toggle('active');
-                selections.vocalStyle = Array.from(container.querySelectorAll('.vocal-option-btn.active')).map(b => b.dataset.value);
+                tag.classList.toggle('selected');
+                selections.vocalStyle = Array.from(container.querySelectorAll('.vocal-style-tag.selected')).map(b => b.dataset.value);
             });
             container.appendChild(tag);
         });
 
-        // 초기 선택 반영
         selections.vocalStyle = Array.from(recommended);
         document.getElementById('vocalStyleGroup').style.display = '';
     }
@@ -712,27 +708,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================
     // 머니코드 진행 드롭다운
     // ============================================
-    const chordSelect = document.getElementById('chordProgressionSelect');
+    const chordTrigger = document.getElementById('chordTrigger');
+    const chordFilter = document.getElementById('chordFilter');
+    const chordDropdownEl = document.getElementById('chordDropdown');
     const chordDisplay = document.getElementById('chordDisplay');
+    let chordOpen = false;
 
     function updateChordDropdown() {
-        chordSelect.innerHTML = '';
-
         if (selections.genres.length === 0) {
-            chordSelect.innerHTML = '<option value="">-- 장르를 먼저 선택하면 코드 진행이 표시됩니다 --</option>';
+            chordTrigger.textContent = '장르를 먼저 선택하면 코드 진행이 표시됩니다 \u25BC';
             chordDisplay.innerHTML = '';
             selections.chordProgression = '';
             return;
         }
+        if (!selections.chordProgression) {
+            chordTrigger.textContent = '클릭하여 코드 진행 선택 \u25BC';
+        }
+    }
 
-        // 선택된 장르들의 카테고리 수집 (중복 제거)
+    function getChordCategories() {
         const categories = new Set();
         selections.genres.forEach(genre => {
-            // 정확한 매핑 먼저
             if (GENRE_TO_CHORD_CATEGORY[genre]) {
                 categories.add(GENRE_TO_CHORD_CATEGORY[genre]);
             } else {
-                // DB에서 main 카테고리로 매핑 시도
                 const dbEntry = GENRE_DATABASE.find(g => g.genre === genre);
                 if (dbEntry && dbEntry.main) {
                     const mainLower = dbEntry.main.toLowerCase();
@@ -740,52 +739,69 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (key.toLowerCase() === mainLower) { categories.add(cat); break; }
                     }
                 }
-                // 못 찾으면 pop 기본
-                if (categories.size === 0) categories.add('pop');
             }
         });
+        if (categories.size === 0) categories.add('pop');
+        return categories;
+    }
 
-        // 기본 옵션
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = '';
-        defaultOpt.textContent = '-- 코드 진행을 선택하세요 --';
-        chordSelect.appendChild(defaultOpt);
+    function renderChordDropdown(query) {
+        chordDropdownEl.innerHTML = '';
+        const q = (query || '').toLowerCase();
+        const categories = getChordCategories();
 
-        // 카테고리별 코드 진행 추가
         categories.forEach(cat => {
             const data = MONEY_CHORD_PROGRESSIONS[cat];
             if (!data) return;
 
-            const optGroup = document.createElement('optgroup');
-            optGroup.label = data.label;
+            const filtered = q ? data.chords.filter(c =>
+                c.name.toLowerCase().includes(q) || c.value.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q)
+            ) : data.chords;
+            if (filtered.length === 0) return;
 
-            data.chords.forEach(chord => {
-                const opt = document.createElement('option');
-                opt.value = chord.value;
-                opt.textContent = `${chord.name}: ${chord.value}`;
-                opt.title = chord.desc;
-                optGroup.appendChild(opt);
+            const header = document.createElement('div');
+            header.className = 'genre-dropdown-header';
+            header.textContent = data.label;
+            chordDropdownEl.appendChild(header);
+
+            filtered.forEach(chord => {
+                const item = document.createElement('div');
+                item.className = 'genre-dropdown-item';
+                if (selections.chordProgression === chord.value) item.classList.add('selected');
+                item.innerHTML = '<strong>' + chord.name + '</strong> <span class="genre-dd-main">' + chord.value + '</span>';
+                item.title = chord.desc;
+                item.addEventListener('click', () => {
+                    selections.chordProgression = chord.value;
+                    chordTrigger.textContent = chord.name + ': ' + chord.value + ' \u2714';
+                    chordDisplay.innerHTML = '<div class="chord-info"><strong>' + chord.name + '</strong><br><span class="chord-value">' + chord.value + '</span><br><span class="chord-desc">' + chord.desc + '</span></div>';
+                    closeChord();
+                });
+                chordDropdownEl.appendChild(item);
             });
-
-            chordSelect.appendChild(optGroup);
         });
     }
 
-    chordSelect.addEventListener('change', () => {
-        selections.chordProgression = chordSelect.value;
-        if (chordSelect.value) {
-            // 선택한 코드 진행 상세 표시
-            let found = null;
-            for (const cat of Object.values(MONEY_CHORD_PROGRESSIONS)) {
-                found = cat.chords.find(c => c.value === chordSelect.value);
-                if (found) break;
-            }
-            if (found) {
-                chordDisplay.innerHTML = `<div class="chord-info"><strong>${found.name}</strong><br><span class="chord-value">${found.value}</span><br><span class="chord-desc">${found.desc}</span></div>`;
-            }
-        } else {
-            chordDisplay.innerHTML = '';
-        }
+    function openChord() {
+        if (selections.genres.length === 0) return;
+        chordOpen = true;
+        chordTrigger.classList.add('open');
+        chordFilter.style.display = 'block';
+        chordFilter.value = '';
+        chordFilter.focus();
+        renderChordDropdown('');
+        chordDropdownEl.classList.add('active');
+    }
+    function closeChord() {
+        chordOpen = false;
+        chordTrigger.classList.remove('open');
+        chordFilter.style.display = 'none';
+        chordDropdownEl.classList.remove('active');
+    }
+
+    chordTrigger.addEventListener('click', () => { chordOpen ? closeChord() : openChord(); });
+    chordFilter.addEventListener('input', () => renderChordDropdown(chordFilter.value));
+    document.addEventListener('click', (e) => {
+        if (chordOpen && !chordTrigger.contains(e.target) && !chordFilter.contains(e.target) && !chordDropdownEl.contains(e.target)) closeChord();
     });
 
     // ============================================
@@ -970,11 +986,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 detected.push(g.genre);
             }
         });
-        // 한글 장르명 감지
-        if (detected.length === 0) {
-            for (const [kor, eng] of Object.entries(korGenreMap)) {
-                if (text.includes(kor) && !detected.includes(eng)) detected.push(eng);
-            }
+        // 한글 장르명도 항상 감지 (영어와 병행)
+        for (const [kor, eng] of Object.entries(korGenreMap)) {
+            if (text.includes(kor) && !detected.includes(eng)) detected.push(eng);
         }
         // 감지된 장르 추가
         detected.forEach(g => {
