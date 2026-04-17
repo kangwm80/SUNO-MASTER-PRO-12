@@ -147,9 +147,11 @@
             <div class="setting-group">
                 <h3 class="setting-title">&#127929; 머니코드 진행 (Chord Progression) <span class="pro-badge">전문가</span></h3>
                 <p class="setting-hint">장르별 히트곡에서 검증된 코드 진행을 선택하세요.</p>
-                <select class="chord-select" id="chordProgressionSelect">
-                    <option value="">-- 장르를 먼저 선택하면 코드 진행이 표시됩니다 --</option>
-                </select>
+                <div class="genre-direct-input">
+                    <button class="genre-select-trigger" id="chordTrigger">클릭하여 코드 진행 선택 &#9660;</button>
+                    <input type="text" class="genre-filter-input" id="chordFilter" placeholder="코드 진행 검색..." style="display:none;">
+                    <div class="genre-dropdown" id="chordDropdown"></div>
+                </div>
                 <div class="chord-display" id="chordDisplay"></div>
             </div>
 
