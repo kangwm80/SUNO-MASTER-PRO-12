@@ -205,10 +205,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try { const j = JSON.parse(c); if (Array.isArray(j) && j[0]) { state.promptData = j[0]; state.promptData.fileName = file.name; showLoadedPrompt(); return; } } catch {}
             const sm = c.match(/\[Style Prompt\]\s*\n([\s\S]*?)(?=\n={3,})/);
             if (sm) {
-                state.promptData = { stylePrompt: sm[1].trim(), genres: [], mood: [], target: [], place: [], excludeStyles: '', explanation: '', fileName: file.name };
+                state.promptData = { stylePrompt: sm[1].trim(), genres: [], mood: [], target: [], place: [], situationCategory: '', situationText: '', excludeStyles: '', explanation: '', fileName: file.name };
                 const gm = c.match(/-\s*장르:\s*(.+)/); if (gm) state.promptData.genres = gm[1].trim().split(/\s*\+\s*/);
                 const tm = c.match(/-\s*타겟층:\s*(.+)/); if (tm) state.promptData.target = tm[1].trim().split(',').map(s => s.trim());
                 const pm = c.match(/-\s*장소:\s*(.+)/); if (pm) state.promptData.place = pm[1].trim().split(',').map(s => s.trim());
+                const scm = c.match(/-\s*상황 카테고리:\s*(.+)/); if (scm && scm[1].trim() !== '-') state.promptData.situationCategory = scm[1].trim();
+                const stm = c.match(/-\s*장소\/상황:\s*(.+)/); if (stm && stm[1].trim() !== '-') state.promptData.situationText = stm[1].trim();
                 const mm = c.match(/-\s*분위기:\s*(.+)/); if (mm) state.promptData.mood = mm[1].trim().split(',').map(s => s.trim());
                 const em = c.match(/\[Exclude Styles\]\s*\n([\s\S]*?)(?=\n={3,})/); if (em) state.promptData.excludeStyles = em[1].trim();
                 const wm = c.match(/Weirdness:\s*(\d+)%/); if (wm) state.promptData.weirdness = parseInt(wm[1]);
@@ -1705,6 +1707,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loadedTarget').value = (d.target || []).join(', ') || '-';
         document.getElementById('loadedGenres').value = (d.genres || []).join(' + ') || '-';
         document.getElementById('loadedPlace').value = (d.place || []).join(', ') || '-';
+        const locCat = document.getElementById('loadedSituationCategory');
+        if (locCat) locCat.value = d.situationCategory || '-';
+        const locText = document.getElementById('loadedSituationText');
+        if (locText) locText.value = d.situationText || '-';
         document.getElementById('loadedMood').value = (d.mood || []).join(', ') || '-';
 
         let optStr = '';
