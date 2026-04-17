@@ -1157,6 +1157,77 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // === 파이프라인 데이터 기반 노래주제 + 장소/상황 자동 매칭 ===
+        const pipeData = state.promptData || {};
+        const pipeMoods = (pipeData.mood || []).map(m => (typeof m === 'string' ? m : '').toLowerCase());
+        const pipePlaces = (pipeData.place || []).map(p => (typeof p === 'string' ? p : '').toLowerCase());
+        const pipeFreeText = ((pipeData.explanation || '') + ' ' + (pipeData.stylePrompt || '')).toLowerCase();
+
+        if (selectedAge && (pipeMoods.length > 0 || pipePlaces.length > 0 || pipeFreeText.length > 10)) {
+            // mood/place → 노래주제 매핑
+            const themeMatchMap = {
+                '사랑과 연애': ['love', 'flutter', '사랑', '설레', '로맨스', '연애', '고백'],
+                '이별과 상실': ['breakup', '이별', '헤어', '슬픈', '눈물', '상실'],
+                '나를 찾아가는 여정': ['자아', '정체성', '나를 찾', '성장'],
+                '다시 일어서는 힘': ['confidence', 'powerful', '자신감', '용기', '도전', '파워', '극복'],
+                '그리움과 향수': ['nostalgic', '그리운', '추억', '향수', '그리움', '보고 싶'],
+                '가족이라는 이름': ['가족', '부모', '엄마', '아빠', '할머니', '할아버지'],
+                '우정과 인연': ['우정', '친구', '인연', '절친'],
+                '외로움과 고독': ['lonely', '외로', '고독', '쓸쓸', 'sentimental', '센치'],
+                '밤과 새벽의 감정': ['dawn', 'dawn-mood', '새벽', '밤', '야심한'],
+                '파티와 자유': ['exciting', 'groovy', 'tension-up', '신나', '흥겨', '파티', '클럽', '자유'],
+                '위로와 치유': ['comfort', 'healing', '위로', '힐링', '치유', '위안'],
+                '꿈과 미래': ['꿈', '미래', '목표', '희망'],
+                '여행과 떠남': ['travel', '여행', '떠나', '트립'],
+                '자연과 계절': ['rainy', 'sunset', '비오는', '일몰', '노을', '봄', '여름', '가을', '겨울', '눈오는', '자연'],
+                '도시의 삶': ['도시', '일상', '출퇴근', '직장'],
+                '카페': ['cafe', '카페', '커피', 'coffee'],
+                '출퇴근길': ['commute', '출퇴근', '지하철', '버스'],
+                '업무/집중': ['focus', 'immersive', '집중', '몰입', '업무', '일할'],
+                '집/사무실': ['home', '집', '거실', '사무실'],
+                '운동/산책': ['running', 'gym', '운동', '산책', '달리', '헬스', '조깅'],
+                '드라이브': ['drive', '드라이브', '운전', '자동차'],
+                '힐링': ['comfortable', 'calm', 'cozy', 'warm', '편안', '잔잔', '포근', '따뜻', '수면', 'sleep'],
+                '독서': ['reading', '독서', '책', '도서관']
+            };
+
+            let bestThemeId = 0;
+            let bestScore = 0;
+            const allKeywords = [...pipeMoods, ...pipePlaces, ...pipeFreeText.split(/\s+/)];
+
+            for (const [themeName, keywords] of Object.entries(themeMatchMap)) {
+                let score = 0;
+                keywords.forEach(kw => {
+                    if (allKeywords.some(w => w.includes(kw) || kw.includes(w))) score++;
+                    if (pipeFreeText.includes(kw)) score++;
+                });
+                if (score > bestScore) {
+                    bestScore = score;
+                    const found = themeList.find(t => t.name === themeName);
+                    if (found) bestThemeId = found.id;
+                }
+            }
+
+            // 노래주제 자동 선택
+            if (bestThemeId > 0 && bestScore >= 1) {
+                mainSelect.value = bestThemeId;
+                const theme = themeList.find(t => t.id === bestThemeId);
+                currentThemeName = theme ? theme.name : '';
+
+                // 장소/상황 렌더링 후 자동 선택
+                renderSituations();
+                situationArea.style.display = 'block';
+                btnRegenSituations.style.display = 'inline-flex';
+
+                // 첫 번째 장소/상황 자동 선택
+                if (situationSelect.options.length > 1) {
+                    situationSelect.selectedIndex = 1;
+                    selectedSituation = situationSelect.value;
+                    renderStories();
+                }
+            }
+        }
+
         // 연령대 버튼 클릭 (단일 선택)
         ageGroupBtns.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
