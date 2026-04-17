@@ -320,6 +320,7 @@ body.dark-mode .genre-dropdown-header {
     font-weight: 600;
     color: white;
     cursor: default;
+    background: #A78BFA;
 }
 
 .selected-genre-tag.main-tag {
@@ -327,7 +328,7 @@ body.dark-mode .genre-dropdown-header {
 }
 
 .selected-genre-tag.sub-tag {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    background: linear-gradient(135deg, #A78BFA, #C4B5FD);
 }
 
 .genre-remove-btn {
