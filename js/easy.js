@@ -2474,6 +2474,8 @@ Style Influence: ${influence}
 선택 정보:
 - 타겟층: ${selections.target.map(v => labelMap[v]).join(', ')}
 - 장소: ${selections.place.map(v => labelMap[v]).join(', ')}
+- 상황 카테고리: ${selections.situationCategory || '-'}
+- 장소/상황: ${selections.situationText || '-'}
 - 분위기: ${selections.mood.map(v => labelMap[v]).join(', ')}
 - 장르: ${selections.genres.join(' + ')}
 ========================================
