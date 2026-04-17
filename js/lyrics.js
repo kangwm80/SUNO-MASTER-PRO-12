@@ -1178,8 +1178,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     situationArea.style.display = 'block';
                     btnRegenSituations.style.display = 'inline-flex';
 
-                    // 장소/상황 상세 문장이 있으면 드롭다운에서 매칭 시도
-                    if (pipeSitText && situationSelect.options.length > 1) {
+                    // 장소/상황 상세 문장이 있으면 드롭다운에서 매칭 시도 (없으면 수동 추가)
+                    if (pipeSitText) {
                         let matched = false;
                         for (let i = 1; i < situationSelect.options.length; i++) {
                             if (situationSelect.options[i].textContent.includes(pipeSitText.substring(0, 10))) {
@@ -1190,8 +1190,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                         if (!matched) {
+                            // 드롭다운에 없으면 맨 위(기본 옵션 뒤)에 수동 추가
+                            const newOpt = document.createElement('option');
+                            newOpt.value = pipeSitText;
+                            newOpt.textContent = '\u2B50 ' + pipeSitText;
+                            situationSelect.insertBefore(newOpt, situationSelect.options[1] || null);
                             situationSelect.selectedIndex = 1;
-                            selectedSituation = situationSelect.value;
+                            selectedSituation = pipeSitText;
                         }
                         renderStories();
                     } else if (situationSelect.options.length > 1) {

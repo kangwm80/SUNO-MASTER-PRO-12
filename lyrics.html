@@ -162,8 +162,8 @@
             </div>
 
             <div class="setting-group">
-                <h3 class="setting-title">&#128221; 노래 주제 / 스토리</h3>
-                <p class="setting-hint">연령대를 선택하고 노래주제를 선택하면 해당 스토리가 표시됩니다.</p>
+                <h3 class="setting-title">&#128221; 상황 카테고리 / 스토리</h3>
+                <p class="setting-hint">연령대를 선택하고 상황 카테고리를 선택하면 해당 스토리가 표시됩니다.</p>
 
                 <!-- 연령대 선택 (단일 선택, 1단계 데이터 기반 자동 설정) -->
                 <div id="ageGroupArea">
@@ -173,10 +173,10 @@
 
                 <!-- 주제 선택 + 다시생성 -->
                 <div class="theme-dropdown-area" id="themeDropdownArea" style="display:none;">
-                    <p class="setting-hint" style="margin-top:12px;">노래주제를 선택하세요</p>
+                    <p class="setting-hint" style="margin-top:12px;">상황 카테고리를 선택하세요</p>
                     <div style="display:flex;gap:8px;align-items:center;">
                         <select class="theme-select" id="themeDirectSelect" style="flex:1;">
-                            <option value="">-- 노래주제 선택 --</option>
+                            <option value="">-- 상황 카테고리 선택 --</option>
                         </select>
                         <button class="btn-regenerate" id="btnRegenSituations" style="display:none;white-space:nowrap;">
                             <span>&#128260;</span> 다시생성
@@ -184,7 +184,7 @@
                     </div>
                 </div>
 
-                <!-- 장소/상황 선택 (드롭다운, 노래주제 + 연령대 연동) -->
+                <!-- 장소/상황 선택 (드롭다운, 상황 카테고리 + 연령대 연동) -->
                 <div id="situationArea" style="display:none;">
                     <p class="setting-hint" style="margin-top:12px;">장소/상황을 선택하세요</p>
                     <select class="theme-select" id="situationSelect" style="width:100%;">
