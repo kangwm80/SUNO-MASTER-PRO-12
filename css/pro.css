@@ -1,0 +1,502 @@
+/* ============================================
+   SUNO MASTER PRO 12 - 전문가 모드 스타일
+   ============================================ */
+
+/* 전문가 전용 구분선 */
+.pro-divider {
+    text-align: center;
+    margin: 36px auto 28px;
+    max-width: 800px;
+    position: relative;
+    padding: 16px 0;
+}
+
+.pro-divider::before, .pro-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 25%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.pro-divider::before { left: 0; }
+.pro-divider::after { right: 0; }
+
+.pro-divider span {
+    background: var(--bg-main);
+    padding: 0 20px;
+    font-size: var(--font-md);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.pro-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: var(--font-xs);
+    font-weight: 600;
+    background: linear-gradient(135deg, #FF6B6B, #FDCB6E);
+    color: white;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+/* 클릭형 장르 드롭다운 트리거 */
+.genre-select-trigger {
+    width: 100%;
+    max-width: 500px;
+    border: 2px solid var(--text-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: var(--font-base);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+    display: block;
+}
+
+.genre-select-trigger:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.genre-select-trigger.open {
+    border-color: var(--primary);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.genre-filter-input {
+    width: 100%;
+    max-width: 500px;
+    border: 2px solid var(--primary);
+    border-top: none;
+    padding: 10px 16px;
+    font-size: var(--font-sm);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-main);
+    outline: none;
+}
+
+/* 프롬프트 생성 버튼 */
+.generate-prompt-area {
+    text-align: center;
+    margin: 36px auto;
+    max-width: 800px;
+}
+
+.btn-generate-prompt {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 48px;
+    border: none;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    font-size: var(--font-lg);
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
+}
+
+.btn-generate-prompt:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(108, 92, 231, 0.5);
+}
+
+.generate-hint {
+    font-size: var(--font-xs);
+    color: var(--text-secondary);
+    margin-top: 10px;
+}
+
+/* v5 검증 점수 카드 */
+.v5-score-card {
+    max-width: 800px;
+    margin: 0 auto 28px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--primary-light);
+}
+
+.v5-score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.v5-score-label {
+    font-size: var(--font-md);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.v5-score-value {
+    font-size: var(--font-xl);
+    font-weight: 900;
+    color: var(--primary);
+}
+
+.v5-score-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--text-light);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.v5-score-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1s ease, background 0.5s ease;
+}
+
+.v5-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.v5-check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+.v5-check-pass { color: var(--success); }
+.v5-check-fail { color: var(--accent); }
+
+/* 악기 추가 드롭다운 */
+.instrument-add-area {
+    margin-top: 10px;
+    position: relative;
+    max-width: 500px;
+}
+
+/* 홀로그램 효과 - 전문가 모드 전용 */
+.genre-select-trigger,
+.btn-generate-prompt,
+#instrumentAddTrigger {
+    position: relative;
+    overflow: hidden;
+}
+
+.genre-select-trigger::before,
+#instrumentAddTrigger::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 300%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0) 20%, rgba(168,230,255,0.1) 40%, rgba(255,182,255,0.1) 60%, rgba(255,255,255,0) 80%, transparent);
+    animation: hologram-btn-sweep 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.toggle-btn.active {
+    position: relative;
+    overflow: hidden;
+}
+
+.toggle-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 300%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0) 30%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 70%, transparent);
+    animation: hologram-btn-sweep 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* 장르 직접 입력/검색 */
+.genre-direct-input {
+    position: relative;
+    max-width: 500px;
+}
+
+.genre-search-input {
+    width: 100%;
+    border: 2px solid var(--text-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: var(--font-base);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    transition: var(--transition);
+}
+
+.genre-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+}
+
+.genre-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 2px solid var(--primary-light);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 50;
+    display: none;
+    box-shadow: var(--shadow-md);
+}
+
+.genre-dropdown.active {
+    display: block;
+}
+
+.genre-dropdown-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    transition: var(--transition);
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.genre-dropdown-item:hover {
+    background: rgba(108, 92, 231, 0.08);
+    color: var(--primary);
+}
+
+.genre-dropdown-header {
+    padding: 8px 16px;
+    font-size: var(--font-xs);
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(108, 92, 231, 0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    position: sticky;
+    top: 0;
+}
+
+body.dark-mode .genre-dropdown-header {
+    background: rgba(108, 92, 231, 0.15);
+}
+
+.genre-dropdown-item .genre-dd-main {
+    font-size: var(--font-xs);
+    color: var(--text-secondary);
+}
+
+.selected-genre-display {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.selected-genre-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: white;
+    cursor: default;
+    background: #A78BFA;
+}
+
+.selected-genre-tag.main-tag {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+}
+
+.selected-genre-tag.sub-tag {
+    background: linear-gradient(135deg, #A78BFA, #C4B5FD);
+}
+
+.genre-remove-btn {
+    background: rgba(255,255,255,0.3);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.genre-remove-btn:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+/* 곡 구조 */
+.struct-btn {
+    border: 2px solid var(--primary-light);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-size: var(--font-sm);
+    font-weight: 600;
+    font-family: 'Noto Sans KR', monospace;
+    background: var(--bg-card);
+    color: var(--primary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.struct-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.structure-preview {
+    margin-top: 14px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary-light);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.struct-empty {
+    color: var(--text-light);
+    font-size: var(--font-sm);
+}
+
+.struct-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    background: var(--primary);
+    color: white;
+    font-size: var(--font-xs);
+    font-weight: 600;
+}
+
+.struct-tag .struct-remove {
+    background: rgba(255,255,255,0.3);
+    border: none;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    font-size: 0.65rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.struct-arrow {
+    color: var(--text-light);
+    font-size: var(--font-sm);
+}
+
+.structure-actions {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.btn-struct-preset {
+    border: 1px solid var(--text-light);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: var(--font-xs);
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-struct-preset:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-struct-clear {
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: var(--font-xs);
+    font-family: 'Noto Sans KR', sans-serif;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-struct-clear:hover {
+    background: var(--accent);
+    color: white;
+}
+
+/* 악기 직접 추가 */
+.instrument-custom-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    max-width: 400px;
+}
+
+.instrument-custom-row input {
+    flex: 1;
+    border: 2px solid var(--text-light);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: var(--font-xs);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-main);
+}
+
+.instrument-custom-row input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.btn-add-instrument {
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 18px;
+    background: var(--primary);
+    color: white;
+    font-size: var(--font-xs);
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-add-instrument:hover {
+    background: var(--primary-dark);
+}
