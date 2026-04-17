@@ -1702,6 +1702,8 @@ document.addEventListener('DOMContentLoaded', () => {
             mood: selections.mood.slice(),
             chordProgression: selections.chordProgression,
             customVocal: selections.customVocal,
+            situationCategory: '',
+            situationText: '',
             createdAt: new Date().toISOString(), source: 'pro', fileName
         };
         localStorage.setItem('suno-pipeline-pro', JSON.stringify(pipelineData));
