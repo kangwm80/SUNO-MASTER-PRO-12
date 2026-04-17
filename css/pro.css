@@ -288,14 +288,15 @@
     font-size: var(--font-xs);
     font-weight: 700;
     color: var(--primary);
-    background: rgba(108, 92, 231, 0.06);
+    background: #f3f0ff;
     border-bottom: 1px solid rgba(0,0,0,0.04);
     position: sticky;
     top: 0;
+    z-index: 1;
 }
 
 body.dark-mode .genre-dropdown-header {
-    background: rgba(108, 92, 231, 0.15);
+    background: #2d2640;
 }
 
 .genre-dropdown-item .genre-dd-main {
