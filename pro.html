@@ -210,45 +210,44 @@
                 </div>
             </div>
 
-            <!-- 보컬 성별 -->
-            <div class="setting-group">
-                <h3 class="setting-title">&#127908; 보컬 성별 <span class="auto-badge">AI 추천</span></h3>
-                <div class="btn-grid" id="vocalGenderBtns">
-                    <button class="toggle-btn" data-value="male">&#128104; 남성</button>
-                    <button class="toggle-btn" data-value="female">&#128105; 여성</button>
-                    <button class="toggle-btn" data-value="duet">&#128107; 듀엣</button>
-                    <button class="toggle-btn" data-value="group">&#128101; 그룹</button>
-                    <button class="toggle-btn" data-value="instrumental">&#127929; 무보컬</button>
-                </div>
-            </div>
+            <!-- ===== 보컬 설정 (직접만들기와 동일한 4단계 순차 선택) ===== -->
+            <div class="vocal-settings-area" id="vocalSettingsArea">
+                <h2 class="setting-title">&#127908; 보컬 설정 <span class="auto-badge">AI 추천</span></h2>
+                <p class="setting-hint">보컬을 순서대로 선택하세요. 이전 단계를 선택하면 다음 옵션이 표시됩니다.</p>
 
-            <!-- 보컬 스타일 -->
-            <div class="setting-group">
-                <h3 class="setting-title">&#127924; 보컬 스타일 <span class="auto-badge">AI 추천</span></h3>
-                <div class="btn-grid" id="vocalStyleBtns">
-                    <button class="toggle-btn" data-value="chest-voice" title="자연스럽고 힘 있는 목소리">자연스러운 목소리</button>
-                    <button class="toggle-btn" data-value="head-voice" title="맑고 가벼운 고음">맑은 고음</button>
-                    <button class="toggle-btn" data-value="falsetto" title="가늘고 높은 가성">가성</button>
-                    <button class="toggle-btn" data-value="belting" title="시원하게 지르는 파워 고음">파워 고음</button>
-                    <button class="toggle-btn" data-value="vibrato" title="목소리 떨림으로 감정 표현">목소리 떨림</button>
-                    <button class="toggle-btn" data-value="breathy" title="숨소리 섞인 부드러운 목소리">숨소리 섞인</button>
-                    <button class="toggle-btn" data-value="grit" title="허스키하고 거친 목소리">허스키한</button>
-                    <button class="toggle-btn" data-value="whisper" title="속삭이는 목소리">속삭임</button>
-                    <button class="toggle-btn" data-value="rap" title="랩">랩</button>
-                    <button class="toggle-btn" data-value="autotune" title="전자음 보정">오토튠</button>
+                <!-- 1) 보컬 선택 -->
+                <div class="vocal-group">
+                    <label class="vocal-label">보컬 선택</label>
+                    <div class="vocal-options" id="vocalTypeOptions">
+                        <button class="vocal-option-btn" data-value="male vocals">&#129489; 남성 (Male)</button>
+                        <button class="vocal-option-btn" data-value="female vocals">&#128105; 여성 (Female)</button>
+                        <button class="vocal-option-btn" data-value="duet vocals">&#128107; 듀엣 (Duet)</button>
+                        <button class="vocal-option-btn" data-value="instrumental">&#127929; 연주곡 (Instrumental)</button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- 보컬 음역대 -->
-            <div class="setting-group">
-                <h3 class="setting-title">&#127926; 음역대 <span class="auto-badge">AI 추천</span></h3>
-                <div class="btn-grid" id="vocalRangeBtns">
-                    <button class="toggle-btn" data-value="bass" title="매우 낮은 남성 저음">&#128104; 저음</button>
-                    <button class="toggle-btn" data-value="baritone" title="따뜻한 남성 중저음">&#128104; 중저음</button>
-                    <button class="toggle-btn" data-value="tenor" title="힘찬 남성 고음">&#128104; 고음</button>
-                    <button class="toggle-btn" data-value="alto" title="깊은 여성 저음">&#128105; 저음</button>
-                    <button class="toggle-btn" data-value="mezzo" title="풍부한 여성 중음">&#128105; 중음</button>
-                    <button class="toggle-btn" data-value="soprano" title="맑은 여성 고음">&#128105; 고음</button>
+                <!-- 2) 보컬 연령대 (성별 선택 후 표시) -->
+                <div class="vocal-group" id="vocalAgeGroup" style="display:none;">
+                    <label class="vocal-label">보컬 연령대</label>
+                    <div class="vocal-options" id="vocalAgeOptions">
+                        <button class="vocal-option-btn" data-value="teen vocals" title="밝고 투명한 음색, 감정적 순수성">&#129302; 10대</button>
+                        <button class="vocal-option-btn" data-value="young adult vocals" title="음색이 가장 선명, 다이나믹 범위 최대">&#129489; 20대</button>
+                        <button class="vocal-option-btn" data-value="mature vocals" title="저음 무게감 + 중음 밀도 + 고음 파워 균형">&#128104; 30대</button>
+                        <button class="vocal-option-btn" data-value="seasoned vocals" title="원숙미, 감정적 설득력이 압도적">&#129492; 40대</button>
+                        <button class="vocal-option-btn" data-value="veteran vocals" title="인생이 담긴 음색, 복제 불가능한 깊이">&#128116; 50대+</button>
+                    </div>
+                </div>
+
+                <!-- 3) 보컬 음역대 (성별+연령 선택 후 표시) -->
+                <div class="vocal-group" id="vocalRangeGroup" style="display:none;">
+                    <label class="vocal-label">보컬 음역대 <span class="vocal-hint">(1옥타브 단위)</span></label>
+                    <div class="vocal-options" id="vocalRangeOptions"></div>
+                </div>
+
+                <!-- 4) 보컬 스타일 (장르 기반 자동 추천) -->
+                <div class="vocal-group" id="vocalStyleGroup" style="display:none;">
+                    <label class="vocal-label">보컬 스타일 <span class="vocal-hint">(장르 기반 자동 추천 + 추가 선택 가능)</span></label>
+                    <div class="vocal-style-tags" id="vocalStyleTags"></div>
                 </div>
             </div>
 
