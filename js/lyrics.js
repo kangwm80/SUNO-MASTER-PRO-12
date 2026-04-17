@@ -1159,11 +1159,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // === 파이프라인 데이터 기반 노래주제 + 장소/상황 자동 매칭 ===
         const pipeData = state.promptData || {};
+        const pipeSitCategory = (pipeData.situationCategory || '').trim();
+        const pipeSitText = (pipeData.situationText || '').trim();
         const pipeMoods = (pipeData.mood || []).map(m => (typeof m === 'string' ? m : '').toLowerCase());
         const pipePlaces = (pipeData.place || []).map(p => (typeof p === 'string' ? p : '').toLowerCase());
         const pipeFreeText = ((pipeData.explanation || '') + ' ' + (pipeData.stylePrompt || '')).toLowerCase();
 
-        if (selectedAge && (pipeMoods.length > 0 || pipePlaces.length > 0 || pipeFreeText.length > 10)) {
+        if (selectedAge && (pipeSitCategory || pipeMoods.length > 0 || pipePlaces.length > 0 || pipeFreeText.length > 10)) {
+            // 상황 카테고리가 파이프라인에 있으면 우선 사용
+            if (pipeSitCategory) {
+                const catMatch = themeList.find(t => t.name === pipeSitCategory);
+                if (catMatch) {
+                    mainSelect.value = catMatch.id;
+                    currentThemeName = catMatch.name;
+                    renderSituations();
+                    situationArea.style.display = 'block';
+                    btnRegenSituations.style.display = 'inline-flex';
+
+                    // 장소/상황 상세 문장이 있으면 드롭다운에서 매칭 시도
+                    if (pipeSitText && situationSelect.options.length > 1) {
+                        let matched = false;
+                        for (let i = 1; i < situationSelect.options.length; i++) {
+                            if (situationSelect.options[i].textContent.includes(pipeSitText.substring(0, 10))) {
+                                situationSelect.selectedIndex = i;
+                                selectedSituation = situationSelect.value;
+                                matched = true;
+                                break;
+                            }
+                        }
+                        if (!matched) {
+                            situationSelect.selectedIndex = 1;
+                            selectedSituation = situationSelect.value;
+                        }
+                        renderStories();
+                    } else if (situationSelect.options.length > 1) {
+                        situationSelect.selectedIndex = 1;
+                        selectedSituation = situationSelect.value;
+                        renderStories();
+                    }
+                    return; // 상황 카테고리 매칭 성공 → 아래 키워드 매칭 스킵
+                }
+            }
             // mood/place → 노래주제 매핑
             const themeMatchMap = {
                 '사랑과 연애': ['love', 'flutter', '사랑', '설레', '로맨스', '연애', '고백'],

@@ -645,8 +645,9 @@ const MOOD_ATMOSPHERE_MAP = {
     '_default': 'emotional, cinematic'
 };
 
-function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions) {
+function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions, situationInfo) {
     // vocalOptions = { type: 'male vocals', range: 'tenor', styles: ['belting', 'vibrato'] } (선택적)
+    // situationInfo = { category: '카페', text: '은퇴 후...' } (선택적)
     const mainGenre = selectedGenres[0];
     const subGenre = selectedGenres[1] || null;
 
@@ -828,6 +829,14 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
     if (subData) korExplanation += ` + "${subData.genre}"(블렌딩) 혼합`;
     korExplanation += `\n\u25B6 설명: ${mainData.desc || ''}`;
     if (subData && subData.desc) korExplanation += ` ${subData.desc}`;
+    // 타겟층
+    const targetKorMap = { teens:'10대', 'young-adults':'2030세대', 'middle-aged':'5060세대', seniors:'시니어세대' };
+    const targetKorTexts = (targetAges || []).map(t => targetKorMap[t] || t).filter(Boolean);
+    if (targetKorTexts.length) korExplanation += `\n\u25B6 타겟층: ${targetKorTexts.join(', ')}`;
+    // 상황 카테고리 + 장소/상황 (분리 표시)
+    const sitInfo = situationInfo || {};
+    if (sitInfo.category) korExplanation += `\n\u25B6 상황 카테고리: ${sitInfo.category}`;
+    if (sitInfo.text) korExplanation += `\n\u25B6 장소/상황: ${sitInfo.text}`;
     korExplanation += `\n\u25B6 분위기: ${moodKorTexts}`;
     korExplanation += `\n\u25B6 템포: ${bpm} BPM (${bpm < 80 ? '느린' : bpm < 110 ? '보통' : bpm < 130 ? '약간 빠른' : '빠른'} 속도)`;
     korExplanation += `\n\u25B6 조성: ${selectedKey}`;
@@ -844,7 +853,8 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions)
         moreOptions,
         korExplanation,
         mainGenre: mainData,
-        subGenre: subData
+        subGenre: subData,
+        situationInfo: sitInfo
     };
 }
 
