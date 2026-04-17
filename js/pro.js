@@ -1422,8 +1422,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (c.name.includes('BPM')) {
                 fixed = fixed.replace(/^([^,]+)/, '$1, ' + (selections.bpm || 110) + ' BPM');
             }
-            if (c.name.includes('조성') && selections.key.length) {
-                fixed = fixed.replace(/BPM/, 'BPM, ' + selections.key[0]);
+            if (c.name.includes('조성') && !c.pass) {
+                let autoKey = selections.key.length ? selections.key[0] : 'C major';
+                if (!selections.key.length) {
+                    const m = selections.mood || [];
+                    if (m.some(v => ['emotional','lonely','breakup','sentimental'].includes(v))) autoKey = 'A minor';
+                    else if (m.some(v => ['exciting','feel-good','confidence'].includes(v))) autoKey = 'G major';
+                    else if (m.some(v => ['dreamy','nostalgic','sunset'].includes(v))) autoKey = 'D minor';
+                    else if (m.some(v => ['powerful','tension-up'].includes(v))) autoKey = 'E minor';
+                }
+                fixed = fixed.replace(/BPM/, 'BPM, ' + autoKey);
             }
             if (c.name.includes('감정')) {
                 const mood = selections.mood[0] || 'feel-good';
