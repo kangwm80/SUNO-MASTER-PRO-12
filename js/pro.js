@@ -1201,9 +1201,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // ① 장르 (프론트로드, 무제한)
         promptParts.push(genres.join(', '));
 
-        // ② BPM + 조성 + 박자
+        // ② BPM + 조성 + 박자 (조성이 없으면 분위기 기반 기본값)
         let techLine = selections.bpm + ' BPM';
-        if (selections.key.length) techLine += ', ' + selections.key[0];
+        let keyValue = selections.key.length ? selections.key[0] : '';
+        if (!keyValue) {
+            const m = selections.mood || [];
+            if (m.some(v => ['emotional','lonely','breakup','sentimental'].includes(v))) keyValue = 'A minor';
+            else if (m.some(v => ['exciting','feel-good','confidence'].includes(v))) keyValue = 'G major';
+            else if (m.some(v => ['dreamy','nostalgic','sunset'].includes(v))) keyValue = 'D minor';
+            else if (m.some(v => ['powerful','tension-up'].includes(v))) keyValue = 'E minor';
+            else if (m.some(v => ['calm','healing','comfortable','warm','cozy'].includes(v))) keyValue = 'C major';
+            else keyValue = 'C major';
+        }
+        techLine += ', ' + keyValue;
         if (selections.timeSig.length) techLine += ', ' + selections.timeSig[0] + ' time';
         promptParts.push(techLine);
 
