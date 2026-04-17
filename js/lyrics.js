@@ -1706,7 +1706,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loadedExcludeStyles').value = d.excludeStyles || '';
         document.getElementById('loadedTarget').value = (d.target || []).join(', ') || '-';
         document.getElementById('loadedGenres').value = (d.genres || []).join(' + ') || '-';
-        document.getElementById('loadedPlace').value = (d.place || []).join(', ') || '-';
         const locCat = document.getElementById('loadedSituationCategory');
         if (locCat) locCat.value = d.situationCategory || '-';
         const locText = document.getElementById('loadedSituationText');
