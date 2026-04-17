@@ -644,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
             display.innerHTML = '';
             selections.genres.forEach((genre, idx) => {
                 const tag = document.createElement('span');
-                tag.className = 'selected-genre-tag' + (idx === 0 ? ' main-tag' : '');
+                tag.className = 'selected-genre-tag ' + (idx === 0 ? 'main-tag' : 'sub-tag');
                 tag.innerHTML = `${idx === 0 ? '&#11088;' : '&#127912;'} ${genre} <button class="genre-remove-btn" data-genre="${genre}">&times;</button>`;
                 tag.querySelector('.genre-remove-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
