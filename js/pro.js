@@ -292,8 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
         mood: [],
         genres: [],             // 무제한 배열 (제한 없음)
         chordProgression: '',   // 선택한 머니코드
-        key: '',
-        timeSig: '',
+        key: [],
+        timeSig: [],
         bpm: 110,
         vocalGender: [],
         vocalAge: '',           // 보컬 연령대
@@ -686,6 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
             trigger.classList.remove('open');
             filter.style.display = 'none';
             dropdown.classList.remove('active');
+            dropdown.innerHTML = '';
         }
 
         trigger.addEventListener('click', () => { isOpen ? closeDropdown() : openDropdown(); });
@@ -796,6 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chordTrigger.classList.remove('open');
         chordFilter.style.display = 'none';
         chordDropdownEl.classList.remove('active');
+        chordDropdownEl.innerHTML = '';
     }
 
     chordTrigger.addEventListener('click', () => { chordOpen ? closeChord() : openChord(); });
@@ -869,7 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function openDD() { isOpen = true; trigger.classList.add('open'); filter.style.display = 'block'; filter.value = ''; filter.focus(); renderList(''); dropdown.classList.add('active'); }
-        function closeDD() { isOpen = false; trigger.classList.remove('open'); filter.style.display = 'none'; dropdown.classList.remove('active'); }
+        function closeDD() { isOpen = false; trigger.classList.remove('open'); filter.style.display = 'none'; dropdown.classList.remove('active'); dropdown.innerHTML = ''; }
 
         trigger.addEventListener('click', () => { isOpen ? closeDD() : openDD(); });
         filter.addEventListener('input', () => renderList(filter.value));
@@ -1103,11 +1105,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (parsed.genres.length) parts.push(parsed.genres.slice(0, 3).join(', '));
         else parts.push('Pop');
 
-        // ② BPM + 조성 + 박자
+        // ② BPM + 조성 + 박자 (사용자 수동 선택 우선)
         const techParts = [];
         if (parsed.bpm) techParts.push(parsed.bpm);
-        if (parsed.key) techParts.push(parsed.key);
-        if (parsed.timeSig) techParts.push(parsed.timeSig);
+        // 사용자가 Step 2에서 조성을 선택했으면 그것을 우선 사용
+        const userKey = Array.isArray(selections.key) && selections.key.length ? selections.key[0] : '';
+        if (userKey) techParts.push(userKey);
+        else if (parsed.key) techParts.push(parsed.key);
+        else techParts.push('C major');
+        // 박자
+        const userTimeSig = Array.isArray(selections.timeSig) && selections.timeSig.length ? selections.timeSig[0] : '';
+        if (userTimeSig) techParts.push(userTimeSig + ' time');
+        else if (parsed.timeSig) techParts.push(parsed.timeSig);
         if (techParts.length) parts.push(techParts.join(', '));
 
         // ③ 감정 서술형 문장
@@ -1203,7 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ② BPM + 조성 + 박자 (조성이 없으면 분위기 기반 기본값)
         let techLine = selections.bpm + ' BPM';
-        let keyValue = selections.key.length ? selections.key[0] : '';
+        let keyValue = (Array.isArray(selections.key) && selections.key.length) ? selections.key[0] : '';
         if (!keyValue) {
             const m = selections.mood || [];
             if (m.some(v => ['emotional','lonely','breakup','sentimental'].includes(v))) keyValue = 'A minor';
@@ -1214,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else keyValue = 'C major';
         }
         techLine += ', ' + keyValue;
-        if (selections.timeSig.length) techLine += ', ' + selections.timeSig[0] + ' time';
+        if (Array.isArray(selections.timeSig) && selections.timeSig.length) techLine += ', ' + selections.timeSig[0] + ' time';
         promptParts.push(techLine);
 
         // 머니코드 진행 (선택된 경우)
