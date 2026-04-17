@@ -1225,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (easySituationTheme) {
         easySituationTheme.addEventListener('change', () => {
-            selections.situationCategory = easySituationTheme.options[easySituationTheme.selectedIndex].textContent.trim();
+            selections.situationCategory = easySituationTheme.value;
             renderEasySituations();
             if (easySituationSelect) easySituationSelect.value = '';
             selections.place = [];
