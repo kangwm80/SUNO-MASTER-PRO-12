@@ -401,7 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 보컬 4단계 순차 선택 (직접만들기와 동일)
     // ============================================
     const MALE_RANGES = [
-        { value: 'low bass, G2~G3', label: '저음 (G2~G3)', title: '깊고 무게감 있는 저음' },
+        { value: 'deep bass, E2~E3', label: '저음 (E2~E3)', title: '깊고 묵직한 저음, 몸을 울리는 진동감' },
+        { value: 'low baritone, G2~G3', label: '중저음 (G2~G3)', title: '따뜻하고 안정감 있는 중저음' },
         { value: 'mid baritone, C3~C4', label: '중음 (C3~C4)', title: '가장 자연스러운 남성 음역대' },
         { value: 'high tenor, G3~G4', label: '중고음 (G3~G4)', title: '힘 있고 감동적인 중고음' },
         { value: 'power tenor, C4~C5', label: '고음 (C4~C5)', title: '폭발적인 고음 파워' }
@@ -414,16 +415,42 @@ document.addEventListener('DOMContentLoaded', () => {
         { value: 'power soprano, C5~C6', label: '고음 (C5~C6)', title: '전율을 주는 초고음' }
     ];
     const VOCAL_STYLE_OPTIONS = [
-        { value: 'chest-voice', label: '자연스러운 목소리' },
-        { value: 'head-voice', label: '맑은 고음' },
-        { value: 'falsetto', label: '가성' },
-        { value: 'belting', label: '파워 고음' },
-        { value: 'vibrato', label: '목소리 떨림' },
-        { value: 'breathy', label: '숨소리 섞인' },
-        { value: 'grit', label: '허스키한' },
-        { value: 'whisper', label: '속삭임' },
-        { value: 'rap', label: '랩' },
-        { value: 'autotune', label: '오토튠' }
+        { value: 'chest voice', label: '진성 (Chest Voice)' },
+        { value: 'head voice', label: '두성 (Head Voice)' },
+        { value: 'mixed voice', label: '믹스 보이스' },
+        { value: 'falsetto', label: '팔세토' },
+        { value: 'belting', label: '벨팅' },
+        { value: 'vibrato', label: '비브라토' },
+        { value: 'runs', label: '런/멜리스마' },
+        { value: 'melisma', label: '멜리스마' },
+        { value: 'breathy tone', label: '브레시 (Breathy)' },
+        { value: 'grit', label: '그릿/라스프' },
+        { value: 'rasp', label: '라스프' },
+        { value: 'staccato', label: '스타카토' },
+        { value: 'legato', label: '레가토' },
+        { value: 'whisper tone', label: '속삭임 (Whisper)' },
+        { value: 'scat', label: '스캣' },
+        { value: 'ad-libs', label: '애드립' },
+        { value: 'spoken word', label: '스포큰 워드' },
+        { value: 'rhythmic flow', label: '리듬 플로우' },
+        { value: 'screaming', label: '스크리밍' },
+        { value: 'growling', label: '그로울링' },
+        { value: 'soaring vocals', label: '고음 비상' },
+        { value: 'processed vocals', label: '프로세스드' },
+        { value: 'auto-tune', label: '오토튠' },
+        { value: 'passionate delivery', label: '열정적 전달' },
+        { value: 'gospel runs', label: '가스펠 런' },
+        { value: 'ethereal vocals', label: '에테리얼' },
+        { value: 'humming', label: '허밍' },
+        { value: 'vocal harmonies', label: '하모니' },
+        { value: 'layered vocals', label: '레이어드 보컬' },
+        { value: 'call and response', label: '콜앤리스폰스' },
+        { value: 'portamento', label: '포르타멘토' },
+        { value: 'tremolo', label: '트레몰로' },
+        { value: 'vocal cry', label: '보컬 크라이' },
+        { value: 'nasal tone', label: '비음 (코소리)' },
+        { value: 'powerful belting', label: '파워 벨팅' },
+        { value: 'soft crooning', label: '크루닝' }
     ];
 
     // 1) 보컬 선택 (성별)
@@ -517,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        if (recommended.size === 0) { recommended.add('breathy'); recommended.add('vibrato'); }
+        if (recommended.size === 0) { recommended.add('breathy tone'); recommended.add('vibrato'); }
 
         VOCAL_STYLE_OPTIONS.forEach(opt => {
             const tag = document.createElement('button');
