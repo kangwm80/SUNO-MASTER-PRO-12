@@ -627,21 +627,33 @@ const STORY_THEME_MAP = {
 const MOOD_ATMOSPHERE_MAP = {
     'comfortable': 'warm, cozy',
     'healing': 'gentle, soothing',
+    'cozy': 'cozy, intimate',
+    'warm': 'warm, heartfelt',
+    'snug': 'intimate, sheltered',
     'emotional': 'emotional, vulnerable',
     'dreamy': 'dreamy, ethereal',
     'calm': 'serene, peaceful',
     'lonely': 'melancholic, introspective',
     'sentimental': 'bittersweet, nostalgic',
+    'dawn-mood': 'late-night, introspective',
     'nostalgic': 'cinematic, nostalgic',
     'flutter': 'romantic, playful',
     'love': 'romantic, tender',
     'breakup': 'emotional, reflective',
+    'feel-good': 'uplifting, bright',
+    'refreshing': 'crisp, invigorating',
     'exciting': 'euphoric, energetic',
     'groovy': 'confident, catchy',
+    'tension-up': 'building, climactic',
     'powerful': 'bombastic, anthemic',
     'confidence': 'bold, triumphant',
     'anger': 'intense, aggressive',
     'focus': 'minimal, focused',
+    'rainy': 'atmospheric, contemplative',
+    'snowy': 'crystalline, still',
+    'dawn': 'quiet, awakening',
+    'sunset': 'golden, reflective',
+    'running': 'driving, rhythmic',
     '_default': 'emotional, cinematic'
 };
 
@@ -662,7 +674,7 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions,
 
     // 조성(Key) 결정 — 장르 분위기 기반
     const moodForKey = moods[0] || '_default';
-    const korMoodMap = { comfortable:'편안한', healing:'힐링', calm:'잔잔한', emotional:'감성적', dreamy:'몽환적', lonely:'쓸쓸한', sentimental:'센치한', breakup:'이별', love:'사랑', flutter:'설레는', exciting:'신나는', powerful:'파워풀한', anger:'분노', nostalgic:'그리운' };
+    const korMoodMap = { comfortable:'편안한', healing:'힐링', cozy:'편안한', warm:'편안한', snug:'편안한', calm:'잔잔한', emotional:'감성적', dreamy:'몽환적', lonely:'쓸쓸한', sentimental:'센치한', 'dawn-mood':'센치한', breakup:'이별', love:'사랑', flutter:'설레는', 'feel-good':'신나는', refreshing:'신나는', exciting:'신나는', groovy:'신나는', 'tension-up':'파워풀한', powerful:'파워풀한', confidence:'파워풀한', anger:'분노', nostalgic:'그리운', focus:'잔잔한', rainy:'센치한', snowy:'잔잔한', dawn:'센치한', sunset:'그리운', running:'신나는' };
     const korMood = korMoodMap[moodForKey] || '_default';
     const keyOptions = GENRE_KEY_MAP[korMood] || GENRE_KEY_MAP['_default'];
     const selectedKey = keyOptions[Math.floor(Math.random() * keyOptions.length)];
@@ -794,7 +806,13 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions,
         if (moodSentences[0]) coreParts.push(moodSentences[0]);
         if (mainData.instruments) coreParts.push(mainData.instruments.split(', ').slice(0, 3).join(', '));
         if (vocalOptions && vocalOptions.type && vocalOptions.type !== 'instrumental') {
-            coreParts.push(vocalOptions.type);
+            const coreVParts = [vocalOptions.type];
+            if (vocalOptions.age) coreVParts.push(vocalOptions.age);
+            if (vocalOptions.range) coreVParts.push(vocalOptions.range);
+            if (vocalOptions.styles && vocalOptions.styles.length > 0) {
+                coreVParts.push(...vocalOptions.styles.slice(0, 2));
+            }
+            coreParts.push(coreVParts.join(', '));
         } else if (mainData.vocal) {
             let fallbackVocal = mainData.vocal.split(', ').slice(0, 2).join(', ');
             if (vocalOptions && vocalOptions.type && !/duet/i.test(vocalOptions.type)) {

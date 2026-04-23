@@ -1204,10 +1204,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         selectedSituation = situationSelect.value;
                         renderStories();
                     }
-                    return; // 상황 카테고리 매칭 성공 → 아래 키워드 매칭 스킵
                 }
             }
-            // mood/place → 노래주제 매핑
+            // mood/place → 노래주제 매핑 (상황 카테고리 매칭 성공 시 스킵)
+            if (currentThemeName) { /* 이미 매칭됨 → 스킵 */ }
+            else {
             const themeMatchMap = {
                 '사랑과 연애': ['love', 'flutter', '사랑', '설레', '로맨스', '연애', '고백'],
                 '이별과 상실': ['breakup', '이별', '헤어', '슬픈', '눈물', '상실'],
@@ -1268,6 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectedSituation = situationSelect.value;
                     renderStories();
                 }
+            }
             }
         }
 
@@ -1527,10 +1529,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return genBank['default'] || [];
         }
 
-        const pool = getStoriesForTheme(targetGen, themeName);
+        let pool = getStoriesForTheme(targetGen, themeName);
         if (pool.length === 0) return ['스토리를 생성할 수 없습니다. 1단계에서 데이터를 먼저 불러와주세요.'];
 
-        // 5개 선택 (풀이 부족하면 반복 허용하되 셔플)
+        // pool < 5개면 같은 세대의 다른 테마 스토리로 보충
+        if (pool.length < 5) {
+            const genBank = storyBank[targetGen] || storyBank['2030세대'];
+            const extra = [];
+            for (const key of Object.keys(genBank)) {
+                if (key !== 'default') extra.push(...genBank[key]);
+            }
+            extra.push(...(genBank['default'] || []));
+            const unique = extra.filter(s => !pool.includes(s));
+            pool = [...pool, ...unique];
+        }
+
         const results = [];
         const shuffled = [...pool].sort(() => Math.random() - 0.5);
         for (let i = 0; i < 5; i++) {
