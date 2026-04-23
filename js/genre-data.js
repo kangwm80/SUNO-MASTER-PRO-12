@@ -855,8 +855,8 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions,
     if (targetKorTexts.length) korExplanation += `\n\u25B6 타겟층: ${targetKorTexts.join(', ')}`;
     // 상황 카테고리 + 장소/상황 (분리 표시)
     const sitInfo = situationInfo || {};
-    if (sitInfo.category) korExplanation += `\n\u25B6 상황 카테고리: ${sitInfo.category}`;
-    if (sitInfo.text) korExplanation += `\n\u25B6 장소/상황: ${sitInfo.text}`;
+    if (sitInfo.category) korExplanation += `\n\u25B6 장소 카테고리: ${sitInfo.category}`;
+    if (sitInfo.text) korExplanation += `\n\u25B6 주제 카테고리: ${sitInfo.text}`;
     korExplanation += `\n\u25B6 분위기: ${moodKorTexts}`;
     korExplanation += `\n\u25B6 템포: ${bpm} BPM (${bpm < 80 ? '느린' : bpm < 110 ? '보통' : bpm < 130 ? '약간 빠른' : '빠른'} 속도)`;
     korExplanation += `\n\u25B6 조성: ${selectedKey}`;
