@@ -237,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const themeDropdownArea = document.getElementById('themeDropdownArea');
         const situationArea = document.getElementById('situationArea');
         const situationSelect = document.getElementById('situationSelect');
-        const btnRegenSituations = document.getElementById('btnRegenSituations');
         const storiesArea = document.getElementById('themeStoriesArea');
         const storiesTitle = document.getElementById('themeStoriesTitle');
         const recreatedList = document.getElementById('recreatedStoriesList');
@@ -1177,7 +1176,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentThemeName = catMatch.name;
                     renderSituations();
                     situationArea.style.display = 'block';
-                    btnRegenSituations.style.display = 'inline-flex';
 
                     // 장소/상황 상세 문장이 있으면 드롭다운에서 매칭 시도 (없으면 수동 추가)
                     if (pipeSitText) {
@@ -1262,7 +1260,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 장소/상황 렌더링 후 자동 선택
                 renderSituations();
                 situationArea.style.display = 'block';
-                btnRegenSituations.style.display = 'inline-flex';
 
                 // 첫 번째 장소/상황 자동 선택
                 if (situationSelect.options.length > 1) {
@@ -1310,17 +1307,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderSituations();
             situationArea.style.display = 'block';
-            btnRegenSituations.style.display = 'inline-flex';
-        });
-
-        // 다시생성 버튼
-        btnRegenSituations.addEventListener('click', () => {
-            if (!currentThemeName || !selectedAge) return;
-            renderSituations();
-            // 하위 스토리 초기화
-            situationSelect.value = '';
-            selectedSituation = null;
-            storiesArea.style.display = 'none';
         });
 
         // 장소/상황 드롭다운 렌더링 (SITUATION_DATA에서 랜덤 50개)
