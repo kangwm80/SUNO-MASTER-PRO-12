@@ -1202,7 +1202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ageKey = AGE_LABEL_TO_KEY[selections.target[0]] || '2030세대';
         if (!themeVal || typeof SITUATION_DATA === 'undefined') {
             if (easySituationSelect) {
-                easySituationSelect.innerHTML = '<option value="">-- 위에서 카테고리를 먼저 선택하세요 --</option>';
+                easySituationSelect.innerHTML = '<option value="">-- 위에서 장소를 먼저 선택하세요 --</option>';
                 easySituationSelect.disabled = true;
             }
             return;
@@ -1211,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 50);
 
         if (easySituationSelect) {
-            easySituationSelect.innerHTML = '<option value="">-- 장소/상황 선택 --</option>';
+            easySituationSelect.innerHTML = '<option value="">-- 주제 선택 --</option>';
             shuffled.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.label;
