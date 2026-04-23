@@ -1728,6 +1728,15 @@ document.addEventListener('DOMContentLoaded', () => {
     btnApply.addEventListener('click', () => {
         const style = document.getElementById('stylePromptText').value || '';
         if (!style.trim()) { alert('먼저 프롬프트를 생성해주세요.'); return; }
+
+        // === 강제 저장: 드롭다운 현재 값 무조건 저장 ===
+        const sitThemeEl = document.getElementById('easySituationTheme');
+        const sitSelEl = document.getElementById('easySituationSelect');
+        if (sitThemeEl && sitThemeEl.value) selections.situationCategory = sitThemeEl.value;
+        if (sitSelEl && sitSelEl.value) {
+            const opt = sitSelEl.options[sitSelEl.selectedIndex];
+            if (opt) selections.situationText = opt.textContent.trim().replace(/^[^\s]+\s/, '');
+        }
         const pipelineData = {
             stylePrompt: style,
             excludeStyles: document.getElementById('excludeStylesText').value || '',
