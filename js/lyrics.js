@@ -211,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const pm = c.match(/-\s*장소:\s*(.+)/); if (pm) state.promptData.place = pm[1].trim().split(',').map(s => s.trim());
                 const scm = c.match(/-\s*상황 카테고리:\s*(.+)/); if (scm && scm[1].trim() !== '-') state.promptData.situationCategory = scm[1].trim();
                 const stm = c.match(/-\s*장소\/상황:\s*(.+)/); if (stm && stm[1].trim() !== '-') state.promptData.situationText = stm[1].trim();
+                if (!state.promptData.situationText && state.promptData.place.length > 0) state.promptData.situationText = state.promptData.place.join(', ');
                 const mm = c.match(/-\s*분위기:\s*(.+)/); if (mm) state.promptData.mood = mm[1].trim().split(',').map(s => s.trim());
                 const em = c.match(/\[Exclude Styles\]\s*\n([\s\S]*?)(?=\n={3,})/); if (em) state.promptData.excludeStyles = em[1].trim();
                 const wm = c.match(/Weirdness:\s*(\d+)%/); if (wm) state.promptData.weirdness = parseInt(wm[1]);
