@@ -1528,6 +1528,8 @@ document.addEventListener('DOMContentLoaded', () => {
             weirdness: result.moreOptions.weirdness,
             styleInfluence: result.moreOptions.styleInfluence,
             explanation: result.korExplanation,
+            situationCategory: selections.situationCategory || '',
+            situationText: selections.situationText || '',
             favorite: false, memo: ''
         });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
