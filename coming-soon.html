@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>준비 중 - SUNO MASTER PRO 12</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        .coming-soon-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            padding: 40px 24px;
+        }
+        .coming-soon-icon {
+            font-size: 5rem;
+            margin-bottom: 24px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .coming-soon-title {
+            font-size: var(--font-xxl);
+            font-weight: 900;
+            margin-bottom: 16px;
+        }
+        .coming-soon-menu {
+            font-size: var(--font-lg);
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .coming-soon-desc {
+            font-size: var(--font-md);
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+        .btn-back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 40px;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: var(--font-md);
+            font-weight: 700;
+            font-family: 'Noto Sans KR', sans-serif;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: var(--shadow-md);
+        }
+        .btn-back-home:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-text">SUNO MASTER PRO 12</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="coming-soon-wrap">
+        <div class="coming-soon-icon">&#128679;</div>
+        <h1 class="coming-soon-title">준비 중입니다</h1>
+        <p class="coming-soon-menu" id="menuName"></p>
+        <p class="coming-soon-desc">
+            이 기능은 현재 개발 중입니다.<br>
+            곧 멋진 기능으로 찾아뵙겠습니다!
+        </p>
+        <a href="index.html" class="btn-back-home holo-btn">
+            <span>&#127968;</span> 메인으로 돌아가기
+        </a>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const menu = params.get('menu') || '이 기능';
+        document.getElementById('menuName').textContent = '"' + decodeURIComponent(menu) + '"';
+        document.title = menu + ' - SUNO MASTER PRO 12';
+    </script>
+</body>
+</html>
