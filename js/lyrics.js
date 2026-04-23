@@ -1333,7 +1333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const shuffled = [...pool].sort(() => Math.random() - 0.5);
             const picked = shuffled.slice(0, 50);
 
-            situationSelect.innerHTML = '<option value="">-- 장소/상황 선택 --</option>';
+            situationSelect.innerHTML = '<option value="">-- 주제 선택 --</option>';
             picked.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.label;
