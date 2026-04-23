@@ -699,8 +699,11 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions,
     let parts = [];
 
     // === ① 장르 (1~2개, 프론트로드 맨 앞) ===
-    parts.push(mainData.genre);
-    if (subData) parts.push(`${subData.genre} fusion`);
+    if (subData) {
+        parts.push(`${mainData.genre} / ${subData.genre} crossover`);
+    } else {
+        parts.push(mainData.genre);
+    }
 
     // === ② BPM + 조성 + 박자 ===
     parts.push(`${bpm} BPM`);
@@ -798,8 +801,7 @@ function generatePrompt(selectedGenres, targetAges, places, moods, vocalOptions,
     if (stylePrompt.length > MAX_PROMPT_LENGTH) {
         // 우선순위: 장르 > BPM/Key > Atmosphere > 감정묘사 > 악기 > 보컬 > 훅 > 퍼포먼스 > 품질 > 스토리
         const qualityBlock = 'professional studio quality, clean production, consistent tonal balance, no background noise, radio-ready sound';
-        const coreParts = [parts[0]]; // 장르
-        if (subData) coreParts.push(`${subData.genre} fusion`);
+        const coreParts = [subData ? `${mainData.genre} / ${subData.genre} crossover` : parts[0]]; // 장르
         coreParts.push(`${bpm} BPM`);
         coreParts.push(selectedKey);
         coreParts.push(moodAtmosphere);
