@@ -1357,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 스토리 렌더링
         function renderStories() {
             const ageLabel = selectedAge;
-            storiesTitle.textContent = `${currentThemeName} > ${ageLabel} > ${selectedSituation}`;
+            storiesTitle.textContent = `종합 : ${ageLabel}>${currentThemeName}>${selectedSituation}`;
 
             renderCreatedStories();
 
