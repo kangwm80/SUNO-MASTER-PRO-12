@@ -2565,7 +2565,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const GEN_TITLE_STYLE = {
         teens: {
             korean: ['너만 보여', '심쿵', '찐이야', '완전 빠짐', '레전드', '킹받네', '갓생', '존잼', '너뿐이야', '첫느낌',
-                     '설렘주의', '심장폭발', '내맘알아?', '난 몰랐어', '말해줘', 'OMG', '취향저격', '넌 특별해', '찐사랑', '직진'],
+                     '설렘주의', '심장폭발', '내맘알아?', '난 몰랐어', '말해줘', 'OMG', '취향저격', '넌 특별해', '찐사랑', '직진',
+                     '처음 느꼈던 그 설렘으로', '그날 이후로 달라진 것들', '말 못 하고 스쳐간 너'],
             english: ['Crush', 'Feels', 'Obsessed', 'No Cap', 'Vibe Check', 'Main Character', 'Glow Up', 'Slay',
                       'Lowkey', 'Highkey', 'For Real', 'No Filter', 'On Repeat', 'My Type', 'Catch Me',
                       'So Into You', 'Can\'t Stop', 'Bad Idea', 'Sweet Chaos', 'Plot Twist']
@@ -2573,7 +2574,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'young-adults': {
             korean: ['현타', '번아웃', '소확행', '워라밸', '혼술', '자존감', '괜찮은 척', '그냥 그래', '어쩌라고',
                      '어른이라서', '알아서 할게', '나답게', '천천히', '한잔해', '퇴근길', '새벽감성', '지쳤어', '그래도 괜찮아',
-                     '충분해', '내 속도로'],
+                     '충분해', '내 속도로',
+                     '말 못 했던 그 한마디', '살다 보니 그게 맞더라', '그때로 돌아갈 수 있다면',
+                     '어른이 되어도 여전히 서툰', '모두가 한 번쯤 우는 새벽', '잘 지내고 있냐고 묻고 싶어',
+                     '괜찮다고 했지만 괜찮지 않았던', '그게 마지막인 줄 몰랐던 날'],
             english: ['Burnout', 'Adulting', 'Self Love', 'Let It Be', 'On My Own', 'Growing Pains', 'Real Talk',
                       'Enough', 'Breathe', 'My Pace', 'Late Night', 'Quarter Life', 'Worth It', 'Take Your Time',
                       'Figure It Out', 'Glass Half Full', 'Raw Deal', 'Slow Down', 'Room to Grow', 'Honest']
@@ -2582,7 +2586,10 @@ document.addEventListener('DOMContentLoaded', () => {
             korean: ['수고했어', '고생 많았어', '당신 덕분에', '오늘도 감사', '함께한 시간', '인생이란',
                      '아직도 설레', '당신은 특별해', '고마워요', '세월이 가도', '우리의 이야기', '변함없이',
                      '든든한 당신', '힘내요 당신', '행복한 오늘', '좋은 사람', '그대가 있어', '감사한 하루',
-                     '가슴 뛰는 날', '아름다운 인생'],
+                     '가슴 뛰는 날', '아름다운 인생',
+                     '그 사람 덕분에 여기까지', '살아보니 알게 되는 것들', '참 잘 살았다 오늘도',
+                     '아무것도 아닌 것에 눈물 나는 날', '지금 이 순간이 얼마나 소중한지',
+                     '말 못 했던 사랑이 아직도', '그 하나로 평생을 살았다'],
             english: ['Worth Every Mile', 'Standing Strong', 'Golden Years', 'Through It All', 'Still Standing',
                       'Grateful Heart', 'Time Well Spent', 'Built to Last', 'Rise Again', 'Legacy',
                       'Steady Ground', 'Unshaken', 'Proud Heart', 'Long Road Home', 'Second Wind',
@@ -2592,7 +2599,9 @@ document.addEventListener('DOMContentLoaded', () => {
             korean: ['감사합니다', '건강하세요', '사랑합니다', '행복하세요', '고마운 세월', '함께해서 좋아요',
                      '당신이 있어', '건강한 하루', '감사한 인생', '오래오래', '행복한 노래', '고마워 내 사람',
                      '좋은 날', '따뜻한 마음', '함께 걸어요', '감사해요 오늘', '건강이 최고', '사랑하는 가족',
-                     '우리 함께', '고운 마음'],
+                     '우리 함께', '고운 마음',
+                     '그 시절 덕분에 지금의 내가', '살아온 날들이 노래가 되어', '이 나이 되어 알게 된 것',
+                     '당신이 곁에 있어 다 괜찮았다', '모든 날이 소중한 선물이었다'],
             english: ['Thank You', 'Blessed Life', 'Forever Young', 'Gentle Days', 'Family Song',
                       'Golden Sunset', 'With Gratitude', 'Peaceful Heart', 'Together Always', 'Beautiful Life',
                       'Warm Embrace', 'Heart Full', 'Grace Notes', 'Simple Joy', 'Love Remains',
@@ -2642,6 +2651,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 '오늘도 {emotion}을 삼킨다', '어른이라 참았던 {emotion}',
                 '말하지 못한 {emotion}', '그건 {emotion}이 아니었다',
                 '처음이자 마지막 {emotion}', '{time}에 흘린 {emotion}'
+            ],
+            // 깊은 감동·공감·후킹 패턴 (누구나 살면서 한 번쯤 겪는 순간)
+            deep_emotion: [
+                '그때 그 {emotion} 한마디가', '{time}이 지나도 잊히지 않는 {image}',
+                '말 못 했던 {emotion}이 아직도', '살다 보면 알게 되는 {emotion}',
+                '한 번쯤은 겪어보는 {emotion}', '{image} 하나로 충분했던 그 {time}',
+                '{emotion}이 거짓말처럼 찾아온 날', '어른이 되어도 여전히 {emotion}인 것들',
+                '그게 마지막인 줄 몰랐던 {time}', '잘 지내냐고 묻고 싶었던 {time}',
+                '괜찮다고 했지만 {emotion}이 아니었던', '모두가 한 번쯤 우는 {time}',
+                '아무것도 아닌 것에 {emotion}이 나는 날', '지금 이 {image}이 얼마나 소중한지',
+                '{emotion}도 모른 채 흘러간 {time}', '{image}을 볼 때마다 네가 생각나',
+                '참 잘 살았다 {time}도', '{emotion}이 있어 살 수 있었다',
+                '덕분에 내가 여기까지', '그날의 {image}이 나를 살렸다',
+                '{emotion}인 줄도 모르고 지나친 {time}', '이름도 없이 흘린 {emotion}',
+                '작은 {image} 하나가 전부였던', '그 {emotion} 하나에 평생을 살았다',
+                '처음 느꼈던 그 {emotion}으로 돌아가고 싶어', '{time}을 돌아보면 {emotion}뿐이야'
             ]
         },
         english: {
@@ -2887,7 +2912,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (lang === 'korean' || lang === 'mixed') {
             const patterns = BILLBOARD_TITLE_PATTERNS.korean;
-            const allPatterns = [...patterns.emotion_image, ...patterns.question, ...patterns.paradox, ...patterns.sentence, ...patterns.sentence];
+            // deep_emotion 패턴 2배 가중치(감동·공감·후킹 강화)
+            const allPatterns = [...patterns.emotion_image, ...patterns.question, ...patterns.paradox, ...patterns.sentence, ...patterns.deep_emotion, ...patterns.deep_emotion];
             const pattern = pick(allPatterns);
             return pattern
                 .replace('{emotion}', pick(ingredients.emotions.length > 0 ? ingredients.emotions : ['마음']))
@@ -3230,11 +3256,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 const input = document.getElementById(`titleEditInput_${idx}`);
                 if (input && input.value.trim()) {
                     const oldTitle = state.titles[idx];
-                    const newTitle = input.value.trim();
-                    state.titles[idx] = newTitle;
+                    const rawInput = input.value.trim();
+                    const lang = getSelectedLanguage();
+                    const hasKorean = /[가-힣]/.test(rawInput);
+                    const alreadyFormatted = rawInput.includes('(') && rawInput.includes(')');
+                    let finalTitle = rawInput;
+
+                    if (!alreadyFormatted) {
+                        if (hasKorean) {
+                            // 한국어 입력 → 설정 언어로 자동 번역 (한국어/혼합이면 그대로)
+                            if (lang !== 'korean' && lang !== 'mixed') {
+                                finalTitle = translateTitleToLanguage(rawInput, lang);
+                            }
+                        } else {
+                            // 외국어 입력 → 한국어 번역 추가
+                            const kor = findKorTranslation(rawInput);
+                            if (kor) finalTitle = `${rawInput} (${kor})`;
+                        }
+                    }
+
+                    state.titles[idx] = finalTitle;
                     // 고정 목록도 업데이트
                     const lockIdx = lockedTitles.indexOf(oldTitle);
-                    if (lockIdx !== -1) lockedTitles[lockIdx] = newTitle;
+                    if (lockIdx !== -1) lockedTitles[lockIdx] = finalTitle;
                 }
                 editingTitleIdx = -1;
                 renderTitles();
