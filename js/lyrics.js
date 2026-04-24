@@ -1720,7 +1720,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targets.length) html += '\u2022 \uD0C0\uAC9F\uCE35: ' + targets.join(', ') + '<br>';
         if (excludeStyles) html += '\u2022 Exclude Styles: ' + excludeStyles + '<br>';
         if (d.weirdness) html += '\u2022 Weirdness: ' + d.weirdness + '%<br>';
-        if (d.styleInfluence) html += '\u2022 Style Influence: ' + d.styleInfluence + '%';
+        if (d.styleInfluence) html += '\u2022 Style Influence: ' + d.styleInfluence + '%<br>';
+        if (d.stylePrompt) html += '<br><strong>\uD83C\uDFB5 Style Prompt \uC6D0\uBB38</strong><br><span style="font-size:0.9em;color:var(--text-secondary);word-break:break-all;">' + d.stylePrompt + '</span>';
         html += '</div>';
 
         guide.innerHTML = html;
