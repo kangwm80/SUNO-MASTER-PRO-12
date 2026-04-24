@@ -2277,7 +2277,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (anyMatched) {
+        if (anyMatched && !/[가-힣]/.test(translated)) {
             return `${translated} (${trimmed})`;
         }
 
@@ -2293,7 +2293,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (anyMatched) {
+        if (anyMatched && !/[가-힣]/.test(translated)) {
             return `${translated} (${trimmed})`;
         }
 
@@ -2302,12 +2302,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (words.length >= 1) {
             const translatedWords = words.map(w => map[w] || KOR_BASE[w] || w);
             const result = translatedWords.join(' ');
-            if (result !== trimmed) {
+            if (result !== trimmed && !/[가-힣]/.test(result)) {
                 return `${result} (${trimmed})`;
             }
         }
 
-        // 최종 실패: 영어 경유 번역 (KOR_BASE 사용)
+        // 최종 실패: 번역 불가능한 한국어 → 원본 그대로 반환
         // KOR_BASE에도 없으면 해당 언어 표기 + 한국어 원본 유지
         // 번역 실패 시 원본 그대로 반환 (태그 붙이지 않음)
         return trimmed;
@@ -2329,7 +2329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 설정 언어가 한국어/혼합이 아니면 해당 언어로 번역
             if (lang !== 'korean' && lang !== 'mixed') {
                 const translated = translateTitleToLanguage(trimmed, lang);
-                if (translated !== trimmed) return `${translated} (${trimmed})`;
+                if (translated !== trimmed) return translated;
             }
 
             // 기본: 영어로 번역
@@ -2342,12 +2342,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     anyMatched = true;
                 }
             }
-            if (anyMatched) return `${translated} (${trimmed})`;
+            if (anyMatched && !/[가-힣]/.test(translated)) return `${translated} (${trimmed})`;
 
             const words = trimmed.split(/\s+/);
             const translatedWords = words.map(w => KOR_BASE[w] || w);
             const result = translatedWords.join(' ');
-            if (result !== trimmed) return `${result} (${trimmed})`;
+            if (result !== trimmed && !/[가-힣]/.test(result)) return `${result} (${trimmed})`;
 
             return val;
         } else if (isLatin) {
