@@ -1707,13 +1707,24 @@ document.addEventListener('DOMContentLoaded', () => {
         prefillDataInfo();
     }
 
+    // 영어 mood/place 값 → 한국어 표시용 변환
+    function toKorMood(val) {
+        if (/[가-힣]/.test(val)) return val;
+        const mapped = typeof MOOD_TO_GENRE_MAP !== 'undefined' && MOOD_TO_GENRE_MAP[val.toLowerCase()];
+        return mapped ? mapped[0] : val;
+    }
+    function toKorPlace(val) {
+        if (/[가-힣]/.test(val)) return val;
+        return (typeof PLACE_MAP !== 'undefined' && PLACE_MAP[val.toLowerCase()]) || val;
+    }
+
     // 1단계에서 미리 2단계의 데이터 정보를 채워놓는 함수
     function prefillDataInfo() {
         const guide = document.getElementById('generationGuide');
         if (!guide) return;
         const d = state.promptData || {};
-        const moods = (d.mood || []).join(', ');
-        const places = (d.place || []).join(', ');
+        const moods = (d.mood || []).map(toKorMood).join(', ');
+        const places = (d.place || []).map(toKorPlace).join(', ');
         const genres = (d.genres || []).join(', ');
         const targets = normalizeTargetLabels(d.target || []);
         const sitCategory = d.situationCategory || '';
@@ -1729,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (places) html += '\u2022 \uC7A5\uC18C/\uD65C\uB3D9: ' + places + '<br>';
         if (sitCategory) html += '\u2022 \uC7A5\uC18C \uCE74\uD14C\uACE0\uB9AC: ' + sitCategory + '<br>';
         if (sitText) html += '\u2022 \uC8FC\uC81C \uCE74\uD14C\uACE0\uB9AC: ' + sitText + '<br>';
-        html += '\u2022 \uB178\uB798 \uC5B8\uC5B4: \uD55C\uAD6D\uC5B4<br>';
+        html += '\u2022 \uB178\uB798 \uC5B8\uC5B4: ' + ({ korean: '\uD55C\uAD6D\uC5B4', english: '\uC601\uC5B4', mixed: '\uD55C\uC601 \uD63C\uD569', japanese: '\uC77C\uBCF8\uC5B4', spanish: '\uC2A4\uD398\uC778\uC5B4', chinese: '\uC911\uAD6D\uC5B4', portuguese: '\uD3EC\uB974\uD22C\uAC08\uC5B4', german: '\uB3C5\uC77C\uC5B4', french: '\uD504\uB791\uC2A4\uC5B4', hindi: '\uD78C\uB514\uC5B4', arabic: '\uC544\uB78D\uC5B4' }[getSelectedLanguage()] || getSelectedLanguage()) + '<br>';
         if (targets.length) html += '\u2022 \uD0C0\uAC9F\uCE35: ' + targets.join(', ') + '<br>';
         if (excludeStyles) html += '\u2022 Exclude Styles: ' + excludeStyles + '<br>';
         if (d.weirdness) html += '\u2022 Weirdness: ' + d.weirdness + '%<br>';
@@ -2011,8 +2022,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 데이터 기반 정보 추가
         const d = state.promptData || {};
-        const moods = (d.mood || []).join(', ');
-        const places = (d.place || []).join(', ');
+        const moods = (d.mood || []).map(toKorMood).join(', ');
+        const places = (d.place || []).map(toKorPlace).join(', ');
         const genres = (d.genres || []).join(', ');
 
         let html = '';
