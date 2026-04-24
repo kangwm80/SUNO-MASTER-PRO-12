@@ -215,11 +215,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!state.promptData.situationText && state.promptData.place.length > 0) state.promptData.situationText = state.promptData.place.join(', ');
                 const mm = c.match(/-\s*분위기:\s*(.+)/); if (mm) state.promptData.mood = mm[1].trim().split(',').map(s => s.trim());
                 const em = c.match(/\[Exclude Styles\]\s*\n([\s\S]*?)(?=\n={3,})/); if (em) state.promptData.excludeStyles = em[1].trim();
-                const wm = c.match(/Weirdness:\s*(\d+)%/); if (wm) state.promptData.weirdness = parseInt(wm[1]);
-                const sim = c.match(/Style Influence:\s*(\d+)%/); if (sim) state.promptData.styleInfluence = parseInt(sim[1]);
+                const wm = c.match(/Weirdness:\s*(\d+)%?/); if (wm) state.promptData.weirdness = parseInt(wm[1]);
+                const sim = c.match(/Style Influence:\s*(\d+)%?/); if (sim) state.promptData.styleInfluence = parseInt(sim[1]);
                 const exm = c.match(/\[한국어 설명\]\s*\n([\s\S]*?)(?=\n={3,})/); if (exm) state.promptData.explanation = exm[1].trim();
                 const dm = c.match(/생성일시:\s*(.+)/); if (dm) state.promptData.createdAt = dm[1].trim();
                 showLoadedPrompt();
+            } else {
+                alert('파일 형식을 인식할 수 없습니다.\nSUNO MASTER PRO 12에서 저장한 파일(.txt)만 불러올 수 있습니다.');
             }
         };
         reader.readAsText(file, 'UTF-8'); e.target.value = '';
