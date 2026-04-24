@@ -1661,18 +1661,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loadedStylePrompt').value = d.stylePrompt || '';
         document.getElementById('loadedExcludeStyles').value = d.excludeStyles || '';
         document.getElementById('loadedTarget').value = (d.target || []).join(', ') || '-';
-        document.getElementById('loadedGenres').value = (d.genres || []).join(' + ') || '-';
+        // 장르 표시: Style Prompt의 첫 요소(장르 부분)를 우선 사용 → Style Prompt와 형식 일치
+        let genreDisplay = (d.genres || []).join(' + ') || '-';
+        if (d.stylePrompt) {
+            const firstPart = d.stylePrompt.split(',')[0].trim();
+            if (firstPart) genreDisplay = firstPart;
+        }
+        document.getElementById('loadedGenres').value = genreDisplay;
         const locCat = document.getElementById('loadedSituationCategory');
         if (locCat) locCat.value = d.situationCategory || '-';
         const locText = document.getElementById('loadedSituationText');
         if (locText) locText.value = d.situationText || '-';
         document.getElementById('loadedMood').value = (d.mood || []).join(', ') || '-';
 
-        let optStr = '';
-        if (d.weirdness) optStr += `Weirdness: ${d.weirdness}%`;
-        if (d.weirdness && d.styleInfluence) optStr += ' | ';
-        if (d.styleInfluence) optStr += `Style Influence: ${d.styleInfluence}%`;
-        document.getElementById('loadedOptions').value = optStr || '-';
+        const optLines = [];
+        if (d.weirdness) optLines.push(`Weirdness: ${d.weirdness}%`);
+        if (d.styleInfluence) optLines.push(`Style Influence: ${d.styleInfluence}%`);
+        document.getElementById('loadedOptions').value = optLines.join('\n') || '-';
 
         document.getElementById('loadedExplanation').value = d.explanation || '-';
         document.getElementById('loadedFileName').value = d.fileName || '-';
