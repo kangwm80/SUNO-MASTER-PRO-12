@@ -134,8 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.step-line').forEach((l, i) => l.classList.toggle('done', i < step-1));
 
         const nb = document.getElementById('navButtons');
-        if (step === 5) { nb.style.display = 'none'; }
-        else { nb.style.display = 'flex'; document.getElementById('btnPrev').style.visibility = step === 1 ? 'hidden' : 'visible'; }
+        nb.style.display = 'flex';
+        document.getElementById('btnPrev').style.visibility = step === 1 ? 'hidden' : 'visible';
+        document.getElementById('btnNext').style.display = step === 5 ? 'none' : '';
 
         document.getElementById('navInfo').textContent = `${step} / 5 단계`;
         const btnNext = document.getElementById('btnNext');
@@ -208,9 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.promptData = { stylePrompt: sm[1].trim(), genres: [], mood: [], target: [], place: [], situationCategory: '', situationText: '', excludeStyles: '', explanation: '', fileName: file.name };
                 const gm = c.match(/-\s*장르:\s*(.+)/); if (gm) state.promptData.genres = gm[1].trim().split(/\s*\+\s*/);
                 const tm = c.match(/-\s*타겟층:\s*(.+)/); if (tm) state.promptData.target = tm[1].trim().split(',').map(s => s.trim());
-                const pm = c.match(/-\s*장소:\s*(.+)/); if (pm) state.promptData.place = pm[1].trim().split(',').map(s => s.trim());
-                const scm = c.match(/-\s*상황 카테고리:\s*(.+)/); if (scm && scm[1].trim() !== '-') state.promptData.situationCategory = scm[1].trim();
-                const stm = c.match(/-\s*장소\/상황:\s*(.+)/); if (stm && stm[1].trim() !== '-') state.promptData.situationText = stm[1].trim();
+                const pm = c.match(/-\s*(?:장소\/활동|장소):\s*(.+)/); if (pm) state.promptData.place = pm[1].trim().split(',').map(s => s.trim());
+                const scm = c.match(/-\s*(?:장소 카테고리|상황 카테고리):\s*(.+)/); if (scm && scm[1].trim() !== '-') state.promptData.situationCategory = scm[1].trim();
+                const stm = c.match(/-\s*(?:주제 카테고리|장소\/상황):\s*(.+)/); if (stm && stm[1].trim() !== '-') state.promptData.situationText = stm[1].trim();
                 if (!state.promptData.situationText && state.promptData.place.length > 0) state.promptData.situationText = state.promptData.place.join(', ');
                 const mm = c.match(/-\s*분위기:\s*(.+)/); if (mm) state.promptData.mood = mm[1].trim().split(',').map(s => s.trim());
                 const em = c.match(/\[Exclude Styles\]\s*\n([\s\S]*?)(?=\n={3,})/); if (em) state.promptData.excludeStyles = em[1].trim();
@@ -1702,17 +1703,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const places = (d.place || []).join(', ');
         const genres = (d.genres || []).join(', ');
         const targets = normalizeTargetLabels(d.target || []);
+        const sitCategory = d.situationCategory || '';
+        const sitText = d.situationText || '';
+        const excludeStyles = d.excludeStyles || '';
 
         let html = '';
 
-        // 데이터 기반 정보
         html += '<div style="margin-top:8px;padding-top:8px;border-top:2px solid var(--primary-light);">';
         html += '<strong>\uD83D\uDCCA \uBD88\uB7EC\uC628 \uB370\uC774\uD130 \uAE30\uBC18 \uC815\uBCF4</strong><br>';
         if (genres) html += '\u2022 \uC7A5\uB974: ' + genres + '<br>';
         if (moods) html += '\u2022 \uBD84\uC704\uAE30: ' + moods + '<br>';
         if (places) html += '\u2022 \uC7A5\uC18C/\uD65C\uB3D9: ' + places + '<br>';
+        if (sitCategory) html += '\u2022 \uC7A5\uC18C \uCE74\uD14C\uACE0\uB9AC: ' + sitCategory + '<br>';
+        if (sitText) html += '\u2022 \uC8FC\uC81C \uCE74\uD14C\uACE0\uB9AC: ' + sitText + '<br>';
         html += '\u2022 \uB178\uB798 \uC5B8\uC5B4: \uD55C\uAD6D\uC5B4<br>';
-        if (targets.length) html += '\u2022 \uD0C0\uAC9F\uCE35: ' + targets.join(', ');
+        if (targets.length) html += '\u2022 \uD0C0\uAC9F\uCE35: ' + targets.join(', ') + '<br>';
+        if (excludeStyles) html += '\u2022 Exclude Styles: ' + excludeStyles + '<br>';
+        if (d.weirdness) html += '\u2022 Weirdness: ' + d.weirdness + '%<br>';
+        if (d.styleInfluence) html += '\u2022 Style Influence: ' + d.styleInfluence + '%';
         html += '</div>';
 
         guide.innerHTML = html;
@@ -2295,17 +2303,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // state.titles에는 원본(한국어/영어 등)을 저장, 표시할 때 getTitleWithTranslation()이 설정 언어로 변환
     // 직접 입력된 제목을 "영어 (한국어)" 형식으로 변환
     function formatCustomTitle(val) {
-        // 이미 (번역) 형식이면 그대로
         if (val.includes('(') && val.includes(')')) return val;
 
+        const lang = getSelectedLanguage();
         const hasKorean = /[\uAC00-\uD7A3]/.test(val);
         const isLatin = /^[a-zA-Z\s'\-!?,.:;]+$/.test(val.trim());
 
         if (hasKorean && !isLatin) {
-            // 한국어 입력 → 영어로 번역 시도
             const trimmed = val.trim();
 
-            // KOR_BASE에서 전체/부분 매칭
+            // 설정 언어가 한국어/혼합이 아니면 해당 언어로 번역
+            if (lang !== 'korean' && lang !== 'mixed') {
+                const translated = translateTitleToLanguage(trimmed, lang);
+                if (translated !== trimmed) return `${translated} (${trimmed})`;
+            }
+
+            // 기본: 영어로 번역
             const baseKeys = Object.keys(KOR_BASE).sort((a, b) => b.length - a.length);
             let translated = trimmed;
             let anyMatched = false;
@@ -2317,13 +2330,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (anyMatched) return `${translated} (${trimmed})`;
 
-            // 단어별 번역
             const words = trimmed.split(/\s+/);
             const translatedWords = words.map(w => KOR_BASE[w] || w);
             const result = translatedWords.join(' ');
             if (result !== trimmed) return `${result} (${trimmed})`;
 
-            // 번역 실패 시 원본 유지
             return val;
         } else if (isLatin) {
             // 영어 입력 → 한국어 번역 추가
@@ -2583,21 +2594,22 @@ document.addEventListener('DOMContentLoaded', () => {
             emotion_image: [
                 '{emotion}이 번지는 {time}', '{place}에서 부르는 {emotion}', '{emotion} 가득한 {image}',
                 '{image} 위의 {emotion}', '{time}의 {emotion}', '{emotion}이 머무는 곳',
-                '{image}처럼 피어나는 {emotion}', '{emotion}을 담은 {image}'
+                '{image}처럼 피어나는 {emotion}', '{emotion}을 담은 {image}',
+                '{image}에 내린 {emotion}', '{emotion}이 스며든 {time}'
             ],
-            // 질문형/명령형 (빌보드 공식)
             question: [
                 '그때 {emotion} 알았을까', '{image} 기억나?', '{emotion} 느껴본 적 있나요',
                 '왜 자꾸 {image}이 떠오를까', '다시 {emotion}할 수 있을까',
-                '{place}에서 널 만나면', '이게 {emotion}인 걸까'
+                '{place}에서 널 만나면', '이게 {emotion}인 걸까',
+                '괜찮냐고 묻지 마', '그게 나였을까', '아직도 거기 있어?',
+                '이 {emotion}을 뭐라 불러야 할까', '왜 하필 {time}이었을까'
             ],
-            // 역설/반전 (빌보드 공식)
             paradox: [
                 '아름다운 {emotion}', '달콤한 {image}', '차가운 {emotion}',
                 '뜨거운 {image}', '조용한 {emotion}', '찬란한 {image}',
-                '익숙한 {emotion}', '낯선 {image}'
+                '익숙한 {emotion}', '낯선 {image}',
+                '따뜻한 이별', '웃으며 우는 밤', '행복한 눈물'
             ],
-            // 공감/진심 문장형 (감동/공감/진심 - 시청자가 느끼는)
             sentence: [
                 '{emotion}이 찾아온 {time}', '나만의 {image}', '너에게 보내는 {emotion}',
                 '{image} 같은 너', '{emotion}을 걷는 밤', '우리의 {image}',
@@ -2609,7 +2621,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 '{emotion}이 시작되는 곳', '{image}에서 만난 {emotion}',
                 '{emotion} 하나면 돼', '{time}의 {image}', '다시 {emotion}할 수 있다면',
                 '{emotion}을 닮은 {image}', '{image}와 {emotion} 사이',
-                '우리가 {emotion}이던 {time}', '{emotion}이 머무는 {image}'
+                '우리가 {emotion}이던 {time}', '{emotion}이 머무는 {image}',
+                '한 번쯤은 나도', '내가 놓친 {time}', '그때로 돌아간다면',
+                '살아보니 그게 {emotion}이었다', '모르는 척했던 {emotion}',
+                '{emotion}을 배우는 중입니다', '나에게 주는 {emotion}',
+                '오늘도 {emotion}을 삼킨다', '어른이라 참았던 {emotion}',
+                '말하지 못한 {emotion}', '그건 {emotion}이 아니었다',
+                '처음이자 마지막 {emotion}', '{time}에 흘린 {emotion}'
             ]
         },
         english: {
