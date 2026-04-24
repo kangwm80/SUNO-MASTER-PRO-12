@@ -1657,6 +1657,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 타겟층을 표준 라벨로 변환
         d.target = normalizeTargetLabels(d.target);
 
+        // 구형 "fusion" 포맷 → 신형 "crossover" 포맷 자동 변환
+        // 예: "Country Folk, Acoustic Pop fusion, ..." → "Country Folk / Acoustic Pop crossover, ..."
+        if (d.stylePrompt) {
+            d.stylePrompt = d.stylePrompt.replace(/^([^,]+),\s*([^,]+?)\s+fusion\b/, '$1 / $2 crossover');
+        }
+
         // 각 입력창에 데이터 채우기
         document.getElementById('loadedStylePrompt').value = d.stylePrompt || '';
         document.getElementById('loadedExcludeStyles').value = d.excludeStyles || '';
