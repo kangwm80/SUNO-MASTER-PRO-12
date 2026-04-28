@@ -11,6 +11,7 @@ if (typeof SITUATION_DATA !== 'undefined') {
 
 document.addEventListener('DOMContentLoaded', () => {
     let currentStep = 1;
+    let langOverride = null; // 한국어 번역 생성 시 임시 언어 오버라이드
     const state = {
         promptData: null, appliedPrompt: null, appliedStory: null, reference: '', language: 'korean', story: '', generation: '', generations: [], confirmedTitles: [],
         titleCount: 5, titles: [], selectedTitle: '', songform: [], sectionLyrics: {}
@@ -2563,6 +2564,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getSelectedLanguage() {
+        if (langOverride) return langOverride;
         // 버튼에서 읽기 (가장 최신 UI 상태 반영)
         const active = langBtns ? langBtns.querySelector('.toggle-btn.active') : null;
         if (active) {
@@ -2575,48 +2577,84 @@ document.addEventListener('DOMContentLoaded', () => {
     // 세대별 제목 스타일 DB - 각 세대 특성에 맞는 제목 패턴
     const GEN_TITLE_STYLE = {
         teens: {
-            korean: ['너만 보여', '심쿵', '찐이야', '완전 빠짐', '레전드', '킹받네', '갓생', '존잼', '너뿐이야', '첫느낌',
-                     '설렘주의', '심장폭발', '내맘알아?', '난 몰랐어', '말해줘', 'OMG', '취향저격', '넌 특별해', '찐사랑', '직진',
-                     '처음 느꼈던 그 설렘으로', '그날 이후로 달라진 것들', '말 못 하고 스쳐간 너'],
+            korean: [
+                // 첫사랑·설렘 — 누구나 경험한 그 순간
+                '처음 느꼈던 그 설렘으로', '이어폰 한 쪽 건네던 그 순간', '좋아한다 못 했던 말',
+                '매일 같은 자리에 앉던 너', '손 잡으면 될 것 같았던 순간',
+                '그냥 친구라고 했던 말이 후회돼', '졸업식 날 끝내 못 한 말',
+                '같은 노래 들으며 걷던 등굣길', '단톡방에서만 용감한 내 마음',
+                '쪽지 돌리다 들킨 그 자습시간', '너만 보면 갑자기 서툴러지던',
+                // 10대 공감 일상
+                '친구가 좋아하는 그 애가 나라면', '다 알면서 모른 척해 줘',
+                '졸업하고 처음 만난 날의 어색함', '그날 이후로 달라진 것들',
+                '말 못 하고 스쳐간 너', '우리 그냥 친구 할 수 있을까',
+                '아무 말도 안 했는데 다 아는 눈빛', '학교 끝나고 일부러 돌아가던 길',
+                '내가 먼저 말 걸고 싶었던 그 순간', '혼자 보내는 주말이 싫어진 이유'
+            ],
             english: ['Crush', 'Feels', 'Obsessed', 'No Cap', 'Vibe Check', 'Main Character', 'Glow Up', 'Slay',
                       'Lowkey', 'Highkey', 'For Real', 'No Filter', 'On Repeat', 'My Type', 'Catch Me',
-                      'So Into You', 'Can\'t Stop', 'Bad Idea', 'Sweet Chaos', 'Plot Twist']
+                      'So Into You', 'Can\'t Stop', 'Bad Idea', 'Sweet Chaos', 'Plot Twist',
+                      'Butterflies', 'First Time', 'Still Thinking Bout You', 'Almost Said It']
         },
         'young-adults': {
-            korean: ['현타', '번아웃', '소확행', '워라밸', '혼술', '자존감', '괜찮은 척', '그냥 그래', '어쩌라고',
-                     '어른이라서', '알아서 할게', '나답게', '천천히', '한잔해', '퇴근길', '새벽감성', '지쳤어', '그래도 괜찮아',
-                     '충분해', '내 속도로',
-                     '말 못 했던 그 한마디', '살다 보니 그게 맞더라', '그때로 돌아갈 수 있다면',
-                     '어른이 되어도 여전히 서툰', '모두가 한 번쯤 우는 새벽', '잘 지내고 있냐고 묻고 싶어',
-                     '괜찮다고 했지만 괜찮지 않았던', '그게 마지막인 줄 몰랐던 날'],
+            korean: [
+                // 번아웃·공감·현실 — 누구나 한 번쯤
+                '아무것도 아닌 것에 울었던 날', '잘 지내냐고 묻고 싶었어',
+                '모두가 한 번쯤 우는 새벽', '괜찮다고 했지만 괜찮지 않았어',
+                '그게 마지막인 줄 몰랐던 날', '살다 보니 그게 맞더라',
+                '말 못 했던 그 한마디', '천천히 가도 괜찮은 이유',
+                '다 때려치우고 싶던 그 밤', '혼자인 게 편한데 왜 외롭지',
+                // 자기 위로·성장
+                '어른이 되어도 여전히 서툰 것들', '나를 잃어가던 시절',
+                '그래도 오늘 하루 잘 살았어', '퇴근길에 혼자 듣는 노래',
+                '괜찮지 않아도 괜찮은 날', '나한테 제일 못해줬던 나에게',
+                '그냥 살다 보면 되는 거야', '아무것도 안 해도 되는 하루',
+                '지쳐도 여기 있어줘', '울어도 돼 오늘만큼은'
+            ],
             english: ['Burnout', 'Adulting', 'Self Love', 'Let It Be', 'On My Own', 'Growing Pains', 'Real Talk',
                       'Enough', 'Breathe', 'My Pace', 'Late Night', 'Quarter Life', 'Worth It', 'Take Your Time',
-                      'Figure It Out', 'Glass Half Full', 'Raw Deal', 'Slow Down', 'Room to Grow', 'Honest']
+                      'Figure It Out', 'Glass Half Full', 'Raw Deal', 'Slow Down', 'Room to Grow', 'Honest',
+                      'Tired But Fine', '3AM Thoughts', 'Almost Made It', 'You\'re Not Alone']
         },
         'middle-aged': {
-            korean: ['수고했어', '고생 많았어', '당신 덕분에', '오늘도 감사', '함께한 시간', '인생이란',
-                     '아직도 설레', '당신은 특별해', '고마워요', '세월이 가도', '우리의 이야기', '변함없이',
-                     '든든한 당신', '힘내요 당신', '행복한 오늘', '좋은 사람', '그대가 있어', '감사한 하루',
-                     '가슴 뛰는 날', '아름다운 인생',
-                     '그 사람 덕분에 여기까지', '살아보니 알게 되는 것들', '참 잘 살았다 오늘도',
-                     '아무것도 아닌 것에 눈물 나는 날', '지금 이 순간이 얼마나 소중한지',
-                     '말 못 했던 사랑이 아직도', '그 하나로 평생을 살았다'],
+            korean: [
+                // 인정·감사·세월 — 깊은 공감
+                '그 사람 덕분에 여기까지 왔다', '말 못 했던 사랑이 아직도 남아',
+                '살아보니 알게 되는 것들', '참 잘 살았다 오늘도',
+                '아무것도 아닌 것에 눈물 나는 날', '지금 이 순간이 얼마나 소중한지',
+                '그 하나로 평생을 살았다', '수고했다 나 자신아',
+                // 가족·세월·반성
+                '자식이 어느새 내 키를 넘어선 날', '한 번만 더 돌아갈 수 있다면',
+                '늦게서야 알게 된 고마운 사람', '화내지 말걸 그랬어 그날',
+                '뒤돌아보면 다 행복이었다', '너희가 있어서 버텼다',
+                '엄마도 처음이야 미안해', '그때는 몰랐어 그게 행복인 줄',
+                '오십 넘어 처음 안 것들', '세월이 가르쳐 준 것들'
+            ],
             english: ['Worth Every Mile', 'Standing Strong', 'Golden Years', 'Through It All', 'Still Standing',
                       'Grateful Heart', 'Time Well Spent', 'Built to Last', 'Rise Again', 'Legacy',
                       'Steady Ground', 'Unshaken', 'Proud Heart', 'Long Road Home', 'Second Wind',
-                      'Timeless Bond', 'Seasons Change', 'Iron Will', 'Heart of Gold', 'Homebound']
+                      'Timeless Bond', 'Seasons Change', 'Iron Will', 'Heart of Gold', 'Homebound',
+                      'Everything Was Enough', 'All Along It Was You', 'I Should Have Said More']
         },
         seniors: {
-            korean: ['감사합니다', '건강하세요', '사랑합니다', '행복하세요', '고마운 세월', '함께해서 좋아요',
-                     '당신이 있어', '건강한 하루', '감사한 인생', '오래오래', '행복한 노래', '고마워 내 사람',
-                     '좋은 날', '따뜻한 마음', '함께 걸어요', '감사해요 오늘', '건강이 최고', '사랑하는 가족',
-                     '우리 함께', '고운 마음',
-                     '그 시절 덕분에 지금의 내가', '살아온 날들이 노래가 되어', '이 나이 되어 알게 된 것',
-                     '당신이 곁에 있어 다 괜찮았다', '모든 날이 소중한 선물이었다'],
+            korean: [
+                // 감사·가족·세월 — 따뜻한 울림
+                '이 나이 되어 알게 된 것', '당신이 곁에 있어 다 괜찮았다',
+                '모든 날이 소중한 선물이었다', '살아온 날들이 노래가 되어',
+                '그 시절 덕분에 지금의 내가', '손주 얼굴 보면 다 잊어버려',
+                '이만하면 잘 살았다 싶은 날', '아직 고마운 사람들이 많아서',
+                '봄이 또 왔다는 것이 감사해', '너희 웃음소리만 들려도 행복해',
+                '같이 늙어가는 것도 행복이야', '몇 번을 다시 태어나도 당신',
+                '지나고 나니 다 추억이 되더라', '건강한 오늘이 최고의 하루',
+                '사랑한다는 말 못 해서 미안해', '당신만 있으면 그걸로 족해',
+                '오래오래 함께해요', '살아있다는 게 얼마나 감사한지',
+                '세월아 조금만 천천히 가다오', '곱게 늙어 가고 싶다'
+            ],
             english: ['Thank You', 'Blessed Life', 'Forever Young', 'Gentle Days', 'Family Song',
                       'Golden Sunset', 'With Gratitude', 'Peaceful Heart', 'Together Always', 'Beautiful Life',
                       'Warm Embrace', 'Heart Full', 'Grace Notes', 'Simple Joy', 'Love Remains',
-                      'Cherished Days', 'Held Close', 'Soft Morning', 'Ever Grateful', 'Home Sweet Home']
+                      'Cherished Days', 'Held Close', 'Soft Morning', 'Ever Grateful', 'Home Sweet Home',
+                      'Growing Old With You', 'Every Day a Gift', 'Still Grateful']
         }
     };
 
@@ -2702,6 +2740,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 '{time} of {emotion}', 'Falling Into {image}', '{emotion} Is Enough'
             ]
         }
+    };
+
+    // 세대별 맞춤 감동 패턴 (누구나 한 번쯤 겪는 순간 집중)
+    const GEN_DEEP_PATTERNS = {
+        teens: [
+            '처음 느꼈던 그 {emotion}으로', '{time}에 말 못 했던 {emotion}',
+            '그날 이후로 달라진 {image}', '{image} 하나로 설레던 {time}',
+            '좋아한다 못 했던 그 {time}', '너만 보면 갑자기 서툴러지던',
+            '아무 말 없이도 다 아는 그 {image}', '우리 그냥 {image}일 수 있을까',
+            '졸업하고 처음 만난 날의 {emotion}', '단 한 번만 더 {time}으로 돌아갈 수 있다면',
+            '{image} 건네던 그 순간', '말 걸고 싶었던 그 {time}'
+        ],
+        'young-adults': [
+            '아무것도 아닌 것에 {emotion}이 나는 날', '모두가 한 번쯤 우는 {time}',
+            '괜찮다고 했지만 {emotion}이 아니었던', '살다 보니 그게 {emotion}이었다',
+            '말 못 했던 {emotion}이 아직도', '{time}에 혼자 듣는 {image}',
+            '나를 잃어가던 그 {time}', '어른이 되어도 여전히 서툰 {emotion}',
+            '그게 마지막인 줄 몰랐던 {time}', '잘 지내냐고 묻고 싶었던 {image}',
+            '그래도 오늘 하루 잘 살았어', '지쳐도 여기 있어줘'
+        ],
+        'middle-aged': [
+            '그 {image} 하나로 평생을 살았다', '살아보니 알게 되는 {emotion}',
+            '아무것도 아닌 것에 {emotion}이 나는 날', '지금 이 {time}이 얼마나 소중한지',
+            '{image}을 볼 때마다 네가 생각나', '{emotion}도 모른 채 흘러간 {time}',
+            '그 사람 {emotion}에 여기까지 왔다', '참 잘 살았다 {time}도',
+            '뒤돌아보면 다 {emotion}이었다', '한 번만 더 {time}으로 돌아갈 수 있다면',
+            '수고했다 나 자신아', '그때는 몰랐어 그게 {emotion}인 줄'
+        ],
+        seniors: [
+            '이 나이 되어 알게 된 {emotion}', '당신이 곁에 있어 {image}이 다 괜찮았다',
+            '살아온 {time}들이 {emotion}이 되어', '모든 {image}이 소중한 선물이었다',
+            '{time}이 지나도 당신 {emotion} 잊을 수 없어', '몇 번을 다시 태어나도 당신 {image}',
+            '지나고 나니 다 {emotion}이 되더라', '{image}을 보면 그 {time}이 생각나',
+            '같이 {time} 보낸 것이 {emotion}이야', '아직 {image}이 있어 감사해',
+            '살아있다는 게 얼마나 감사한지', '세월아 조금만 천천히 가다오'
+        ]
     };
 
     // 스토리 텍스트에서 핵심 단어를 직접 추출
@@ -2920,11 +2994,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function generateStoryBasedTitle(lang, ingredients) {
         const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
         const pickPair = (pairs) => pairs[Math.floor(Math.random() * pairs.length)];
+        const gen = state.generations && state.generations.length > 0 ? state.generations[0] : '';
 
         if (lang === 'korean' || lang === 'mixed') {
             const patterns = BILLBOARD_TITLE_PATTERNS.korean;
-            // deep_emotion 패턴 2배 가중치(감동·공감·후킹 강화)
-            const allPatterns = [...patterns.emotion_image, ...patterns.question, ...patterns.paradox, ...patterns.sentence, ...patterns.deep_emotion, ...patterns.deep_emotion];
+            const genPatterns = (gen && GEN_DEEP_PATTERNS[gen]) ? GEN_DEEP_PATTERNS[gen] : [];
+            // 세대 맞춤 패턴 3배 + deep_emotion 2배 가중치 (감동·공감 극대화)
+            const allPatterns = [
+                ...patterns.emotion_image, ...patterns.question, ...patterns.paradox,
+                ...patterns.sentence, ...patterns.deep_emotion, ...patterns.deep_emotion,
+                ...genPatterns, ...genPatterns, ...genPatterns
+            ];
             const pattern = pick(allPatterns);
             return pattern
                 .replace('{emotion}', pick(ingredients.emotions.length > 0 ? ingredients.emotions : ['마음']))
@@ -3277,7 +3357,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (hasKorean) {
                             // 한국어 입력 → 설정 언어로 자동 번역 (한국어/혼합이면 그대로)
                             if (lang !== 'korean' && lang !== 'mixed') {
-                                finalTitle = translateTitleToLanguage(rawInput, lang);
+                                const translated = translateTitleToLanguage(rawInput, lang);
+                                // 번역 성공 여부 확인: 한국어 문자가 없으면 성공
+                                const translationOk = translated !== rawInput && !/[가-힣]/.test(translated);
+                                if (translationOk) {
+                                    finalTitle = translated; // "외국어번역 (한국어원본)" 형식
+                                } else {
+                                    // 해당 언어 번역 실패 → 영어로 fallback 시도
+                                    const engTranslated = translateTitleToLanguage(rawInput, 'english');
+                                    const engOk = engTranslated !== rawInput && !/[가-힣]/.test(engTranslated);
+                                    finalTitle = engOk ? `${engTranslated} (${rawInput})` : rawInput;
+                                }
                             }
                         } else {
                             // 외국어 입력 → 한국어 번역 추가
@@ -3484,6 +3574,24 @@ document.addEventListener('DOMContentLoaded', () => {
             titleLyricsMap[i] = { title: t, section: sectionVer, meta: metaVer };
         });
 
+        // 비한국어 언어인 경우 한국어 번역도 함께 생성
+        const actualLang = getSelectedLanguage();
+        const needsKorTranslation = actualLang !== 'korean';
+        if (needsKorTranslation) {
+            langOverride = 'korean';
+            titles.forEach((t, i) => {
+                state.selectedTitle = t;
+                currentFormat = 'section';
+                titleLyricsMap[i].korSection = generateLyricsText();
+                currentFormat = 'meta';
+                titleLyricsMap[i].korMeta = generateLyricsText();
+            });
+            langOverride = null;
+            document.getElementById('korTranslationArea').style.display = 'block';
+        } else {
+            document.getElementById('korTranslationArea').style.display = 'none';
+        }
+
         // 현재 형식 복원
         currentFormat = document.querySelector('.lyrics-format-tab.active').dataset.format || 'section';
 
@@ -3515,6 +3623,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!data) return;
         const fmt = document.querySelector('.lyrics-format-tab.active').dataset.format || 'section';
         document.getElementById('lyricsMainTextarea').value = fmt === 'meta' ? data.meta : data.section;
+
+        // 한국어 번역 동기화
+        const korArea = document.getElementById('korTranslationArea');
+        const korTA = document.getElementById('korTranslationTextarea');
+        if (data.korSection || data.korMeta) {
+            korTA.value = fmt === 'meta' ? (data.korMeta || '') : (data.korSection || '');
+            korArea.style.display = 'block';
+        } else {
+            korArea.style.display = 'none';
+        }
+
         updateLyricsInfo();
     }
 
@@ -4333,6 +4452,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const applied = state.appliedPrompt || {};
         const d = state.promptData || {};
 
+        // 0. 적용된 설정 정보
+        const langNames = { korean: '한국어', english: '영어', mixed: '한영 혼합', japanese: '일본어', spanish: '스페인어', chinese: '중국어', portuguese: '포르투갈어', german: '독일어', french: '프랑스어', hindi: '힌디어', arabic: '아랍어' };
+        const genLabels = { teens: '10대', 'young-adults': '2030세대', 'middle-aged': '5060세대', seniors: '시니어세대' };
+        const lang = state.language || 'korean';
+        const genList = (state.generations || []).map(g => genLabels[g] || g).join(', ') || '미설정';
+        let metaHtml = '';
+        metaHtml += `<span class="meta-info-tag">🎵 언어: ${langNames[lang] || lang}</span>`;
+        metaHtml += `<span class="meta-info-tag">👥 타겟: ${genList}</span>`;
+        if (state.appliedStory) {
+            const sn = state.appliedStory.name || (state.appliedStory.desc || '').substring(0, 30);
+            if (sn) metaHtml += `<span class="meta-info-tag">📖 스토리: ${sn}</span>`;
+        }
+        if ((state.songform || []).length > 0) {
+            metaHtml += `<span class="meta-info-tag">🎼 송폼: ${state.songform.join(' → ')}</span>`;
+        }
+        if ((d.genres || []).length > 0) metaHtml += `<span class="meta-info-tag">🎸 장르: ${d.genres.join(' + ')}</span>`;
+        if ((d.mood || []).length > 0) metaHtml += `<span class="meta-info-tag">✨ 분위기: ${d.mood.join(', ')}</span>`;
+        document.getElementById('finalMetaBox').innerHTML = metaHtml;
+
         // 1. Style Prompt
         document.getElementById('finalStylePrompt').value = applied.stylePrompt || d.stylePrompt || '';
         autoResizeFinalBox('finalStylePrompt');
@@ -4378,6 +4516,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // 자동 높이
         box.style.height = 'auto';
         box.style.height = Math.max(300, box.scrollHeight) + 'px';
+
+        // 한국어 번역 섹션 (비한국어 언어 시)
+        const korSection = document.getElementById('finalKorSection');
+        const korBox = document.getElementById('finalKorLyricsBox');
+        if (data && (data.korSection || data.korMeta)) {
+            const korText = finalCurrentVersion === 'a' ? (data.korMeta || '') : (data.korSection || '');
+            korBox.value = korText;
+            korBox.style.height = 'auto';
+            korBox.style.height = Math.max(200, korBox.scrollHeight) + 'px';
+            korSection.style.display = 'block';
+        } else {
+            korSection.style.display = 'none';
+        }
     }
 
     function autoResizeFinalBox(id) {
@@ -4400,6 +4551,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    setupFinalCopyBtn('btnCopyFinalMeta', () => {
+        const box = document.getElementById('finalMetaBox');
+        return box ? box.textContent.replace(/\s+/g, ' ').trim() : '';
+    });
     setupFinalCopyBtn('btnCopyFinalPrompt', () => document.getElementById('finalStylePrompt').value);
     setupFinalCopyBtn('btnCopyFinalExclude', () => document.getElementById('finalExcludeStyles').value);
     setupFinalCopyBtn('btnCopyFinalTitle', () => {
@@ -4407,6 +4562,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return allTitles[finalCurrentIdx] || '';
     });
     setupFinalCopyBtn('btnCopyFinalLyrics', () => document.getElementById('finalLyricsBox').value);
+    setupFinalCopyBtn('btnCopyFinalKorLyrics', () => document.getElementById('finalKorLyricsBox').value);
+
+    // STEP 4 한국어 번역 복사 버튼
+    document.getElementById('btnCopyKorTranslation').addEventListener('click', () => {
+        const text = document.getElementById('korTranslationTextarea').value;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('btnCopyKorTranslation');
+            const orig = btn.textContent;
+            btn.textContent = '✓ 복사됨!'; btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+        });
+    });
 
     // === 전체 복사 (한 세트) ===
     document.getElementById('btnCopyAll').addEventListener('click', () => {

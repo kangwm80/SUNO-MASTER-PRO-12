@@ -441,6 +441,18 @@
                     </button>
                 </div>
             </div>
+
+            <!-- 한국어 번역 (비한국어 언어 선택 시 자동 표시) -->
+            <div id="korTranslationArea" style="display:none;margin-top:16px;">
+                <div class="setting-group">
+                    <div class="step-title-row" style="margin-bottom:6px;">
+                        <h3 class="setting-title" style="margin:0;">&#127472;&#127479; 한국어 번역</h3>
+                        <button class="btn-copy-lyrics" id="btnCopyKorTranslation">&#128203; 복사</button>
+                    </div>
+                    <p class="setting-hint">위 가사의 한국어 번역입니다. Suno AI 입력용이 아닌 내용 확인용입니다.</p>
+                    <textarea class="lyrics-main-textarea" id="korTranslationTextarea" rows="15" readonly placeholder="가사 생성 후 한국어 번역이 표시됩니다."></textarea>
+                </div>
+            </div>
         </section>
 
         <!-- ========== STEP 5: 최종 완성 ========== -->
@@ -458,6 +470,15 @@
 
             <!-- 현재 선택된 제목의 전체 출력 -->
             <div class="final-output-area" id="finalOutputArea">
+
+                <!-- 0. 적용된 설정 정보 -->
+                <div class="final-section">
+                    <div class="final-section-header">
+                        <h3 class="final-section-label">&#128202; 적용된 설정 정보</h3>
+                        <button class="btn-copy-sm" id="btnCopyFinalMeta">복사</button>
+                    </div>
+                    <div class="final-meta-box" id="finalMetaBox"></div>
+                </div>
 
                 <!-- 1. Style Prompt -->
                 <div class="final-section">
@@ -511,6 +532,18 @@
                         <textarea class="final-output-box final-lyrics-box" id="finalLyricsBox" rows="18" readonly></textarea>
                         <div class="lyrics-char-count" id="finalLyricsCharCount">0 / 5,000자</div>
                     </div>
+                </div>
+
+                <!-- 6. 한국어 번역 (비한국어 언어 시 자동 표시) -->
+                <div class="final-section" id="finalKorSection" style="display:none;">
+                    <div class="final-section-header">
+                        <h3 class="final-section-label">&#127472;&#127479; 한국어 번역</h3>
+                        <button class="btn-copy-sm" id="btnCopyFinalKorLyrics">복사</button>
+                    </div>
+                    <p style="font-size:0.85em;color:var(--text-secondary);margin:0 0 6px;">
+                        위 가사의 한국어 번역 버전입니다. Suno AI에 직접 사용하지 말고, 내용 확인용으로만 참고하세요.
+                    </p>
+                    <textarea class="final-output-box final-lyrics-box" id="finalKorLyricsBox" rows="12" readonly></textarea>
                 </div>
             </div>
 
