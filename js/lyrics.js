@@ -238,6 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
         themeDropdownInitialized = true;
 
         const mainSelect = document.getElementById('themeDirectSelect');
+        const themeDirectDisplay = document.getElementById('themeDirectDisplay');
+        const situationDisplay = document.getElementById('situationDisplay');
         const ageGroupBtns = document.getElementById('ageGroupBtns');
         const themeDropdownArea = document.getElementById('themeDropdownArea');
         const situationArea = document.getElementById('situationArea');
@@ -1178,6 +1180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const catMatch = themeList.find(t => t.name === pipeSitCategory);
                 if (catMatch) {
                     mainSelect.value = catMatch.id;
+                    if (themeDirectDisplay) themeDirectDisplay.textContent = `${catMatch.emoji || ''} ${catMatch.name}`.trim();
                     currentThemeName = catMatch.name;
                     renderSituations();
                     situationArea.style.display = 'block';
@@ -1189,6 +1192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (situationSelect.options[i].textContent.includes(pipeSitText.substring(0, 10))) {
                                 situationSelect.selectedIndex = i;
                                 selectedSituation = situationSelect.value;
+                                if (situationDisplay) situationDisplay.textContent = situationSelect.options[i].textContent;
                                 matched = true;
                                 break;
                             }
@@ -1201,11 +1205,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             situationSelect.insertBefore(newOpt, situationSelect.options[1] || null);
                             situationSelect.selectedIndex = 1;
                             selectedSituation = pipeSitText;
+                            if (situationDisplay) situationDisplay.textContent = '⭐ ' + pipeSitText;
                         }
                         renderStories();
                     } else if (situationSelect.options.length > 1) {
                         situationSelect.selectedIndex = 1;
                         selectedSituation = situationSelect.value;
+                        if (situationDisplay) situationDisplay.textContent = situationSelect.options[1].textContent;
                         renderStories();
                     }
                 }
@@ -1261,6 +1267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainSelect.value = bestThemeId;
                 const theme = themeList.find(t => t.id === bestThemeId);
                 currentThemeName = theme ? theme.name : '';
+                if (themeDirectDisplay && theme) themeDirectDisplay.textContent = `${theme.emoji || ''} ${theme.name}`.trim();
 
                 // 장소/상황 렌더링 후 자동 선택
                 renderSituations();
@@ -1270,6 +1277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (situationSelect.options.length > 1) {
                     situationSelect.selectedIndex = 1;
                     selectedSituation = situationSelect.value;
+                    if (situationDisplay) situationDisplay.textContent = situationSelect.options[1].textContent;
                     renderStories();
                 }
             }
@@ -1292,8 +1300,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 // 연령대 바뀌면 하위 초기화
                 mainSelect.value = '';
+                if (themeDirectDisplay) themeDirectDisplay.textContent = '-';
                 currentThemeName = '';
                 situationArea.style.display = 'none';
+                if (situationDisplay) situationDisplay.textContent = '-';
                 storiesArea.style.display = 'none';
                 selectedSituation = null;
             });
@@ -1303,12 +1313,14 @@ document.addEventListener('DOMContentLoaded', () => {
         mainSelect.addEventListener('change', () => {
             const themeId = parseInt(mainSelect.value);
             situationArea.style.display = 'none';
+            if (situationDisplay) situationDisplay.textContent = '-';
             storiesArea.style.display = 'none';
             selectedSituation = null;
             if (!themeId || !selectedAge) return;
 
             const theme = themeList.find(t => t.id === themeId);
             currentThemeName = theme ? theme.name : '';
+            if (themeDirectDisplay && theme) themeDirectDisplay.textContent = `${theme.emoji || ''} ${theme.name}`.trim();
 
             renderSituations();
             situationArea.style.display = 'block';
@@ -1333,15 +1345,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 장소/상황 드롭다운 선택 시 스토리 표시
+        // 장소/상황 선택 시 스토리 표시
         situationSelect.addEventListener('change', () => {
             const val = situationSelect.value;
             if (!val) {
                 storiesArea.style.display = 'none';
                 selectedSituation = null;
+                if (situationDisplay) situationDisplay.textContent = '-';
                 return;
             }
             selectedSituation = val;
+            if (situationDisplay) situationDisplay.textContent = situationSelect.options[situationSelect.selectedIndex].textContent;
             renderStories();
         });
 
