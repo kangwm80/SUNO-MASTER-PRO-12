@@ -4681,6 +4681,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 초기화
     document.getElementById('btnRetry').addEventListener('click', () => {
+        if (!confirm('⚠️ 처음부터 다시 시작하시겠습니까?\n현재까지 작업한 모든 내용이 삭제됩니다.')) return;
         Object.keys(state).forEach(k => { if (Array.isArray(state[k])) state[k] = []; else if (typeof state[k] === 'object') state[k] = null; else state[k] = ''; });
         state.titleCount = 5; state.sectionLyrics = {}; state.generations = [];
         step2Initialized = false; lockedTitles = [];
