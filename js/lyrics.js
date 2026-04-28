@@ -3064,12 +3064,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const genDefaultImgs = gen && defaultImages[gen] ? defaultImages[gen] : fallbackImages;
         const genSceneImgs = gen && genScenes[gen] ? genScenes[gen] : [];
 
-        // situation 단어를 이미지 풀에 추가
+        // situation + 장소 단어를 이미지 풀에 3배 가중치로 추가 (파이프라인 반영 극대화)
         const sitImageWords = sitWords.filter(w => w.length > 1);
+        const themeImgWords = themeNameWords.filter(w => w.length >= 2);
+        const pipelineImgs = [...sitImageWords, ...themeImgWords];
 
         const images = storyImages.length > 0
-            ? [...storyImages, ...sitImageWords, ...genSceneImgs, ...genDefaultImgs]
-            : [...sitImageWords, ...genSceneImgs, ...genDefaultImgs];
+            ? [...storyImages, ...pipelineImgs, ...pipelineImgs, ...pipelineImgs, ...genSceneImgs, ...genDefaultImgs]
+            : [...pipelineImgs, ...pipelineImgs, ...pipelineImgs, ...genSceneImgs, ...genDefaultImgs];
         places.forEach(p => { if (p && !images.includes(p)) images.push(p); });
 
         // {place} 전용 풀 — images와 분리하여 중복 단어 방지
@@ -3400,6 +3402,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // mixed 모드: 영어만 있는 제목에 한국어 번역 추가
+        if (lang === 'mixed') {
+            return result.map(t => {
+                if (!/[가-힣]/.test(t) && !t.includes('(')) {
+                    const kor = findKorTranslation(t);
+                    return kor ? `${t} (${kor})` : t;
+                }
+                return t;
+            });
+        }
         return result;
     }
 
@@ -3515,7 +3527,37 @@ document.addEventListener('DOMContentLoaded', () => {
         '\u062D\u0631\u064A\u0629': '자유', '\u0633\u0645\u0627\u0621': '하늘', '\u0628\u062D\u0631': '바다',
         '\u0632\u0647\u0631\u0629': '꽃', '\u0645\u0637\u0631': '비', '\u0631\u064A\u062D': '바람',
         '\u0641\u062C\u0631': '새벽', '\u063A\u0631\u0648\u0628': '석양', '\u0642\u0644\u0628': '마음',
-        '\u0637\u0631\u064A\u0642': '길', '\u0646\u0648\u0631': '빛'
+        '\u0637\u0631\u064A\u0642': '길', '\u0646\u0648\u0631': '빛',
+        // 10대 영어 (누락 추가)
+        'Butterflies': '설렘', 'First Time': '처음', 'Still Thinking Bout You': '아직 네 생각',
+        'Almost Said It': '거의 말할 뻔했어', 'School Crush': '교실 짝사랑', 'After Class': '수업 끝나고',
+        'Too Scared to Say': '말하기 무서워서',
+        // 2030 영어 (누락 추가)
+        'Tired But Fine': '지쳐도 괜찮아', '3AM Thoughts': '새벽 3시 생각', 'Almost Made It': '거의 다 왔어',
+        "You're Not Alone": '혼자가 아냐', 'Empty Wallet Vibes': '텅 빈 통장 감성',
+        'After Work': '퇴근 후에', 'Just Me Tonight': '오늘 밤은 나 혼자',
+        // 5060 영어 (누락 추가)
+        'Everything Was Enough': '그 모든 게 충분했어', 'All Along It Was You': '처음부터 당신이었어',
+        'I Should Have Said More': '더 말했어야 했는데', 'Friday Night Tired': '금요일 밤 지침',
+        'Worth the Grind': '고생할 가치 있어',
+        // 시니어 영어 (누락 추가)
+        'Growing Old With You': '함께 늙어가며', 'Every Day a Gift': '매일이 선물',
+        'Still Grateful': '여전히 감사해',
+        // TITLE_DB.english (누락 추가)
+        'Stay With Me': '내 곁에 있어줘', 'One More Time': '한 번만 더', 'Before I Go': '가기 전에',
+        "Can't Let Go": '놓을 수 없어', 'Come Back to Me': '내게 돌아와', 'Miss You Bad': '너무 보고 싶어',
+        'Never Enough': '절대 충분하지 않아', 'Right Here': '바로 여기에', 'Say It Now': '지금 말해줘',
+        'Hold On Tight': '꽉 잡아줘', 'All I Want': '내가 원하는 전부', 'In My Arms': '내 품 안에',
+        'Just Breathe': '그냥 숨만 쉬어', 'Save Me Tonight': '오늘 밤 날 구해줘', 'Find You': '너를 찾아서',
+        'Better Together': '함께라 더 좋아', 'Promise Me': '나에게 약속해', 'Without You': '너 없이',
+        'Wide Awake': '완전히 깨어', 'Not Alone': '혼자가 아냐', 'Last Night': '지난 밤',
+        'Almost Home': '거의 다 왔어', 'Let It Rain': '비가 와도 괜찮아', 'Far Away': '멀리서',
+        'Same Stars': '같은 별 아래', 'No Goodbye': '작별 없이', 'Running Back': '다시 달려가',
+        'Perfect Timing': '딱 맞는 타이밍', 'Heart On Fire': '불타는 마음', 'I Found You': '너를 찾았어',
+        'Starting Over': '다시 시작해', 'Carry On': '계속 나아가', 'One Last Dance': '마지막 춤',
+        'The Long Way': '돌아가는 길', 'Worth It All': '모두 가치 있어',
+        'Catch Me When I Fall': '내가 쓰러질 때 잡아줘', 'New Chapter': '새로운 장',
+        'Believe in Me': '나를 믿어줘'
     };
 
     // TITLE_KOR_MAP에 없는 외국어 제목도 단어별로 번역 시도
@@ -3624,8 +3666,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // 한국어 설정 → 그대로 유지
                                 finalTitle = rawInput;
                             } else if (lang === 'mixed') {
-                                // 혼합 설정 → 그대로 유지
-                                finalTitle = rawInput;
+                                // 혼합 설정 → 영어 번역 추가 시도 (English (한국어) 형식)
+                                const engTranslated = translateTitleToLanguage(rawInput, 'english');
+                                finalTitle = engTranslated !== rawInput ? engTranslated : rawInput;
                             } else {
                                 // 외국어 설정 → 번역 시도
                                 // translateTitleToLanguage는 성공 시 "Foreign (한국어)" 형식으로 반환
