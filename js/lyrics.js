@@ -232,6 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // === 주제 선택 (흐름: 연령대 → 노래주제 → 장소/상황 → 스토리) ===
     let themeDropdownInitialized = false;
     let selectedStoryData = null;
+    // 파이프라인 접근 가능하도록 외부 스코프에 선언 (extractTitleIngredients에서 직접 읽음)
+    let selectedSituation = null;
+    let currentThemeName = '';
 
     function initThemeDropdown() {
         if (themeDropdownInitialized) return;
@@ -252,8 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!mainSelect) return;
 
         let selectedAge = ''; // 선택된 연령대 (단일 선택)
-        let selectedSituation = null; // 선택된 장소/상황
-        let currentThemeName = '';
 
         // 31개 주제 (감정/스토리 22개 + 일상/상황 9개)
         const themeList = [
@@ -2165,7 +2166,77 @@ document.addEventListener('DOMContentLoaded', () => {
         '지우개': 'Eraser', '연필': 'Pencil', '칠판': 'Blackboard', '교실': 'Classroom',
         '우산': 'Umbrella', '거짓말': 'Lie', '약속해': 'Promise Me', '웃음': 'Laughter',
         '쓸쓸한': 'Lonely', '설레는': 'Fluttering', '고요한': 'Still', '아침': 'Morning',
-        '저녁': 'Evening', '하루': 'One Day', '내년': 'Next Year', '진실': 'Truth'
+        '저녁': 'Evening', '하루': 'One Day', '내년': 'Next Year', '진실': 'Truth',
+        // GEN_TITLE_STYLE 10대 한국어 제목
+        '처음이라서': 'Because It\'s the First Time', '설레는데 무서워': 'Excited but Scared',
+        '너만 봐': 'Only Looking at You', '처음 느꼈던 그 설렘으로': 'With That First Flutter',
+        '이어폰 한 쪽 건네던 그 순간': 'The Moment You Shared an Earbud',
+        '좋아한다 못 했던 말': 'Words I Couldn\'t Say',
+        '매일 같은 자리에 앉던 너': 'You Who Always Sat in the Same Spot',
+        '그냥 친구라고 했던 말이 후회돼': 'I Regret Saying Just Friends',
+        '졸업식 날 끝내 못 한 말': 'Words Left Unsaid on Graduation Day',
+        '같은 노래 들으며 걷던 등굣길': 'Walking to School with the Same Song',
+        '단톡방에서만 용감한 내 마음': 'Brave Only in the Group Chat',
+        '너만 보면 갑자기 서툴러지던': 'I Only Got Clumsy Around You',
+        '교복 입고 달려갔던 그 길': 'The Road I Ran Down in My Uniform',
+        '야자 끝나고 걷던 그 밤길': 'That Night Walk After Evening Study',
+        '수능 전날 밤에 네 생각이 났어': 'Thought of You the Night Before the Exam',
+        '교실 창밖으로 보이던 너': 'You Seen Through the Classroom Window',
+        '말 못 하고 스쳐간 너': 'You Who Passed Without a Word',
+        '우리 그냥 친구 할 수 있을까': 'Can We Just Be Friends',
+        '학교 끝나고 일부러 돌아가던 길': 'The Long Way Home on Purpose',
+        '혼자 보내는 주말이 싫어진 이유': 'Why I Started Hating Weekends Alone',
+        // GEN_TITLE_STYLE 20대 한국어 제목
+        '버텨': 'Hold On', '혼자도 괜찮아': 'Okay Alone', '이게 나인가봐': 'Guess This Is Me',
+        '진짜 지쳤어': 'Truly Exhausted', '텅 빈 통장을 보면서': 'Staring at an Empty Account',
+        '혼자 하는 술 한 잔': 'Drinking Alone Tonight',
+        '알바 끝나고 걷는 그 길': 'That Walk After My Shift',
+        '취업 전날 밤에': 'The Night Before the Job Interview',
+        '아무것도 아닌 것에 울었던 날': 'The Day I Cried for Nothing',
+        '잘 지내냐고 묻고 싶었어': 'I Wanted to Ask If You\'re Okay',
+        '모두가 한 번쯤 우는 새벽': 'The Dawn Everyone Cries Through Once',
+        '괜찮다고 했지만 괜찮지 않았어': 'I Said Fine But I Wasn\'t',
+        '다 때려치우고 싶던 그 밤': 'The Night I Wanted to Quit Everything',
+        '혼자인 게 편한데 왜 외롭지': 'Comfortable Alone Yet Why Am I Lonely',
+        '그래도 오늘 하루 잘 살았어': 'Still Lived Well Today',
+        '퇴근길에 혼자 듣는 노래': 'Song I Listen to Alone on the Way Home',
+        '괜찮지 않아도 괜찮은 날': 'Days When Not Okay Is Okay',
+        '나한테 제일 못해줬던 나에게': 'To Me Who Treated Myself Worst',
+        '지쳐도 여기 있어줘': 'Stay Even When You\'re Tired',
+        '울어도 돼 오늘만큼은': 'It\'s Okay to Cry Just for Today',
+        // GEN_TITLE_STYLE 30-40대 한국어 제목
+        '수고했어 오늘도': 'Well Done Today Too', '퇴근길에': 'On the Way Home',
+        '그때의 우리': 'Us Back Then', '여전히 괜찮아?': 'Still Okay?',
+        '불금이야': 'It\'s Friday Night', '육아 퇴근길': 'Parent\'s Way Home',
+        '전세 만기일': 'Lease Expiration Day',
+        '그 사람 덕분에 여기까지 왔다': 'Got Here Thanks to That Person',
+        '살아보니 알게 되는 것들': 'Things You Learn by Living',
+        '아무것도 아닌 것에 눈물 나는 날': 'Days Tears Come for Nothing',
+        '지금 이 순간이 얼마나 소중한지': 'How Precious This Moment Is',
+        '그 하나로 평생을 살았다': 'Lived a Lifetime on That One Thing',
+        '수고했다 나 자신아': 'Well Done My Own Self',
+        '자식이 어느새 내 키를 넘어선 날': 'The Day My Child Grew Taller Than Me',
+        '한 번만 더 돌아갈 수 있다면': 'If Only I Could Go Back Once More',
+        '엄마도 처음이야 미안해': 'I\'m a First-Time Mom Too Sorry',
+        '그때는 몰랐어 그게 행복인 줄': 'Didn\'t Know Then That Was Happiness',
+        '뒤돌아보면 다 행복이었다': 'Looking Back It Was All Happiness',
+        '너희가 있어서 버텼다': 'Held On Because of You',
+        // GEN_TITLE_STYLE 50대+ 한국어 제목
+        '세월이 빠르네': 'Time Flies So Fast', '밥은 먹었어': 'Have You Eaten',
+        '행복했으면 해': 'I Hope You\'re Happy', '이제 손자가': 'Now Grandchildren',
+        '빈방이 된 네 방': 'Your Empty Room Now', '건강하게 살자': 'Let\'s Live Healthy',
+        '이 나이 되어 알게 된 것': 'What I Know Now at This Age',
+        '당신이 곁에 있어 다 괜찮았다': 'Everything Was Fine With You Beside Me',
+        '살아온 날들이 노래가 되어': 'My Lived Days Become a Song',
+        '그 시절 덕분에 지금의 내가': 'Because of Those Days I Am Who I Am',
+        '이만하면 잘 살았다 싶은 날': 'Days I Think I Lived Well Enough',
+        '봄이 또 왔다는 것이 감사해': 'Grateful Spring Came Again',
+        '같이 늙어가는 것도 행복이야': 'Growing Old Together Is Also Happiness',
+        '몇 번을 다시 태어나도 당신': 'You No Matter How Many Times I\'m Born',
+        '건강한 오늘이 최고의 하루': 'A Healthy Today Is the Best Day',
+        '사랑한다는 말 못 해서 미안해': 'Sorry I Couldn\'t Say I Love You',
+        '세월아 조금만 천천히 가다오': 'Time Please Go a Little Slower',
+        '곱게 늙어 가고 싶다': 'I Want to Age Gracefully'
     };
 
     const KOR_TO_LANG = {
@@ -2588,6 +2659,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return FAMOUS_TITLES.some(famous => calcSimilarity(title, famous) >= 0.7);
     }
 
+    // 배치 내 핵심 단어 중복 방지 — 이미 쓴 제목들에서 핵심 단어(2자+) 추출해 비교
+    const TITLE_STOP_WORDS = new Set(['이','가','을','를','은','는','의','에','서','로','와','과','도','만','가','나','너','우리','그','이','저','거리','이미','그냥','정말','아직','여기','그때','한번','다시','한','두','세']);
+    function extractKeyWords(title) {
+        return title.replace(/\(.*?\)/g, '').split(/[\s,·\-–—\/()]+/)
+            .map(w => w.trim())
+            .filter(w => w.length >= 2 && !TITLE_STOP_WORDS.has(w));
+    }
+    function hasBatchKeywordOverlap(title, usedSet) {
+        const newKeys = extractKeyWords(title);
+        if (newKeys.length === 0) return false;
+        for (const usedTitle of usedSet) {
+            const usedKeys = extractKeyWords(usedTitle);
+            const overlap = newKeys.filter(k => usedKeys.includes(k));
+            // 핵심 단어 1개 이상 겹치면 중복으로 처리
+            if (overlap.length >= 1) return true;
+        }
+        return false;
+    }
+
     function getSelectedLanguage() {
         if (langOverride) return langOverride;
         // 버튼에서 읽기 (가장 최신 UI 상태 반영)
@@ -2854,9 +2944,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. 스토리 키워드
         const storyKeywords = story.keywords || [];
 
-        // 3. situationText/situationCategory에서 단어 추출 (파이프라인 데이터 반영)
-        const sitText = d.situationText || d.situationCategory || '';
+        // 3. situationText/situationCategory + Step2 선택값에서 단어 추출 (파이프라인 완전 연결)
+        // selectedSituation, currentThemeName은 외부 스코프 변수 (initThemeDropdown에서 설정됨)
+        const sitText = selectedSituation || d.situationText || d.situationCategory || '';
+        const themeNameText = currentThemeName || '';
         const sitWords = extractWordsFromStory(sitText);
+        const themeNameWords = extractWordsFromStory(themeNameText);
 
         // 4. 분위기에서 감정 추출 (기본 무드맵)
         const emotionMap = {
@@ -2905,9 +2998,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (gl.includes('록') || gl.includes('rock')) genreEmotions.push('열정', '자유');
         });
 
-        // 감정 풀: 스토리 키워드 > 상황 단어 > 세대 핵심 감정 > 분위기 (우선순위)
+        // 감정 풀: 스토리 키워드 > 상황 단어 > 노래주제 > 세대 핵심 감정 > 분위기 (우선순위)
         const emotions = [...storyKeywords, ...storyWords, ...storyNameWords, ...themeWords,
-                          ...sitWords, ...genEmotions, ...moodEmotions, ...genreEmotions];
+                          ...sitWords, ...themeNameWords, ...genEmotions, ...moodEmotions, ...genreEmotions];
 
         // 6. 이미지 풀: 스토리 > 상황 단어 > 세대별 구체 장면 > 기본값 (자료 5부 요소 5)
         const storyImages = storyWords.filter(w =>
@@ -2945,6 +3038,17 @@ document.addEventListener('DOMContentLoaded', () => {
             ? [...storyImages, ...sitImageWords, ...genSceneImgs, ...genDefaultImgs]
             : [...sitImageWords, ...genSceneImgs, ...genDefaultImgs];
         places.forEach(p => { if (p && !images.includes(p)) images.push(p); });
+
+        // {place} 전용 풀 — images와 분리하여 중복 단어 방지
+        const placeDefaults = {
+            teens:          ['학교 앞', '교문', '도서관', '체육관', '편의점', '버스 정류장'],
+            'young-adults': ['카페', '지하철역', '회사 앞', '편의점', '공원 벤치', '골목'],
+            'middle-aged':  ['퇴근길', '지하철', '마트 앞', '아파트 단지', '골목', '카페'],
+            seniors:        ['공원', '시장', '고향 마을', '텃밭 옆', '경로당', '병원 앞']
+        };
+        const placePool = [...(places.length > 0 ? places : []),
+                           ...(selectedSituation ? [selectedSituation] : []),
+                           ...(gen && placeDefaults[gen] ? placeDefaults[gen] : ['카페', '거리', '공원', '바다', '하늘 아래'])];
 
         // 시간 풀
         const storyTimes = storyWords.filter(w =>
@@ -3027,13 +3131,36 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // {place} 영어 쌍 (기본 장소 매핑)
+        const placeEngMap = {
+            '카페': ['Café','카페'], '거리': ['Street','거리'], '공원': ['Park','공원'],
+            '바다': ['Ocean','바다'], '하늘 아래': ['Under the Sky','하늘 아래'],
+            '지하철': ['Subway','지하철'], '학교 앞': ['School Gate','학교 앞'],
+            '교문': ['School Gate','교문'], '버스 정류장': ['Bus Stop','버스 정류장'],
+            '편의점': ['Convenience Store','편의점'], '회사 앞': ['Office Street','회사 앞'],
+            '아파트 단지': ['Apartment','아파트 단지'], '골목': ['Alley','골목'],
+            '마트 앞': ['Market Street','마트 앞'], '병원 앞': ['Hospital Road','병원 앞'],
+            '고향 마을': ['Hometown','고향 마을'], '경로당': ['Community Center','경로당']
+        };
+        const engPlacePairs = [];
+        placePool.forEach(p => {
+            if (placeEngMap[p] && !engPlacePairs.some(x => x[0] === placeEngMap[p][0])) engPlacePairs.push(placeEngMap[p]);
+        });
+        if (engPlacePairs.length < 2) {
+            [['Café','카페'],['Street','거리'],['Park','공원'],['Night Road','밤길']].forEach(p => {
+                if (!engPlacePairs.some(e => e[0] === p[0])) engPlacePairs.push(p);
+            });
+        }
+
         return {
             emotions: [...new Set(emotions)],
             images: [...new Set(images)],
+            placePool: [...new Set(placePool)],
             times,
             engEmotionPairs,
             engImagePairs,
             engTimePairs,
+            engPlacePairs,
             engEmotions: engEmotionPairs.map(p => p[0]),
             engImages: engImagePairs.map(p => p[0]),
             engTimes: engTimePairs.map(p => p[0]),
@@ -3044,6 +3171,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 영어-한국어 대응 패턴 쌍 (영어 패턴 → 자연스러운 한국어 번역 패턴)
+    // 주의: {emotion}에는 명사형 단어가 들어오므로 동사 패턴 금지 (Do You X? → Do You Feel X?)
     const ENG_KOR_PATTERN_PAIRS = [
         // emotion_image
         ['{emotion} in the {image}', '{image} 속의 {emotion}'],
@@ -3054,10 +3182,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ['{image} and {emotion}', '{image}와 {emotion}'],
         ['{emotion} Like {image}', '{image} 같은 {emotion}'],
         ['Chasing {emotion}', '{emotion}을 쫓아서'],
-        // question
-        ['Do You {emotion}?', '너도 {emotion}을 느껴?'],
-        ['What If {emotion}?', '{emotion}이라면 어떨까'],
-        ['Can You {emotion}?', '{emotion}할 수 있을까'],
+        // question (명사 호환 — "Do You Feel X?", "What Is X?")
+        ['Do You Feel {emotion}?', '너도 {emotion}을 느껴?'],
+        ['What Is {emotion}?', '{emotion}이란 뭘까'],
+        ['Can You Feel {emotion}?', '{emotion}할 수 있을까'],
         ['Remember the {image}?', '{image} 기억나?'],
         ['Where Did {emotion} Go?', '{emotion}은 어디로 갔을까'],
         // paradox
@@ -3101,11 +3229,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 ...genPatterns, ...genPatterns, ...genPatterns
             ];
             const pattern = pick(allPatterns);
+            // {place}는 images와 분리된 placePool 사용 → 동일 단어 중복 방지
             return pattern
                 .replace('{emotion}', pick(ingredients.emotions.length > 0 ? ingredients.emotions : ['마음']))
                 .replace('{image}', pick(ingredients.images))
                 .replace('{time}', pick(ingredients.times))
-                .replace('{place}', pick(ingredients.images));
+                .replace('{place}', pick(ingredients.placePool && ingredients.placePool.length > 0 ? ingredients.placePool : ingredients.images));
         } else {
             // 영어: 영어 + (자연스러운 한국어 번역) 형식으로 생성
             const pair = pick(ENG_KOR_PATTERN_PAIRS);
@@ -3115,18 +3244,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const emotionPair = pickPair(ingredients.engEmotionPairs);
             const imagePair = pickPair(ingredients.engImagePairs);
             const timePair = pickPair(ingredients.engTimePairs);
+            // {place}는 engPlacePairs 전용 풀 사용 → imagePair와 중복 방지
+            const placePair = pickPair(ingredients.engPlacePairs && ingredients.engPlacePairs.length > 0 ? ingredients.engPlacePairs : ingredients.engImagePairs);
 
             const engTitle = engPattern
                 .replace('{emotion}', emotionPair[0])
                 .replace('{image}', imagePair[0])
                 .replace('{time}', timePair[0])
-                .replace('{place}', imagePair[0]);
+                .replace('{place}', placePair[0]);
 
             const korTitle = korPattern
                 .replace('{emotion}', emotionPair[1])
                 .replace('{image}', imagePair[1])
                 .replace('{time}', timePair[1])
-                .replace('{place}', imagePair[1]);
+                .replace('{place}', placePair[1]);
 
             return `${engTitle} (${korTitle})`;
         }
@@ -3194,7 +3325,8 @@ document.addEventListener('DOMContentLoaded', () => {
             do {
                 title = generateStoryBasedTitle(lang, ingredients);
                 tries++;
-            } while ((used.has(title) || previouslyGeneratedTitles.has(title) || isTitleTooSimilar(title)) && tries < 50);
+            } while ((used.has(title) || previouslyGeneratedTitles.has(title) || isTitleTooSimilar(title)
+                      || (tries < 30 && hasBatchKeywordOverlap(title, used))) && tries < 50);
             if (!used.has(title)) {
                 result.push(title);
                 used.add(title);
@@ -3206,7 +3338,8 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < poolTitleCount && available.length > 0; i++) {
             let idx = Math.floor(Math.random() * available.length);
             let tries = 0;
-            while ((used.has(available[idx]) || previouslyGeneratedTitles.has(available[idx]) || isTitleTooSimilar(available[idx])) && tries < 100) {
+            while ((used.has(available[idx]) || previouslyGeneratedTitles.has(available[idx]) || isTitleTooSimilar(available[idx])
+                    || (tries < 50 && hasBatchKeywordOverlap(available[idx], used))) && tries < 100) {
                 idx = Math.floor(Math.random() * available.length);
                 tries++;
             }
