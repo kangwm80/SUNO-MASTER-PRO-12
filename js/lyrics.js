@@ -1291,11 +1291,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (btn.classList.contains('active')) {
                     btn.classList.remove('active');
                     selectedAge = '';
+                    state.generations = [];
                     themeDropdownArea.style.display = 'none';
                 } else {
                     ageGroupBtns.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     selectedAge = val;
+                    state.generations = [val];
                     themeDropdownArea.style.display = 'block';
                 }
                 // 연령대 바뀌면 하위 초기화
@@ -2601,83 +2603,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const GEN_TITLE_STYLE = {
         teens: {
             korean: [
-                // 첫사랑·설렘 — 누구나 경험한 그 순간
+                // 첫사랑·설렘 (자료 4부 원칙2 방식1·2 반영)
+                '처음이라서', '설레는데 무서워', '너만 봐',
                 '처음 느꼈던 그 설렘으로', '이어폰 한 쪽 건네던 그 순간', '좋아한다 못 했던 말',
-                '매일 같은 자리에 앉던 너', '손 잡으면 될 것 같았던 순간',
-                '그냥 친구라고 했던 말이 후회돼', '졸업식 날 끝내 못 한 말',
-                '같은 노래 들으며 걷던 등굣길', '단톡방에서만 용감한 내 마음',
-                '쪽지 돌리다 들킨 그 자습시간', '너만 보면 갑자기 서툴러지던',
-                // 10대 공감 일상
-                '친구가 좋아하는 그 애가 나라면', '다 알면서 모른 척해 줘',
-                '졸업하고 처음 만난 날의 어색함', '그날 이후로 달라진 것들',
+                '매일 같은 자리에 앉던 너', '그냥 친구라고 했던 말이 후회돼',
+                '졸업식 날 끝내 못 한 말', '같은 노래 들으며 걷던 등굣길',
+                '단톡방에서만 용감한 내 마음', '너만 보면 갑자기 서툴러지던',
+                // 10대 구체 상황 (교실·야자·교복)
+                '교복 입고 달려갔던 그 길', '야자 끝나고 걷던 그 밤길',
+                '수능 전날 밤에 네 생각이 났어', '교실 창밖으로 보이던 너',
                 '말 못 하고 스쳐간 너', '우리 그냥 친구 할 수 있을까',
-                '아무 말도 안 했는데 다 아는 눈빛', '학교 끝나고 일부러 돌아가던 길',
-                '내가 먼저 말 걸고 싶었던 그 순간', '혼자 보내는 주말이 싫어진 이유'
+                '학교 끝나고 일부러 돌아가던 길', '혼자 보내는 주말이 싫어진 이유'
             ],
             english: ['Crush', 'Feels', 'Obsessed', 'No Cap', 'Vibe Check', 'Main Character', 'Glow Up', 'Slay',
                       'Lowkey', 'Highkey', 'For Real', 'No Filter', 'On Repeat', 'My Type', 'Catch Me',
                       'So Into You', 'Can\'t Stop', 'Bad Idea', 'Sweet Chaos', 'Plot Twist',
-                      'Butterflies', 'First Time', 'Still Thinking Bout You', 'Almost Said It']
+                      'Butterflies', 'First Time', 'Still Thinking Bout You', 'Almost Said It',
+                      'School Crush', 'After Class', 'Too Scared to Say']
         },
         'young-adults': {
             korean: [
-                // 번아웃·공감·현실 — 누구나 한 번쯤
+                // 번아웃·현실·위로 (자료 4부 원칙2 방식1·2 반영)
+                '버텨', '혼자도 괜찮아', '이게 나인가봐',
+                '진짜 지쳤어', '텅 빈 통장을 보면서', '혼자 하는 술 한 잔',
+                '알바 끝나고 걷는 그 길', '취업 전날 밤에',
+                // 공감 상황
                 '아무것도 아닌 것에 울었던 날', '잘 지내냐고 묻고 싶었어',
                 '모두가 한 번쯤 우는 새벽', '괜찮다고 했지만 괜찮지 않았어',
-                '그게 마지막인 줄 몰랐던 날', '살다 보니 그게 맞더라',
-                '말 못 했던 그 한마디', '천천히 가도 괜찮은 이유',
                 '다 때려치우고 싶던 그 밤', '혼자인 게 편한데 왜 외롭지',
-                // 자기 위로·성장
-                '어른이 되어도 여전히 서툰 것들', '나를 잃어가던 시절',
+                // 자기 위로
                 '그래도 오늘 하루 잘 살았어', '퇴근길에 혼자 듣는 노래',
                 '괜찮지 않아도 괜찮은 날', '나한테 제일 못해줬던 나에게',
-                '그냥 살다 보면 되는 거야', '아무것도 안 해도 되는 하루',
                 '지쳐도 여기 있어줘', '울어도 돼 오늘만큼은'
             ],
             english: ['Burnout', 'Adulting', 'Self Love', 'Let It Be', 'On My Own', 'Growing Pains', 'Real Talk',
                       'Enough', 'Breathe', 'My Pace', 'Late Night', 'Quarter Life', 'Worth It', 'Take Your Time',
-                      'Figure It Out', 'Glass Half Full', 'Raw Deal', 'Slow Down', 'Room to Grow', 'Honest',
-                      'Tired But Fine', '3AM Thoughts', 'Almost Made It', 'You\'re Not Alone']
+                      'Figure It Out', 'Slow Down', 'Room to Grow', 'Honest',
+                      'Tired But Fine', '3AM Thoughts', 'Almost Made It', 'You\'re Not Alone',
+                      'Empty Wallet Vibes', 'After Work', 'Just Me Tonight']
         },
         'middle-aged': {
             korean: [
-                // 인정·감사·세월 — 깊은 공감
-                '그 사람 덕분에 여기까지 왔다', '말 못 했던 사랑이 아직도 남아',
-                '살아보니 알게 되는 것들', '참 잘 살았다 오늘도',
+                // 수고·위로·세월 (자료 4부 원칙2 방식1·2 반영)
+                '수고했어 오늘도', '퇴근길에', '그때의 우리', '여전히 괜찮아?',
+                '불금이야', '육아 퇴근길', '전세 만기일',
+                // 인정·감사
+                '그 사람 덕분에 여기까지 왔다', '살아보니 알게 되는 것들',
                 '아무것도 아닌 것에 눈물 나는 날', '지금 이 순간이 얼마나 소중한지',
                 '그 하나로 평생을 살았다', '수고했다 나 자신아',
-                // 가족·세월·반성
+                // 가족·세월
                 '자식이 어느새 내 키를 넘어선 날', '한 번만 더 돌아갈 수 있다면',
-                '늦게서야 알게 된 고마운 사람', '화내지 말걸 그랬어 그날',
-                '뒤돌아보면 다 행복이었다', '너희가 있어서 버텼다',
                 '엄마도 처음이야 미안해', '그때는 몰랐어 그게 행복인 줄',
-                '오십 넘어 처음 안 것들', '세월이 가르쳐 준 것들'
+                '뒤돌아보면 다 행복이었다', '너희가 있어서 버텼다'
             ],
             english: ['Worth Every Mile', 'Standing Strong', 'Golden Years', 'Through It All', 'Still Standing',
                       'Grateful Heart', 'Time Well Spent', 'Built to Last', 'Rise Again', 'Legacy',
-                      'Steady Ground', 'Unshaken', 'Proud Heart', 'Long Road Home', 'Second Wind',
-                      'Timeless Bond', 'Seasons Change', 'Iron Will', 'Heart of Gold', 'Homebound',
-                      'Everything Was Enough', 'All Along It Was You', 'I Should Have Said More']
+                      'After Work', 'Long Road Home', 'Second Wind', 'Timeless Bond', 'Heart of Gold',
+                      'Everything Was Enough', 'All Along It Was You', 'I Should Have Said More',
+                      'Friday Night Tired', 'Still Here', 'Worth the Grind']
         },
         seniors: {
             korean: [
-                // 감사·가족·세월 — 따뜻한 울림
+                // 감사·가족·세월 (자료 4부 원칙2 방식1·2 반영)
+                '세월이 빠르네', '밥은 먹었어', '행복했으면 해',
+                '이제 손자가', '빈방이 된 네 방', '건강하게 살자',
+                // 따뜻한 울림
                 '이 나이 되어 알게 된 것', '당신이 곁에 있어 다 괜찮았다',
-                '모든 날이 소중한 선물이었다', '살아온 날들이 노래가 되어',
-                '그 시절 덕분에 지금의 내가', '손주 얼굴 보면 다 잊어버려',
-                '이만하면 잘 살았다 싶은 날', '아직 고마운 사람들이 많아서',
-                '봄이 또 왔다는 것이 감사해', '너희 웃음소리만 들려도 행복해',
+                '살아온 날들이 노래가 되어', '그 시절 덕분에 지금의 내가',
+                '이만하면 잘 살았다 싶은 날', '봄이 또 왔다는 것이 감사해',
                 '같이 늙어가는 것도 행복이야', '몇 번을 다시 태어나도 당신',
-                '지나고 나니 다 추억이 되더라', '건강한 오늘이 최고의 하루',
-                '사랑한다는 말 못 해서 미안해', '당신만 있으면 그걸로 족해',
-                '오래오래 함께해요', '살아있다는 게 얼마나 감사한지',
+                '건강한 오늘이 최고의 하루', '사랑한다는 말 못 해서 미안해',
                 '세월아 조금만 천천히 가다오', '곱게 늙어 가고 싶다'
             ],
             english: ['Thank You', 'Blessed Life', 'Forever Young', 'Gentle Days', 'Family Song',
                       'Golden Sunset', 'With Gratitude', 'Peaceful Heart', 'Together Always', 'Beautiful Life',
-                      'Warm Embrace', 'Heart Full', 'Grace Notes', 'Simple Joy', 'Love Remains',
-                      'Cherished Days', 'Held Close', 'Soft Morning', 'Ever Grateful', 'Home Sweet Home',
-                      'Growing Old With You', 'Every Day a Gift', 'Still Grateful']
+                      'Warm Embrace', 'Heart Full', 'Simple Joy', 'Love Remains',
+                      'Cherished Days', 'Held Close', 'Ever Grateful', 'Home Sweet Home',
+                      'Growing Old With You', 'Every Day a Gift', 'Still Grateful',
+                      'Did You Eat Today', 'Stay Healthy', 'Time Flies']
         }
     };
 
@@ -2834,22 +2837,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return found;
     }
 
-    // 스토리/분위기 키워드에서 제목 재료 추출 (2단계 데이터 완전 반영)
+    // 스토리/분위기 키워드에서 제목 재료 추출 (세대별 언어 가이드 완전 반영)
     function extractTitleIngredients() {
         const d = state.promptData || {};
         const story = state.appliedStory || {};
         const moods = d.mood || [];
         const places = d.place || [];
+        const genres = d.genres || [];
+        const gen = state.generations && state.generations.length > 0 ? state.generations[0] : '';
 
         // 1. 스토리에서 직접 추출한 핵심 단어 (가장 중요)
         const storyWords = extractWordsFromStory(story.desc || '');
         const storyNameWords = extractWordsFromStory(story.name || '');
         const themeWords = extractWordsFromStory(story.theme || '');
 
-        // 2. 스토리 키워드 (사용자가 선택한 주제의 키워드)
+        // 2. 스토리 키워드
         const storyKeywords = story.keywords || [];
 
-        // 3. 분위기에서 감정 추출
+        // 3. situationText/situationCategory에서 단어 추출 (파이프라인 데이터 반영)
+        const sitText = d.situationText || d.situationCategory || '';
+        const sitWords = extractWordsFromStory(sitText);
+
+        // 4. 분위기에서 감정 추출 (기본 무드맵)
         const emotionMap = {
             '편안한': ['평온', '안식', '쉼'], '힐링': ['치유', '회복', '온기'],
             '포근한': ['따스함', '온기', '포근함'], '따뜻한': ['온기', '사랑', '따스함'],
@@ -2863,7 +2872,10 @@ document.addEventListener('DOMContentLoaded', () => {
             '파워풀한': ['열정', '도전', '의지'], '자신감': ['당당함', '자신감', '빛남'],
             '위로': ['위로', '공감', '따뜻함'], '비오는날': ['빗소리', '그리움', '감성'],
             '일몰': ['석양', '아름다움', '감동'], '집중': ['몰입', '집중', '흐름'],
-            '공부할때': ['집중', '성장', '도전']
+            '공부할때': ['집중', '성장', '도전'],
+            '드라이브': ['자유', '바람', '달림'], '카페': ['여유', '향기', '쉼'],
+            '여행': ['설렘', '낯선곳', '자유'], '운동': ['열정', '땀', '도전'],
+            '힐링': ['치유', '회복', '온기']
         };
         const moodEmotions = [];
         moods.forEach(m => {
@@ -2871,21 +2883,68 @@ document.addEventListener('DOMContentLoaded', () => {
             else moodEmotions.push(m);
         });
 
-        // 감정 풀: 스토리 키워드 > 스토리 추출어 > 분위기 (우선순위)
-        const emotions = [...storyKeywords, ...storyWords, ...storyNameWords, ...themeWords, ...moodEmotions];
+        // 5. 세대별 핵심 감정 키워드 (자료 3부·5부 요소 1 완전 반영)
+        const genCoreEmotions = {
+            teens:        ['설렘', '짝사랑', '인정받고 싶은', '두근거림', '소속감', '부끄러움', '첫사랑', '친구'],
+            'young-adults': ['번아웃', '지침', '외로움', '취업 불안', '혼자', '공정', '자립', '현실'],
+            'middle-aged': ['수고', '위로', '그리움', '워라밸', '책임', '자기 의심', '집값', '지쳐도'],
+            seniors:      ['건강', '가족', '세월', '감사', '손자', '그리움', '함께', '행복']
+        };
+        const genEmotions = gen && genCoreEmotions[gen] ? genCoreEmotions[gen] : [];
 
-        // 이미지 풀: 스토리에서 추출한 구체적 이미지 우선
+        // 장르 키워드도 감정 풀에 추가
+        const genreEmotions = [];
+        genres.forEach(g => {
+            const gl = (g || '').toLowerCase();
+            if (gl.includes('발라드') || gl.includes('ballad')) genreEmotions.push('그리움', '진심');
+            if (gl.includes('팝') || gl.includes('pop')) genreEmotions.push('설렘', '에너지');
+            if (gl.includes('재즈') || gl.includes('jazz')) genreEmotions.push('여유', '감성');
+            if (gl.includes('트로트') || gl.includes('trot')) genreEmotions.push('세월', '흥');
+            if (gl.includes('r&b') || gl.includes('알앤비')) genreEmotions.push('감성', '사랑');
+            if (gl.includes('힙합') || gl.includes('hip')) genreEmotions.push('도전', '자신감');
+            if (gl.includes('록') || gl.includes('rock')) genreEmotions.push('열정', '자유');
+        });
+
+        // 감정 풀: 스토리 키워드 > 상황 단어 > 세대 핵심 감정 > 분위기 (우선순위)
+        const emotions = [...storyKeywords, ...storyWords, ...storyNameWords, ...themeWords,
+                          ...sitWords, ...genEmotions, ...moodEmotions, ...genreEmotions];
+
+        // 6. 이미지 풀: 스토리 > 상황 단어 > 세대별 구체 장면 > 기본값 (자료 5부 요소 5)
         const storyImages = storyWords.filter(w =>
             ['교실','학교','카페','공원','바다','하늘','별','달','해','비','눈','꽃','나무','숲',
              '거리','골목','계단','지붕','창문','문','다리','강','호수','산','섬','항구',
              '버스','기차','비행기','자동차','자전거','우산','사진','일기','노래','기타','피아노',
              '라면','커피','맥주','초콜릿','반지','선물','LP','영화','앨범','풍선',
              '놀이공원','롤러코스터','모닥불','인스타','카톡','프로필',
-             '흰머리','돋보기','된장찌개','소개팅'].includes(w)
+             '흰머리','돋보기','된장찌개','소개팅',
+             '교복','야자','수능','급식','자취방','월세','알바','퇴근길','지하철','마트',
+             '회의실','동창','병원','아파트','텃밭','손자','고향','시장'].includes(w)
         );
-        const defaultImages = ['하늘', '바람', '별빛', '달빛', '노을', '꽃', '바다', '길', '창문', '편지', '사진'];
-        const images = storyImages.length > 0 ? [...storyImages, ...defaultImages] : [...defaultImages];
-        places.forEach(p => images.push(p));
+
+        // 세대별 구체 일상 장면 (자료 5부 요소 5 완전 반영)
+        const genScenes = {
+            teens:        ['교실', '교복', '야자', '수능', '이어폰', '단톡방', '교문', '급식', '첫사랑'],
+            'young-adults': ['자취방', '월세', '알바', '카페', '텅 빈 통장', '혼밥', '퇴근 버스', '취업'],
+            'middle-aged': ['퇴근길', '지하철', '회사', '유치원 앞', '마트', '불금', '전세'],
+            seniors:      ['텃밭', '손자', '고향', '시장', '빈방', '경로당', '사진첩']
+        };
+        const defaultImages = {
+            teens:        ['교실', '이어폰', '교복', '단톡방', '하늘', '창문', '카페'],
+            'young-adults': ['자취방', '카페', '퇴근 버스', '혼밥', '달빛', '창문', '거리'],
+            'middle-aged': ['퇴근길', '지하철', '창문', '노을', '사진', '마트'],
+            seniors:      ['텃밭', '고향', '노을', '사진첩', '꽃', '손자', '달빛']
+        };
+        const fallbackImages = ['노을', '창문', '길', '사진', '바람', '바다', '별빛'];
+        const genDefaultImgs = gen && defaultImages[gen] ? defaultImages[gen] : fallbackImages;
+        const genSceneImgs = gen && genScenes[gen] ? genScenes[gen] : [];
+
+        // situation 단어를 이미지 풀에 추가
+        const sitImageWords = sitWords.filter(w => w.length > 1);
+
+        const images = storyImages.length > 0
+            ? [...storyImages, ...sitImageWords, ...genSceneImgs, ...genDefaultImgs]
+            : [...sitImageWords, ...genSceneImgs, ...genDefaultImgs];
+        places.forEach(p => { if (p && !images.includes(p)) images.push(p); });
 
         // 시간 풀
         const storyTimes = storyWords.filter(w =>
@@ -2909,7 +2968,12 @@ document.addEventListener('DOMContentLoaded', () => {
             '프러포즈': ['Proposal','프러포즈'], '졸업': ['Graduation','졸업'],
             '수고': ['Well Done','수고'], '고생': ['Hard Work','고생'],
             '성장': ['Growing','성장'], '도전': ['Challenge','도전'], '열정': ['Passion','열정'],
-            '평온': ['Serenity','평온'], '온기': ['Warmth','온기'], '치유': ['Healing','치유']
+            '평온': ['Serenity','평온'], '온기': ['Warmth','온기'], '치유': ['Healing','치유'],
+            '번아웃': ['Burnout','번아웃'], '지침': ['Exhausted','지침'], '외로움': ['Lonely','외로움'],
+            '자립': ['Independence','자립'], '현실': ['Reality','현실'], '혼자': ['Alone','혼자'],
+            '수고': ['Well Done','수고'], '워라밸': ['Balance','워라밸'], '그리움': ['Longing','그리움'],
+            '건강': ['Health','건강'], '가족': ['Family','가족'], '세월': ['Time Flies','세월'],
+            '감사': ['Grateful','감사'], '설렘': ['Excited','설렘'], '소속감': ['Belonging','소속감']
         };
         const korToEngImage = {
             '교실': ['Classroom','교실'], '카페': ['Café','카페'], '공원': ['Park','공원'],
@@ -2921,7 +2985,15 @@ document.addEventListener('DOMContentLoaded', () => {
             '라면': ['Ramen','라면'], '거리': ['Street','거리'], '다리': ['Bridge','다리'],
             '강': ['River','강'], '호수': ['Lake','호수'], '숲': ['Forest','숲'],
             '인스타': ['Instagram','인스타'], '카톡': ['Message','카톡'],
-            '풍선': ['Balloon','풍선'], '선물': ['Gift','선물'], '일기': ['Diary','일기']
+            '풍선': ['Balloon','풍선'], '선물': ['Gift','선물'], '일기': ['Diary','일기'],
+            '교복': ['School Uniform','교복'], '야자': ['Night Study','야자'],
+            '수능': ['College Exam','수능'], '이어폰': ['Earphones','이어폰'],
+            '자취방': ['Studio Room','자취방'], '월세': ['Monthly Rent','월세'],
+            '알바': ['Part-time','알바'], '퇴근길': ['Commute Home','퇴근길'],
+            '지하철': ['Subway','지하철'], '마트': ['Grocery Store','마트'],
+            '회의실': ['Meeting Room','회의실'], '텃밭': ['Garden','텃밭'],
+            '손자': ['Grandchild','손자'], '고향': ['Hometown','고향'],
+            '시장': ['Market','시장'], '사진첩': ['Photo Album','사진첩']
         };
         const korToEngTime = {
             '봄': ['Spring','봄'], '여름': ['Summer','여름'], '가을': ['Autumn','가을'], '겨울': ['Winter','겨울'],
@@ -3064,7 +3136,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const lang = getSelectedLanguage();
         const gen = state.generations && state.generations.length > 0 ? state.generations[0] : '';
         const ingredients = extractTitleIngredients();
-        const hasStory = ingredients.storyDesc.length > 0 || ingredients.emotions.length > 0;
+        // 스토리 미적용 시에도 mood/situation/genres 데이터가 있으면 스토리 기반 생성 활성화
+        const d = state.promptData || {};
+        const hasPipelineData = (d.mood || []).length > 0 || (d.situationText || d.situationCategory || '').length > 0
+            || (d.genres || []).length > 0 || (d.place || []).length > 0;
+        const hasStory = ingredients.storyDesc.length > 0 || ingredients.emotions.length > 0 || hasPipelineData;
 
         // 세대별 제목 풀 구성 — 설정 언어에 맞는 제목만 사용
         let pool = [];
