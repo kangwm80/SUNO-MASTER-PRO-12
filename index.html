@@ -8,6 +8,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <!-- 비밀번호 보호 화면 -->
+    <div id="pwOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:50px 40px;text-align:center;max-width:400px;width:90%;backdrop-filter:blur(10px);">
+            <div style="font-size:48px;margin-bottom:16px;">🎵</div>
+            <h2 style="color:#fff;font-size:22px;font-weight:700;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif;">SUNO MASTER PRO 12</h2>
+            <p style="color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:32px;font-family:'Noto Sans KR',sans-serif;">비밀번호를 입력해주세요</p>
+            <input id="pwInput" type="password" placeholder="비밀번호 입력"
+                style="width:100%;padding:14px 16px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:16px;text-align:center;outline:none;box-sizing:border-box;font-family:'Noto Sans KR',sans-serif;margin-bottom:12px;"
+                onkeydown="if(event.key==='Enter')checkPw()">
+            <button onclick="checkPw()"
+                style="width:100%;padding:14px;border-radius:10px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-bottom:12px;">
+                입장하기
+            </button>
+            <p id="pwError" style="color:#ff6b6b;font-size:13px;min-height:20px;font-family:'Noto Sans KR',sans-serif;"></p>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const PW = 'suno1234'; // 비밀번호 변경 시 이 값만 수정
+            const KEY = 'smp12_auth';
+            const overlay = document.getElementById('pwOverlay');
+            if (sessionStorage.getItem(KEY) === '1') {
+                overlay.style.display = 'none';
+            } else {
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => { const i = document.getElementById('pwInput'); if(i) i.focus(); }, 100);
+            }
+        })();
+        function checkPw() {
+            const PW = 'suno1234';
+            const KEY = 'smp12_auth';
+            const val = document.getElementById('pwInput').value;
+            if (val === PW) {
+                sessionStorage.setItem(KEY, '1');
+                document.getElementById('pwOverlay').style.display = 'none';
+                document.body.style.overflow = '';
+            } else {
+                document.getElementById('pwError').textContent = '비밀번호가 틀렸습니다.';
+                document.getElementById('pwInput').value = '';
+                document.getElementById('pwInput').focus();
+            }
+        }
+    </script>
+
     <!-- 상단 네비게이션 -->
     <header class="header">
         <div class="header-left">
