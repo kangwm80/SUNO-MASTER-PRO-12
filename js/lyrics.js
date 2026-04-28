@@ -141,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('navInfo').textContent = `${step} / 5 단계`;
         const btnNext = document.getElementById('btnNext');
-        btnNext.disabled = false;
+        // 1단계는 데이터 로드 여부로 판단, 나머지는 항상 활성화
+        btnNext.disabled = (step === 1 && !state.promptData);
 
         if (step === 2) { autoFillStep2(); initThemeDropdown(); forceShowDataInfo(); }
         if (step === 4) { autoRecommendSongform(); autoSelectLyricsGen(); }
@@ -2455,28 +2456,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 언어별 제목 데이터베이스
+    // 언어별 제목 데이터베이스 (감동·공감·트렌디 위주)
     const TITLE_DB = {
         korean: [
-            '그 밤', '첫눈', '새벽빛', '너에게', '우리의 계절', '마지막 인사', '다시 봄', '빗소리',
-            '푸른 밤', '손끝', '기다림', '그때 우리', '별이 되어', '안녕 오늘', '내 마음은',
-            '너의 온도', '흔들리는 꽃', '달빛 아래', '어디쯤', '괜찮은 척', '시간의 끝',
-            '바람이 분다', '눈부신 하루', '고마운 사람', '다 괜찮아', '오늘도 수고했어',
-            '떠나지 마', '한 걸음 더', '너만의 길', '아직 여기', '빈자리', '마지막 페이지',
-            '같은 하늘', '잊지 못할', '내일의 나', '작은 기적', '사랑이란', '그리움의 색',
-            '봄날의 기억', '겨울 바다'
+            // 사랑·그리움 (보편 공감)
+            '사랑했잖아', '보고 싶어', '못 잊겠어', '기다릴게', '그리워서',
+            '아직 너야', '처음부터 지금까지', '네 곁에 있을게', '그래도 너야', '돌아올게',
+            // 위로·자기 공감
+            '혼자가 아냐', '잘 지내?', '괜찮다 거짓말', '오늘 하루도', '잘 참았어',
+            '서툰 어른', '그래도 살아야지', '울어도 돼', '나한테 잘해줘', '지금 이대로',
+            // 이별·아픔
+            '안녕 잘 있어', '마지막 인사야', '그 자리에', '먼저 가', '혼자 남아서',
+            '못 보낸 말', '그때 왜 그랬을까', '잊어야 하는데', '아직도 거기 있어?', '이별 후에',
+            // 성장·희망
+            '다시 시작해', '한 번만 더', '내일의 나에게', '변하지 마', '그래도 괜찮아',
+            '살다 보면', '처음이니까', '아직 늦지 않아', '앞으로 나아가', '버텨줘서 고마워'
         ],
         english: [
-            'Beautiful Pain', 'Sweet Goodbye', 'Loud Silence', 'Cold Fire',
-            'Rainy Window', 'Neon Lights', 'Empty Chair', 'Paper Plane', 'Last Train',
-            'Golden Hour', 'Ocean Eyes', 'Better Days', 'Still Here',
-            'Midnight Rain', 'Burning Low', 'Quiet Storm', 'Fading Light',
-            'Silent Waves', 'Crystal Tears', 'Broken Crown', 'Velvet Sky',
-            'Restless Heart', 'Shadow Dance', 'Winter Sun', 'Neon Dreams',
-            'Glass Heart', 'Silver Lining', 'Frozen Time', 'Bitter Sweet',
-            'Distant Shore', 'Falling Stars', 'Empty Roads', 'Lost Signal',
-            'Crimson Tide', 'Paper Moon', 'Wasted Youth', 'Blind Faith',
-            'Chasing Dawn', 'Endless Blue', 'Ghost Town', 'Iron Rose'
+            // 감성 팝 발라드 스타일
+            'Stay With Me', 'One More Time', 'Before I Go', "Can't Let Go", 'Come Back to Me',
+            'Miss You Bad', 'Never Enough', 'Right Here', 'Say It Now', 'Hold On Tight',
+            // 위로·공감
+            'All I Want', 'In My Arms', 'Just Breathe', 'Save Me Tonight', 'Find You',
+            'Better Together', 'Promise Me', 'Without You', 'Wide Awake', 'Not Alone',
+            // 이별·그리움
+            'Last Night', 'Almost Home', 'Let It Rain', 'Far Away', 'Same Stars',
+            'No Goodbye', 'Running Back', 'Perfect Timing', 'Heart On Fire', 'I Found You',
+            // 성장·자기 사랑
+            'Starting Over', 'Carry On', 'One Last Dance', 'The Long Way', 'Worth It All',
+            'Catch Me When I Fall', 'Still Standing', 'Rise Again', 'New Chapter', 'Believe in Me'
         ],
         japanese: [
             '\u5915\u7126\u308C\u306E\u9053', '\u82B1\u706B\u306E\u591C', '\u604B\u306E\u6B4C', '\u661F\u7A7A\u306E\u4E0B',
@@ -3060,8 +3068,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 풀이 부족하면 해당 언어 기본 DB로만 보충
-        if (pool.length < count * 2) {
+        // GEN_TITLE_STYLE이 없거나 부족할 때만 TITLE_DB로 보충 (스토리 생성 우선)
+        if (pool.length < count) {
             const baseTitles = TITLE_DB[lang] || [];
             pool = [...pool, ...baseTitles.filter(t => !pool.includes(t))];
         }
@@ -3085,8 +3093,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const needed = count - lockedTitles.length;
         const used = new Set(lockedTitles);
 
-        // 스토리가 있으면: 절반은 스토리 기반 동적 생성, 절반은 풀에서 선택
-        const storyTitleCount = hasStory ? Math.ceil(needed * 0.6) : 0;
+        // 스토리 기반 동적 생성 80% / 풀 선택 20% (감동·공감 극대화)
+        const storyTitleCount = hasStory ? Math.ceil(needed * 0.8) : 0;
         const poolTitleCount = needed - storyTitleCount;
 
         // 1. 스토리 기반 동적 생성 (매번 새로운 조합 → 중복 거의 없음)
@@ -3356,18 +3364,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (!alreadyFormatted) {
                         if (hasKorean) {
-                            // 한국어 입력 → 설정 언어로 자동 번역 (한국어/혼합이면 그대로)
-                            if (lang !== 'korean' && lang !== 'mixed') {
+                            if (lang === 'korean') {
+                                // 한국어 설정 → 그대로 유지
+                                finalTitle = rawInput;
+                            } else if (lang === 'mixed') {
+                                // 혼합 설정 → 그대로 유지
+                                finalTitle = rawInput;
+                            } else {
+                                // 외국어 설정 → 번역 시도
+                                // translateTitleToLanguage는 성공 시 "Foreign (한국어)" 형식으로 반환
+                                // 실패 시 rawInput 그대로 반환
                                 const translated = translateTitleToLanguage(rawInput, lang);
-                                // 번역 성공 여부 확인: 한국어 문자가 없으면 성공
-                                const translationOk = translated !== rawInput && !/[가-힣]/.test(translated);
-                                if (translationOk) {
-                                    finalTitle = translated; // "외국어번역 (한국어원본)" 형식
+                                if (translated !== rawInput) {
+                                    finalTitle = translated; // 이미 "외국어 (한국어)" 형식
                                 } else {
-                                    // 해당 언어 번역 실패 → 영어로 fallback 시도
+                                    // 해당 언어 번역 실패 → 영어 fallback
                                     const engTranslated = translateTitleToLanguage(rawInput, 'english');
-                                    const engOk = engTranslated !== rawInput && !/[가-힣]/.test(engTranslated);
-                                    finalTitle = engOk ? `${engTranslated} (${rawInput})` : rawInput;
+                                    finalTitle = engTranslated !== rawInput ? engTranslated : `${rawInput}`;
                                 }
                             }
                         } else {
