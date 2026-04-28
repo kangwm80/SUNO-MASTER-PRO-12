@@ -1699,6 +1699,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const pipelineData = {
             stylePrompt: style, excludeStyles, weirdness, styleInfluence, explanation,
             genres: selections.genres.slice(),
+            target: [],
+            place: [],
             mood: selections.mood.slice(),
             chordProgression: selections.chordProgression,
             customVocal: selections.customVocal,
@@ -1735,6 +1737,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lib.push({
             id: 'pro_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
             createdAt: new Date().toISOString(),
+            target: [],
+            place: [],
             mood: selections.mood.map(v => labelMap[v] || v),
             genres: selections.genres.slice(),
             stylePrompt: sp,
@@ -1742,6 +1746,8 @@ document.addEventListener('DOMContentLoaded', () => {
             weirdness: moreOpt.weirdness,
             styleInfluence: moreOpt.styleInfluence,
             explanation: document.getElementById('promptExplanation').textContent,
+            situationCategory: '',
+            situationText: '',
             favorite: false, memo: ''
         });
         localStorage.setItem(K, JSON.stringify(lib));

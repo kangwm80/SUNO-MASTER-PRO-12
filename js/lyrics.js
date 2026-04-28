@@ -1678,7 +1678,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         document.getElementById('loadedGenres').value = genreDisplay;
         const locCat = document.getElementById('loadedSituationCategory');
-        if (locCat) locCat.value = d.situationCategory || '-';
+        const sitCatDisplay = d.situationCategory || ((d.place || []).join(', '));
+        if (locCat) locCat.value = sitCatDisplay || '-';
         const locText = document.getElementById('loadedSituationText');
         if (locText) locText.value = d.situationText || '-';
         document.getElementById('loadedMood').value = (d.mood || []).join(', ') || '-';
@@ -1728,7 +1729,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const places = (d.place || []).map(toKorPlace).join(', ');
         const genres = (d.genres || []).join(', ');
         const targets = normalizeTargetLabels(d.target || []);
-        const sitCategory = d.situationCategory || '';
+        const sitCategory = d.situationCategory || (d.place || []).join(', ') || '';
         const sitText = d.situationText || '';
         const excludeStyles = d.excludeStyles || '';
 
@@ -4469,6 +4470,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if ((d.genres || []).length > 0) metaHtml += `<span class="meta-info-tag">🎸 장르: ${d.genres.join(' + ')}</span>`;
         if ((d.mood || []).length > 0) metaHtml += `<span class="meta-info-tag">✨ 분위기: ${d.mood.join(', ')}</span>`;
+        const metaSitCat = d.situationCategory || (d.place || []).join(', ');
+        if (metaSitCat) metaHtml += `<span class="meta-info-tag">📍 장소: ${metaSitCat}</span>`;
+        if (d.situationText) metaHtml += `<span class="meta-info-tag">🎯 주제: ${d.situationText}</span>`;
         document.getElementById('finalMetaBox').innerHTML = metaHtml;
 
         // 1. Style Prompt
