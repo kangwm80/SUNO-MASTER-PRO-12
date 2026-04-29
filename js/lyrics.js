@@ -4018,43 +4018,32 @@ document.addEventListener('DOMContentLoaded', () => {
             titleLyricsMap[i] = { title: t, variedStylePrompt: generateVariedStylePrompt(i, baseStylePrompt) };
         });
 
-        // 1단계: 섹션태그만 있는 원본 언어 가사 생성 + 선택 인덱스 캡처
-        trIdxPerTitle = [];
+        // 1단계: 섹션태그만 있는 가사 생성
+        const actualLang = getSelectedLanguage();
         titles.forEach((t, i) => {
-            trCurrentTitle = i;
-            trMode = 'capture';
             state.selectedTitle = t;
             currentFormat = 'section';
             const sectionVer = generateLyricsText();
             titleLyricsMap[i].section = sectionVer;
         });
-        trMode = 'off';
 
-        // 2단계: 메타태그 포함 원본 언어 가사 생성 (변형 프롬프트 악기 반영)
+        // 2단계: 메타태그 포함 가사 생성 (변형 프롬프트 악기 반영)
         const savedStylePrompt = state.appliedPrompt ? state.appliedPrompt.stylePrompt : '';
         titles.forEach((t, i) => {
             if (state.appliedPrompt && titleLyricsMap[i].variedStylePrompt) {
                 state.appliedPrompt.stylePrompt = titleLyricsMap[i].variedStylePrompt;
             }
-            trCurrentTitle = i;
-            trCursor = 0;
-            trMode = 'replay';
             state.selectedTitle = t;
             currentFormat = 'meta';
             const metaVer = generateLyricsText();
             titleLyricsMap[i].meta = metaVer;
         });
         if (state.appliedPrompt) state.appliedPrompt.stylePrompt = savedStylePrompt;
-        trMode = 'off';
 
-        // 3단계: 저장된 인덱스로 한국어 번역 생성 (내용 1:1 대응)
-        const actualLang = getSelectedLanguage();
+        // 3단계: 한국어 가사 생성
         try {
             langOverride = 'korean';
             titles.forEach((t, i) => {
-                trCurrentTitle = i;
-                trCursor = 0;
-                trMode = 'replay';
                 state.selectedTitle = t;
                 currentFormat = 'section';
                 const korVer = generateLyricsText();
@@ -4063,7 +4052,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } finally {
             langOverride = null;
-            trMode = 'off';
         }
 
         const needsKorTranslation = actualLang !== 'korean';
@@ -4168,34 +4156,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return generateFromReferenceComplete(refText, title, gen, lang, isMeta);
         }
 
-        // === 레퍼런스 없으면 songform 기반 생성 ===
-        let lyrics = '';
-        const counters = {};
-
-        state.songform.forEach(section => {
-            counters[section] = (counters[section] || 0) + 1;
-            const num = counters[section];
-            const label = num > 1 ? `${section} ${num}` : section;
-            const isNoLyrics = NO_LYRICS_SECTIONS.includes(section);
-
-            lyrics += `[${label}]\n`;
-
-            // v5 메타태그 = 스타일 프롬프트 기반
-            if (isMeta) {
-                const metaTags = buildMetaTagsForSection(section, num);
-                if (metaTags) lyrics += metaTags + '\n';
-            }
-
-            if (isNoLyrics) {
-                lyrics += '(instrumental)\n';
-            } else {
-                // 세대/분위기 기반 가사 자동 생성 (나중에 GPT API)
-                lyrics += generateSectionLyrics(section, num, title, gen, moods);
-            }
-            lyrics += '\n';
-        });
-
-        return lyrics.trim();
+        // === 레퍼런스 없으면 스토리 기반 생성 ===
+        return generateFullStoryLyrics(title, lang, isMeta);
     }
 
     // === 통합 메타태그 빌더 (songform 기반 + 레퍼런스 기반 공용) ===
@@ -4769,6 +4731,496 @@ document.addEventListener('DOMContentLoaded', () => {
         const qualIdx = prompt.search(/professional studio quality|clean production|consistent tonal|radio.ready/i);
         if (qualIdx > 0) return prompt.slice(0, qualIdx) + `${newDesc}, ` + prompt.slice(qualIdx);
         return prompt + `, ${newDesc}`;
+    }
+
+    // ─────────────────────────────────────────────
+    // 스토리 기반 가사 생성 시스템
+    // ─────────────────────────────────────────────
+
+    function analyzeStory(desc, keywords, theme, title, genres, moods) {
+        const text = (desc || '').toLowerCase();
+        const emotionTable = [
+            { key:'love',      kw:['사랑','love','좋아','설레','두근','연인'],   en:'love',      kor:'사랑'  },
+            { key:'longing',   kw:['그리움','그리워','보고싶','longing','miss'], en:'longing',   kor:'그리움' },
+            { key:'farewell',  kw:['이별','헤어','goodbye','farewell','떠나'],   en:'farewell',  kor:'이별'  },
+            { key:'hope',      kw:['희망','hope','내일','꿈','dream','미래'],    en:'hope',      kor:'희망'  },
+            { key:'growth',    kw:['성장','변화','grow','change','극복'],        en:'growth',    kor:'성장'  },
+            { key:'nostalgia', kw:['추억','기억','memory','옛날','그때','지난'], en:'nostalgia', kor:'추억'  },
+            { key:'joy',       kw:['기쁨','행복','happy','joy','신나','즐거'],   en:'joy',       kor:'기쁨'  },
+            { key:'healing',   kw:['치유','위로','heal','comfort','회복'],       en:'healing',   kor:'위로'  },
+        ];
+        const sceneTable = [
+            { kw:['바다','ocean','sea','파도','해변'], en:'by the ocean',           kor:'바닷가에서'        },
+            { kw:['도시','city','거리','street','카페','골목'], en:'on these city streets', kor:'이 거리 위에서'  },
+            { kw:['산','숲','들판','field','강','river'], en:'under the open sky',    kor:'탁 트인 하늘 아래' },
+            { kw:['집','home','방','room','창문','window'], en:'inside these walls',  kor:'이 공간 안에서'    },
+            { kw:['밤','night','달','moon','별','star','새벽'], en:'beneath the night sky', kor:'밤하늘 아래'  },
+            { kw:['봄','spring','꽃','flower','가을','autumn'], en:'in the changing season', kor:'계절이 바뀌는 이 길에서' },
+            { kw:['길','road','여행','travel','출발','역','station'], en:'along this long road', kor:'긴 여정 위에서' },
+        ];
+        let primaryEmotion = emotionTable[1];
+        for (const e of emotionTable) { if (e.kw.some(k => text.includes(k))) { primaryEmotion = e; break; } }
+        const gm = (genres.join(' ') + ' ' + moods.join(' ')).toLowerCase();
+        if (!text.length) {
+            if (gm.includes('설레') || gm.includes('사랑')) primaryEmotion = emotionTable[0];
+            else if (gm.includes('그리') || gm.includes('아련')) primaryEmotion = emotionTable[1];
+            else if (gm.includes('희망') || gm.includes('행복')) primaryEmotion = emotionTable[3];
+        }
+        let primaryScene = sceneTable[3];
+        for (const s of sceneTable) { if (s.kw.some(k => text.includes(k))) { primaryScene = s; break; } }
+        const sentences = (desc || '').replace(/\n+/g, ' ').split(/[.!?。]+/).map(s => s.trim()).filter(Boolean);
+        const n = sentences.length || 1;
+        return {
+            primaryEmotion, primaryScene,
+            concreteKws: extractConcreteImages(desc),
+            ki:    sentences.slice(0, Math.max(1, Math.ceil(n * 0.25))).join('. '),
+            seung: sentences.slice(Math.ceil(n * 0.25), Math.ceil(n * 0.5)).join('. '),
+            jeon:  sentences.slice(Math.ceil(n * 0.5),  Math.ceil(n * 0.75)).join('. '),
+            gyeol: sentences.slice(Math.ceil(n * 0.75)).join('. '),
+            title: cleanTitleForLyrics(title || ''), theme, keywords, genres, moods,
+        };
+    }
+
+    function extractConcreteImages(desc) {
+        const imageMap = {
+            '바다':'the ocean|바다', 'ocean':'the ocean|바다', 'sea':'the sea|바다',
+            '꽃':'the blossoms|꽃잎', 'flower':'the flowers|꽃잎',
+            '비':'the rain|빗소리', 'rain':'the rain|빗소리',
+            '눈설':'the snow|첫눈', 'snow':'the snow|첫눈',
+            '바람':'the wind|바람', 'wind':'the wind|바람',
+            '하늘':'the sky|하늘', 'sky':'the sky|하늘',
+            '별빛':'the stars|별빛', 'star':'the stars|별빛',
+            '달빛':'the moon|달빛', 'moon':'the moon|달빛',
+            '길가':'the road|그 길', 'road':'the road|그 길',
+            '사진':'an old photo|낡은 사진', 'photo':'an old photo|낡은 사진',
+            '편지':'your letters|네 편지', 'letter':'your letters|네 편지',
+            '목소리':'your voice|네 목소리', 'voice':'your voice|네 목소리',
+            '향수':'your scent|네 향기', 'scent':'your scent|네 향기',
+            '손길':'your hands|네 손', 'hand':'your hands|네 손',
+            '눈물':'our tears|눈물', 'tear':'our tears|눈물',
+            '미소':'your smile|네 미소', 'smile':'your smile|네 미소',
+            '카페':'that old cafe|그 카페', 'cafe':'that old cafe|그 카페',
+            '창가':'the window light|창가 빛', 'window':'the window light|창가 빛',
+            '빈방':'this empty room|이 빈 방', 'room':'this empty room|이 빈 방',
+            '기차역':'the old station|그 역', 'station':'the old station|그 역',
+            '봄빛':'the spring air|봄바람', 'spring':'the spring air|봄바람',
+            '가을잎':'the autumn leaves|가을 낙엽', 'autumn':'the autumn leaves|가을 낙엽',
+            '겨울한':'the winter chill|겨울 냉기', 'winter':'the winter chill|겨울 냉기',
+            '새벽녘':'the quiet dawn|새벽 공기', 'dawn':'the quiet dawn|새벽 공기',
+            '저녁노':'the fading light|저물녘', 'evening':'the fading light|저물녘',
+            '아침볕':'a quiet morning|아침의 고요함', 'morning':'a quiet morning|아침의 고요함',
+        };
+        const text = (desc || '').toLowerCase();
+        const found = [];
+        for (const [kw, val] of Object.entries(imageMap)) {
+            if (text.includes(kw)) { found.push(val.split('|')); if (found.length >= 3) break; }
+        }
+        const defaults = [['this moment','이 순간'],['your voice','네 목소리'],['the distance','이 거리']];
+        while (found.length < 3) found.push(defaults[found.length]);
+        return found;
+    }
+
+    function getSectionArc(section, num) {
+        const sec = section.toLowerCase().replace(/\s+\d+$/, '');
+        if (sec === 'bridge')                            return 'jeon';
+        if (sec === 'chorus' || sec === 'hook')          return 'gyeol';
+        if (sec === 'pre-chorus' || sec === 'prechorus') return 'seung_peak';
+        if (sec === 'outro')                             return 'gyeol_end';
+        return num === 1 ? 'ki' : 'seung';
+    }
+
+    function getStoryLineCount(section) {
+        const d = state.promptData || {};
+        const prompt = ((state.appliedPrompt || {}).stylePrompt || d.stylePrompt || '');
+        const bpm = parseInt((prompt.match(/(\d+)\s*BPM/i) || [])[1] || '110');
+        const sec = section.toLowerCase().replace(/\s+\d+$/, '');
+        if (sec === 'chorus' || sec === 'hook') return Math.min(8, bpm <= 80 ? 4 : bpm <= 110 ? 6 : 8);
+        if (sec === 'verse')  return 4;
+        if (sec === 'rap')    return bpm >= 130 ? 8 : 6;
+        if (sec === 'pre-chorus' || sec === 'prechorus') return bpm <= 80 ? 2 : 4;
+        if (sec === 'bridge') return 4;
+        if (sec === 'outro')  return 2;
+        return 4;
+    }
+
+    function pickRhymePattern(section, num) {
+        const sec = section.toLowerCase().replace(/\s+\d+$/, '');
+        const p = ['ABCA','ABAC','AABC'];
+        if (sec === 'bridge') return 'AABC';
+        return p[(num + (sec === 'verse' ? 1 : 0)) % 3];
+    }
+
+    function stCap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+    function buildChorusLines(hookPool, poolA, poolB, poolC, lineCount, off) {
+        const h = (i) => hookPool[(off + i) % hookPool.length];
+        const a = (i) => poolA[(off + i) % poolA.length];
+        const b = (i) => poolB[(off + i + 1) % poolB.length];
+        const c = (i) => poolC[(off + i) % poolC.length];
+        let lines;
+        if (lineCount <= 4)      lines = [h(0), a(0), b(0), h(1)];
+        else if (lineCount <= 6) lines = [h(0), a(0), b(0), a(1), b(1), h(1)];
+        else                     lines = [h(0), a(0), b(0), c(0), a(1), b(1), c(1), h(1)];
+        return lines.slice(0, 8);
+    }
+
+    function buildVerseLines(poolA, poolB, poolC, pattern, lineCount, off) {
+        const a = (i) => poolA[(off + i) % poolA.length];
+        const b = (i) => poolB[(off + i + 1) % poolB.length];
+        const c = (i) => poolC[(off + i + 2) % poolC.length];
+        const patMap = { ABCA:['A','B','C','A'], ABAC:['A','B','A','C'], AABC:['A','A','B','C'] };
+        const pat = patMap[pattern] || patMap['ABCA'];
+        const lines = [];
+        let ai = 0, bi = 0, ci = 0;
+        for (let i = 0; i < lineCount; i++) {
+            const slot = pat[i % 4];
+            if (slot === 'A') lines.push(a(ai++));
+            else if (slot === 'B') lines.push(b(bi++));
+            else lines.push(c(ci++));
+        }
+        return lines;
+    }
+
+    function generateStorySection(arc, section, num, lineCount, narrative, lang, targetAge, pattern, title) {
+        if (lang === 'korean') return generateKorStorySection(arc, section, num, lineCount, narrative, targetAge, pattern, title);
+        return generateEngStorySection(arc, section, num, lineCount, narrative, pattern, title);
+    }
+
+    function generateEngStorySection(arc, section, num, lineCount, narrative, pattern, title) {
+        const em  = narrative.primaryEmotion.en;
+        const sc  = narrative.primaryScene.en;
+        const kw  = narrative.concreteKws;
+        const kw1 = kw[0][0], kw2 = kw[1][0], kw3 = kw[2][0];
+        const t   = title;
+        const off = (num - 1) * 2;
+
+        const pools = {
+            ki: {
+                A: [
+                    `${stCap(sc)}, everything feels still`,
+                    `I still find ${kw1} everywhere I go`,
+                    `The air feels different since you left`,
+                    `Every corner holds a piece of you`,
+                    `${stCap(kw1)} never quite fades away`,
+                    `I find your traces in the strangest places`,
+                ],
+                B: [
+                    `My hands still reach for what is not here`,
+                    `I trace the places where we used to go`,
+                    `The days go by but I keep looking back`,
+                    `I search for words that never come in time`,
+                    `I hold on to the warmth that used to be`,
+                    `I walk these streets like nothing ever changed`,
+                ],
+                C: [
+                    `Something about ${em} never lets you go`,
+                    `${stCap(kw2)} still echoes through my chest`,
+                    `How can a memory still feel this real`,
+                    `And I wonder if you feel this too`,
+                    `The kind of feeling time cannot erase`,
+                    `And somehow it still pulls me back to you`,
+                ],
+            },
+            seung: {
+                A: [
+                    `I tried to leave it all behind`,
+                    `The further that I go, the more I feel`,
+                    `${stCap(kw1)} keeps pulling me right back`,
+                    `I thought the silence would be easier`,
+                    `The nights grow longer when I think of this`,
+                    `I built these walls but you are everywhere`,
+                ],
+                B: [
+                    `But every road leads back to where we were`,
+                    `I fight to keep my heart from falling through`,
+                    `And nothing that I do can make it stop`,
+                    `The harder that I try, the more it shows`,
+                    `I turn around and there you are again`,
+                    `I look for you in every face I see`,
+                ],
+                C: [
+                    `There is no escaping what I feel`,
+                    `And I know now that this ${em} is real`,
+                    `${stCap(kw2)} finds me even in the quiet`,
+                    `How many times can one heart break like this`,
+                    `The truth I keep on running from is you`,
+                    `This weight I carry starts to feel like home`,
+                ],
+            },
+            seung_peak: {
+                A: [
+                    `I cannot hold this back anymore`,
+                    `Everything inside is rising up`,
+                    `There is no turning back from here`,
+                    `This is the moment I have waited for`,
+                ],
+                B: [
+                    `And all I want is one more chance with you`,
+                    `I reach for you across the space between`,
+                    `The words come rushing to the surface now`,
+                    `I know that I cannot stay quiet anymore`,
+                ],
+                C: [
+                    `So here I am with everything I have`,
+                    `And all my walls come crashing down for you`,
+                ],
+            },
+            jeon: {
+                A: [
+                    `Now I see it all so differently`,
+                    `The answer was right here the whole time`,
+                    `Everything I ran from led me back`,
+                    `I had to lose you to understand`,
+                    `Through all the ${em} and through all the pain`,
+                ],
+                B: [
+                    `It was never really about giving up`,
+                    `I was learning how to let the old self go`,
+                    `The wound became the place where light came in`,
+                    `And I am grateful for every broken piece`,
+                    `I found the strength I never knew I had`,
+                ],
+                C: [
+                    `${stCap(kw1)} was always leading me to now`,
+                    `And I would do it all again to be right here`,
+                    `The breaking was the beginning all along`,
+                    `I carry every tear as part of who I am`,
+                    `What I lost became the thing that made me whole`,
+                ],
+            },
+            gyeol: {
+                hook: [
+                    `${t}, this ${em} never fades`,
+                    `${t}, you are still here with me`,
+                    `${t}, and I will not let go`,
+                    `${t}, you are all I need`,
+                    `${t}, deeper than the words`,
+                    `${t}, this is where I belong`,
+                ],
+                A: [
+                    `You live inside ${kw1} I cannot name`,
+                    `Every breath reminds me you were real`,
+                    `I feel you in the spaces in between`,
+                    `No distance makes this ${em} disappear`,
+                    `The world stood still the moment I found you`,
+                    `You are the reason I believe again`,
+                ],
+                B: [
+                    `I carry you in everything I do`,
+                    `Nothing in this world could change the truth`,
+                    `You are the reason that I keep believing`,
+                    `I hold this feeling even when it hurts`,
+                    `Long after all the words are gone from here`,
+                    `And I would choose this path a thousand times`,
+                ],
+                C: [
+                    `${t}, louder than my doubts`,
+                    `${t}, written in the silence`,
+                    `${t}, brighter than the fear`,
+                    `${t}, beyond ${kw3}`,
+                    `${t}, this is who I am`,
+                    `${t}, always and forever`,
+                ],
+            },
+            gyeol_end: {
+                A: [t, `Still here with you`, `Always`],
+                B: [`This ${em} never fades`, `And it never will`],
+                C: [t],
+            },
+        };
+
+        const p = pools[arc] || pools.ki;
+        if (arc === 'gyeol')     return buildChorusLines(p.hook, p.A, p.B, p.C, lineCount, off);
+        if (arc === 'gyeol_end') return [p.A[off % p.A.length], p.B[off % p.B.length]].slice(0, lineCount);
+        return buildVerseLines(p.A, p.B, p.C, pattern, lineCount, off);
+    }
+
+    function generateKorStorySection(arc, section, num, lineCount, narrative, targetAge, pattern, title) {
+        const em  = narrative.primaryEmotion.kor;
+        const sc  = narrative.primaryScene.kor;
+        const kw  = narrative.concreteKws;
+        const kw1 = kw[0][1], kw2 = kw[1][1], kw3 = kw[2][1];
+        const t   = title;
+        const off = (num - 1) * 2;
+        const isFormal = targetAge === '5060세대' || targetAge === '시니어세대';
+        const isYoung  = targetAge === '10대';
+        function e(ca, po, fo) { return isFormal ? (fo || po) : isYoung ? ca : (po || ca); }
+
+        const pools = {
+            ki: {
+                A: [
+                    e(`${sc}, 아무것도 안 변한 것 같아`,`${sc}, 아무것도 안 변한 것 같아요`,`${sc}, 아무것도 변하지 않은 것 같습니다`),
+                    e(`${kw1}이 아직도 선명해`,`${kw1}이 아직도 선명해요`,`${kw1}이 아직도 선명합니다`),
+                    e(`네가 없는 이 공간엔 바람만 머물러`,`당신이 없는 이 공간엔 바람만 머물러요`,`그대가 없는 이 공간엔 바람만 머뭅니다`),
+                    e(`모든 곳에 네 흔적이 남아있어`,`모든 곳에 당신 흔적이 남아있어요`,`모든 곳에 그대 흔적이 남아있습니다`),
+                    e(`${kw1}은 사라지질 않아`,`${kw1}은 사라지질 않아요`,`${kw1}은 사라지지 않습니다`),
+                    e(`낯선 곳에서도 네가 보여`,`낯선 곳에서도 당신이 보여요`,`낯선 곳에서도 그대가 보입니다`),
+                ],
+                B: [
+                    e(`손이 먼저 기억을 잡으려 해`,`손이 먼저 기억을 잡으려 해요`,`손이 먼저 기억을 잡으려 합니다`),
+                    e(`우리가 걷던 길을 혼자 걸어`,`우리가 걷던 길을 혼자 걸어요`,`우리가 걷던 길을 혼자 걷습니다`),
+                    e(`시간이 가도 계속 돌아보게 돼`,`시간이 가도 계속 돌아보게 돼요`,`시간이 가도 계속 돌아보게 됩니다`),
+                    e(`그 온기를 아직도 찾고 있어`,`그 온기를 아직도 찾고 있어요`,`그 온기를 아직도 찾고 있습니다`),
+                    e(`아무것도 안 변한 척 이 거리를 걸어`,`아무것도 안 변한 척 이 거리를 걸어요`,`아무것도 안 변한 척 이 거리를 걷습니다`),
+                    e(`말이 없어도 네가 느껴져`,`말이 없어도 당신이 느껴져요`,`말이 없어도 그대가 느껴집니다`),
+                ],
+                C: [
+                    e(`${em}이라는 게 왜 이렇게 오래가`,`${em}이라는 게 왜 이렇게 오래 가요`,`${em}이라는 것이 왜 이렇게 오래 갑니다`),
+                    e(`${kw2}가 아직도 귓가에 맴돌아`,`${kw2}가 아직도 귓가에 맴돌아요`,`${kw2}가 아직도 귓가에 맴돕니다`),
+                    e(`기억이 어떻게 이렇게 생생할 수 있어`,`기억이 어떻게 이렇게 생생할 수 있어요`,`기억이 어떻게 이렇게 생생할 수 있습니까`),
+                    e(`너도 지금 이게 느껴지는지 궁금해`,`당신도 지금 이게 느껴지는지 궁금해요`,`그대도 지금 이게 느껴지는지 궁금합니다`),
+                    e(`이런 감정은 시간도 못 지워`,`이런 감정은 시간도 못 지워요`,`이런 감정은 시간도 지우지 못합니다`),
+                    e(`어떻게든 다시 너한테로 가게 돼`,`어떻게든 다시 당신한테로 가게 돼요`,`어떻게든 다시 그대에게로 가게 됩니다`),
+                ],
+            },
+            seung: {
+                A: [
+                    e(`다 잊으려 했는데 안 돼`,`다 잊으려 했는데 안 돼요`,`다 잊으려 했는데 안 됩니다`),
+                    e(`멀어질수록 더 강하게 느껴져`,`멀어질수록 더 강하게 느껴져요`,`멀어질수록 더 강하게 느껴집니다`),
+                    e(`${kw1}이 자꾸 나를 되돌려 놓아`,`${kw1}이 자꾸 나를 되돌려 놓아요`,`${kw1}이 자꾸 나를 되돌려 놓습니다`),
+                    e(`혼자가 더 편할 줄 알았는데`,`혼자가 더 편할 줄 알았는데요`,`혼자가 더 편할 줄 알았습니다`),
+                    e(`밤이 깊어질수록 더 많이 생각나`,`밤이 깊어질수록 더 많이 생각나요`,`밤이 깊어질수록 더 많이 생각납니다`),
+                    e(`어디서든 너를 찾고 있어`,`어디서든 당신을 찾고 있어요`,`어디서든 그대를 찾고 있습니다`),
+                ],
+                B: [
+                    e(`근데 결국 다시 그 자리로 돌아와`,`결국 다시 그 자리로 돌아와요`,`결국 다시 그 자리로 돌아옵니다`),
+                    e(`마음이 무너지지 않으려 버텨`,`마음이 무너지지 않으려 버텨요`,`마음이 무너지지 않으려 버팁니다`),
+                    e(`어떻게 해도 멈출 수가 없어`,`어떻게 해도 멈출 수가 없어요`,`어떻게 해도 멈출 수가 없습니다`),
+                    e(`또 돌아보게 돼 네가 있던 곳을`,`또 돌아보게 돼요 당신이 있던 곳을`,`또 돌아보게 됩니다 그대가 있던 곳을`),
+                    e(`모든 얼굴에서 너를 찾아`,`모든 얼굴에서 당신을 찾아요`,`모든 얼굴에서 그대를 찾습니다`),
+                    e(`억누를수록 더 크게 올라와`,`억누를수록 더 크게 올라와요`,`억누를수록 더 크게 올라옵니다`),
+                ],
+                C: [
+                    e(`이 감정에서 도망칠 수가 없어`,`이 감정에서 도망칠 수가 없어요`,`이 감정에서 도망칠 수가 없습니다`),
+                    e(`이게 진짜 ${em}인 거 이제 알아`,`이게 진짜 ${em}인 거 이제 알아요`,`이게 진짜 ${em}인 것을 이제 압니다`),
+                    e(`${kw2}가 조용한 순간에도 찾아와`,`${kw2}가 조용한 순간에도 찾아와요`,`${kw2}가 조용한 순간에도 찾아옵니다`),
+                    e(`이 마음이 몇 번이나 부서질 수 있을까`,`이 마음이 몇 번이나 부서질 수 있을까요`,`이 마음이 몇 번이나 부서질 수 있습니까`),
+                    e(`내가 도망치는 진실은 결국 너야`,`내가 도망치는 진실은 결국 당신이에요`,`내가 도망치는 진실은 결국 그대입니다`),
+                    e(`이 무게가 어느새 익숙해져 버렸어`,`이 무게가 어느새 익숙해져 버렸어요`,`이 무게가 어느새 익숙해져 버렸습니다`),
+                ],
+            },
+            seung_peak: {
+                A: [
+                    e(`더 이상 못 참겠어`,`더 이상 못 참겠어요`,`더 이상 참을 수가 없습니다`),
+                    e(`모든 게 차올라`,`모든 게 차올라요`,`모든 것이 차오릅니다`),
+                    e(`여기서 돌아설 수 없어`,`여기서 돌아설 수 없어요`,`여기서 돌아설 수 없습니다`),
+                    e(`이게 그 순간인 거야`,`이게 그 순간인 거예요`,`이게 바로 그 순간입니다`),
+                ],
+                B: [
+                    e(`한 번만 더 기회를 줘`,`한 번만 더 기회를 줘요`,`한 번만 더 기회를 주십시오`),
+                    e(`그 거리를 넘어 너한테 닿고 싶어`,`그 거리를 넘어 당신한테 닿고 싶어요`,`그 거리를 넘어 그대에게 닿고 싶습니다`),
+                    e(`하고 싶은 말이 한꺼번에 터져 나와`,`하고 싶은 말이 한꺼번에 터져 나와요`,`하고 싶은 말이 한꺼번에 터져 나옵니다`),
+                    e(`이제는 조용히 있을 수가 없어`,`이제는 조용히 있을 수가 없어요`,`이제는 조용히 있을 수가 없습니다`),
+                ],
+                C: [
+                    e(`가진 것 전부 다 여기 있어`,`가진 것 전부 다 여기 있어요`,`가진 것 전부 다 여기 있습니다`),
+                    e(`모든 벽이 다 무너지고 있어`,`모든 벽이 다 무너지고 있어요`,`모든 벽이 다 무너지고 있습니다`),
+                ],
+            },
+            jeon: {
+                A: [
+                    e(`이제 다르게 보여`,`이제 다르게 보여요`,`이제 다르게 보입니다`),
+                    e(`답은 처음부터 여기 있었어`,`답은 처음부터 여기 있었어요`,`답은 처음부터 여기 있었습니다`),
+                    e(`도망쳤던 모든 게 나를 여기로 데려왔어`,`도망쳤던 모든 게 나를 여기로 데려왔어요`,`도망쳤던 모든 것이 나를 여기로 데려왔습니다`),
+                    e(`잃어봐야 알 수 있는 것들이 있어`,`잃어봐야 알 수 있는 것들이 있어요`,`잃어봐야 알 수 있는 것들이 있습니다`),
+                    e(`${em}을 지나 이제 여기야`,`${em}을 지나 이제 여기예요`,`${em}을 지나 이제 여기입니다`),
+                ],
+                B: [
+                    e(`포기가 아니었던 거야`,`포기가 아니었던 거예요`,`포기가 아니었던 것입니다`),
+                    e(`옛날의 나를 보내주는 법을 배웠어`,`옛날의 나를 보내주는 법을 배웠어요`,`옛날의 나를 보내주는 법을 배웠습니다`),
+                    e(`상처가 빛이 드는 자리가 됐어`,`상처가 빛이 드는 자리가 됐어요`,`상처가 빛이 드는 자리가 됐습니다`),
+                    e(`부서진 모든 조각에 감사해`,`부서진 모든 조각에 감사해요`,`부서진 모든 조각에 감사합니다`),
+                    e(`몰랐던 힘이 내 안에 있었어`,`몰랐던 힘이 내 안에 있었어요`,`몰랐던 힘이 내 안에 있었습니다`),
+                ],
+                C: [
+                    e(`${kw1}이 여기로 이끌어 왔던 거야`,`${kw1}이 여기로 이끌어 왔던 거예요`,`${kw1}이 여기로 이끌어 왔던 것입니다`),
+                    e(`이 모든 걸 다시 해도 괜찮아`,`이 모든 걸 다시 해도 괜찮아요`,`이 모든 것을 다시 해도 괜찮습니다`),
+                    e(`부서지는 게 시작이었던 거야`,`부서지는 게 시작이었던 거예요`,`부서지는 것이 시작이었던 것입니다`),
+                    e(`눈물 한 방울이 나를 만들었어`,`눈물 한 방울이 나를 만들었어요`,`눈물 한 방울이 나를 만들었습니다`),
+                    e(`잃은 것이 나를 완성시켰어`,`잃은 것이 나를 완성시켰어요`,`잃은 것이 나를 완성시켰습니다`),
+                ],
+            },
+            gyeol: {
+                hook: [
+                    e(`${t}, 이 ${em}은 사라지지 않아`,`${t}, 이 ${em}은 사라지지 않아요`,`${t}, 이 ${em}은 사라지지 않습니다`),
+                    e(`${t}, 너는 아직 내 안에 있어`,`${t}, 당신은 아직 내 안에 있어요`,`${t}, 그대는 아직 내 안에 있습니다`),
+                    e(`${t}, 놓을 수가 없어`,`${t}, 놓을 수가 없어요`,`${t}, 놓을 수가 없습니다`),
+                    e(`${t}, 네가 전부야`,`${t}, 당신이 전부예요`,`${t}, 그대가 전부입니다`),
+                    e(`${t}, 말보다 깊은 곳에`,`${t}, 말보다 깊은 곳에`,`${t}, 말보다 깊은 곳에`),
+                    e(`${t}, 내가 있어야 할 곳이야`,`${t}, 내가 있어야 할 곳이에요`,`${t}, 내가 있어야 할 곳입니다`),
+                ],
+                A: [
+                    e(`이름 붙일 수 없는 ${kw1} 속에 네가 있어`,`이름 붙일 수 없는 ${kw1} 속에 당신이 있어요`,`이름 붙일 수 없는 ${kw1} 속에 그대가 있습니다`),
+                    e(`숨 쉴 때마다 네가 진짜였단 걸 알아`,`숨 쉴 때마다 당신이 진짜였단 걸 알아요`,`숨 쉴 때마다 그대가 진짜였단 걸 압니다`),
+                    e(`그 사이사이에서 너를 느껴`,`그 사이사이에서 당신을 느껴요`,`그 사이사이에서 그대를 느낍니다`),
+                    e(`어떤 거리도 이 ${em}을 없애지 못해`,`어떤 거리도 이 ${em}을 없애지 못해요`,`어떤 거리도 이 ${em}을 없애지 못합니다`),
+                    e(`네가 생긴 그 순간부터 세상이 멈췄어`,`당신이 생긴 그 순간부터 세상이 멈췄어요`,`그대가 생긴 그 순간부터 세상이 멈췄습니다`),
+                    e(`다시 믿게 되는 이유가 너야`,`다시 믿게 되는 이유가 당신이에요`,`다시 믿게 되는 이유가 그대입니다`),
+                ],
+                B: [
+                    e(`뭘 해도 네가 담겨있어`,`뭘 해도 당신이 담겨있어요`,`무엇을 해도 그대가 담겨있습니다`),
+                    e(`세상 어떤 것도 이 진실을 바꿀 수 없어`,`세상 어떤 것도 이 진실을 바꿀 수 없어요`,`세상 어떤 것도 이 진실을 바꿀 수 없습니다`),
+                    e(`아파도 이 감정을 꽉 쥐고 있어`,`아파도 이 감정을 꽉 쥐고 있어요`,`아파도 이 감정을 꽉 쥐고 있습니다`),
+                    e(`모든 말이 사라져도 너는 남아`,`모든 말이 사라져도 당신은 남아요`,`모든 말이 사라져도 그대는 남습니다`),
+                    e(`이 길을 천 번이라도 다시 걸을 거야`,`이 길을 천 번이라도 다시 걸을 거예요`,`이 길을 천 번이라도 다시 걷겠습니다`),
+                    e(`계속 믿어줘서 고마워`,`계속 믿어줘서 고마워요`,`계속 믿어주셔서 감사합니다`),
+                ],
+                C: [
+                    e(`${t}, 내 의심보다 크게`,`${t}, 내 의심보다 크게`,`${t}, 내 의심보다 크게`),
+                    e(`${t}, 침묵 속에 새겨져`,`${t}, 침묵 속에 새겨져요`,`${t}, 침묵 속에 새겨집니다`),
+                    e(`${t}, 두려움보다 밝아`,`${t}, 두려움보다 밝아요`,`${t}, 두려움보다 밝습니다`),
+                    e(`${t}, ${kw3}을 넘어서`,`${t}, ${kw3}을 넘어서`,`${t}, ${kw3}을 넘어서`),
+                    e(`${t}, 이게 바로 나야`,`${t}, 이게 바로 나예요`,`${t}, 이것이 바로 저입니다`),
+                    e(`${t}, 영원히 함께야`,`${t}, 영원히 함께예요`,`${t}, 영원히 함께입니다`),
+                ],
+            },
+            gyeol_end: {
+                A: [t, e(`여기 있어`,`여기 있어요`,`여기 있습니다`), `언제나`],
+                B: [e(`이 ${em}은 사라지지 않아`,`이 ${em}은 사라지지 않아요`,`이 ${em}은 사라지지 않습니다`), `영원히`],
+                C: [t],
+            },
+        };
+
+        const p = pools[arc] || pools.ki;
+        if (arc === 'gyeol')     return buildChorusLines(p.hook, p.A, p.B, p.C, lineCount, off);
+        if (arc === 'gyeol_end') return [p.A[off % p.A.length], p.B[off % p.B.length]].slice(0, lineCount);
+        return buildVerseLines(p.A, p.B, p.C, pattern, lineCount, off);
+    }
+
+    function generateFullStoryLyrics(title, lang, isMeta) {
+        const story    = state.appliedStory || {};
+        const d        = state.promptData || {};
+        const genres   = d.genres || [];
+        const moods    = d.mood || [];
+        const targets  = normalizeTargetLabels(d.target || []);
+        const targetAge = targets[0] || '2030세대';
+        const songform = state.songform || ['Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus'];
+        const t        = cleanTitleForLyrics(title);
+        const narrative = analyzeStory(story.desc || '', story.keywords || [], story.theme || '', t, genres, moods);
+        let lyrics = '';
+        const counters = {};
+        songform.forEach(section => {
+            counters[section] = (counters[section] || 0) + 1;
+            const num   = counters[section];
+            const label = num > 1 ? `${section} ${num}` : section;
+            const isNoLyrics = NO_LYRICS_SECTIONS.includes(section);
+            lyrics += `[${label}]\n`;
+            if (isMeta) {
+                const mt = buildMetaTagsForSection(section, num);
+                if (mt) lyrics += mt + '\n';
+            }
+            if (isNoLyrics) {
+                lyrics += '(instrumental)\n';
+            } else {
+                const arc     = getSectionArc(section, num);
+                const lineCnt = getStoryLineCount(section);
+                const pattern = pickRhymePattern(section, num);
+                const lines   = generateStorySection(arc, section, num, lineCnt, narrative, lang, targetAge, pattern, t);
+                lyrics += lines.join('\n') + '\n';
+            }
+            lyrics += '\n';
+        });
+        return lyrics.trim();
     }
 
     function buildContextPools(title, gen, lang) {
