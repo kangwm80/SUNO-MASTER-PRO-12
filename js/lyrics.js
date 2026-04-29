@@ -4012,6 +4012,12 @@ document.addEventListener('DOMContentLoaded', () => {
         sectionLyricsCache = '';
         metaLyricsCache = '';
 
+        // 제목별 변형 프롬프트 사전 계산
+        const baseStylePrompt = (state.appliedPrompt || {}).stylePrompt || (state.promptData || {}).stylePrompt || '';
+        titles.forEach((t, i) => {
+            titleLyricsMap[i] = { title: t, variedStylePrompt: generateVariedStylePrompt(i, baseStylePrompt) };
+        });
+
         // 1단계: 섹션태그만 있는 원본 언어 가사 생성 + 선택 인덱스 캡처
         trIdxPerTitle = [];
         titles.forEach((t, i) => {
@@ -4020,12 +4026,16 @@ document.addEventListener('DOMContentLoaded', () => {
             state.selectedTitle = t;
             currentFormat = 'section';
             const sectionVer = generateLyricsText();
-            titleLyricsMap[i] = { title: t, section: sectionVer };
+            titleLyricsMap[i].section = sectionVer;
         });
         trMode = 'off';
 
-        // 2단계: 메타태그 포함 원본 언어 가사 생성 (동일 인덱스 재사용)
+        // 2단계: 메타태그 포함 원본 언어 가사 생성 (변형 프롬프트 악기 반영)
+        const savedStylePrompt = state.appliedPrompt ? state.appliedPrompt.stylePrompt : '';
         titles.forEach((t, i) => {
+            if (state.appliedPrompt && titleLyricsMap[i].variedStylePrompt) {
+                state.appliedPrompt.stylePrompt = titleLyricsMap[i].variedStylePrompt;
+            }
             trCurrentTitle = i;
             trCursor = 0;
             trMode = 'replay';
@@ -4034,6 +4044,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const metaVer = generateLyricsText();
             titleLyricsMap[i].meta = metaVer;
         });
+        if (state.appliedPrompt) state.appliedPrompt.stylePrompt = savedStylePrompt;
         trMode = 'off';
 
         // 3단계: 저장된 인덱스로 한국어 번역 생성 (내용 1:1 대응)
@@ -4647,6 +4658,117 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         return cands[Math.floor(Math.random() * cands.length)];
+    }
+
+    // === 제목별 변형 Style Prompt 생성 ===
+    function generateVariedStylePrompt(titleIdx, originalPrompt) {
+        if (!originalPrompt) return originalPrompt;
+
+        // 1. BPM 변형 (±10 이내, 제목 인덱스별 고정)
+        const bpmDeltas = [0, 5, -5, 8, -8, 3, -3, 10, -10, 6];
+        const bpmMatch  = originalPrompt.match(/(\d+)\s*BPM/i);
+        const origBpm   = bpmMatch ? parseInt(bpmMatch[1]) : 110;
+        const newBpm    = Math.max(60, origBpm + bpmDeltas[titleIdx % bpmDeltas.length]);
+        let varied = originalPrompt.replace(/\d+\s*BPM/i, `${newBpm} BPM`);
+
+        // 2. 블랜딩 장르 변형
+        const blendRx = /^([^,\/]+)\s*\/\s*([A-Za-z\-\s]+?)\s*(crossover|fusion)/i;
+        const blendM  = varied.match(blendRx);
+        if (blendM) {
+            const mainG    = blendM[1].trim();
+            const curBlend = blendM[2].trim().toLowerCase();
+            const alts     = getBlendAlts(mainG.toLowerCase()).filter(a => a.toLowerCase() !== curBlend);
+            if (alts.length > 0) {
+                varied = varied.replace(blendRx, `${mainG} / ${alts[titleIdx % alts.length]} crossover`);
+            }
+        }
+
+        // 3. 악기 변형
+        varied = applyInstrumentVariation(varied, titleIdx);
+
+        // 4. 다이나믹 변형
+        varied = applyDynamicVariation(varied, titleIdx);
+
+        return varied;
+    }
+
+    function getBlendAlts(g) {
+        const map = {
+            'afrobeats': ['R&B', 'Soul', 'Afro-Soul', 'Dancehall', 'Latin', 'Neo-Soul', 'Funk', 'Reggaeton'],
+            'k-pop':     ['J-Pop', 'Indie Pop', 'EDM', 'Dance Pop', 'City Pop', 'R&B', 'Synth Pop'],
+            'kpop':      ['J-Pop', 'Indie Pop', 'EDM', 'Dance Pop', 'City Pop', 'R&B', 'Synth Pop'],
+            'pop':       ['Indie Pop', 'Folk Pop', 'Electro Pop', 'R&B', 'Jazz', 'Soul', 'Country Pop'],
+            'rock':      ['Blues Rock', 'Folk Rock', 'Punk', 'Psychedelic', 'Alternative', 'Country Rock'],
+            'hip-hop':   ['Trap', 'R&B', 'Soul', 'Electronic', 'Funk', 'Lo-fi Hip-Hop'],
+            'hiphop':    ['Trap', 'R&B', 'Soul', 'Electronic', 'Funk', 'Lo-fi Hip-Hop'],
+            'jazz':      ['Bossa Nova', 'Blues', 'Soul', 'Latin Jazz', 'Smooth Jazz', 'Nu Jazz'],
+            'r&b':       ['Soul', 'Funk', 'Neo-Soul', 'Gospel', 'Jazz', 'Pop'],
+            'electronic':['House', 'Ambient', 'Techno', 'Synth-Pop', 'Future Bass', 'Trance'],
+            'ballad':    ['R&B', 'Jazz', 'Soul', 'Folk', 'Acoustic', 'Orchestral'],
+            'trot':      ['Ballad', 'Jazz', 'Orchestra', 'Pop', 'Retro Pop'],
+            'indie':     ['Folk', 'Dream Pop', 'Shoegaze', 'Post-Rock', 'Art Pop'],
+        };
+        for (const [key, alts] of Object.entries(map)) {
+            if (g.includes(key)) return alts;
+        }
+        return ['R&B', 'Soul', 'Pop', 'Folk', 'Electronic', 'Jazz', 'Indie'];
+    }
+
+    function applyInstrumentVariation(prompt, titleIdx) {
+        const groups = [
+            {
+                candidates: ['afro percussion', 'talking drum', 'djembe', 'bata drum', 'shekere', 'congas'],
+                alts: [['afro percussion', 'log drums'], ['talking drum', 'shekere'], ['djembe', 'balafon'], ['bata drum', 'congas']],
+            },
+            {
+                candidates: ['piano', 'rhodes', 'electric piano', 'wurlitzer'],
+                alts: [['piano'], ['rhodes'], ['electric piano'], ['wurlitzer'], ['grand piano']],
+            },
+            {
+                candidates: ['acoustic guitar', 'electric guitar', 'fingerpicked guitar', 'rhythm guitar'],
+                alts: [['acoustic guitar'], ['fingerpicked guitar'], ['rhythm guitar'], ['fingerstyle guitar']],
+            },
+            {
+                candidates: ['strings', 'string ensemble', 'violin', 'cello'],
+                alts: [['strings'], ['string ensemble'], ['lush strings'], ['cello pizzicato']],
+            },
+        ];
+        let varied = prompt;
+        for (const group of groups) {
+            const found = group.candidates.find(c => varied.toLowerCase().includes(c));
+            if (!found) continue;
+            const alt = group.alts[titleIdx % group.alts.length].join(', ');
+            const rx  = new RegExp(found.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            varied = varied.replace(rx, alt);
+            break;
+        }
+        return varied;
+    }
+
+    function applyDynamicVariation(prompt, titleIdx) {
+        const pool = [
+            'driving rhythm and dynamic contrast',
+            'building intensity with layered texture',
+            'steady groove with pulsing energy',
+            'flowing momentum and organic energy',
+            'rhythmic propulsion with natural crescendo',
+            'dynamic ebb and flow',
+            'tight groove with explosive peaks',
+            'smooth momentum with emotional depth',
+            'powerful crescendo and driving energy',
+            'gentle swell with restrained intensity',
+        ];
+        const dynKws  = ['driving', 'building', 'steady', 'flowing', 'rhythmic', 'dynamic', 'pulsing', 'organic', 'powerful'];
+        const newDesc = pool[titleIdx % pool.length];
+        const existKw = dynKws.find(kw => prompt.toLowerCase().includes(kw));
+        if (existKw) {
+            if (titleIdx === 0) return prompt;
+            const rx = new RegExp(`([^,]*\\b${existKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b[^,]*)`, 'i');
+            return prompt.replace(rx, ` ${newDesc}`);
+        }
+        const qualIdx = prompt.search(/professional studio quality|clean production|consistent tonal|radio.ready/i);
+        if (qualIdx > 0) return prompt.slice(0, qualIdx) + `${newDesc}, ` + prompt.slice(qualIdx);
+        return prompt + `, ${newDesc}`;
     }
 
     function buildContextPools(title, gen, lang) {
@@ -5276,8 +5398,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (d.situationText) metaHtml += `<span class="meta-info-tag">🎯 주제: ${d.situationText}</span>`;
         document.getElementById('finalMetaBox').innerHTML = metaHtml;
 
-        // 1. Style Prompt
-        document.getElementById('finalStylePrompt').value = applied.stylePrompt || d.stylePrompt || '';
+        // 1. Style Prompt (제목별 변형 프롬프트 우선 표시)
+        const variedSP = (titleLyricsMap[idx] || {}).variedStylePrompt;
+        document.getElementById('finalStylePrompt').value = variedSP || applied.stylePrompt || d.stylePrompt || '';
         autoResizeFinalBox('finalStylePrompt');
 
         // 2. Exclude Styles
