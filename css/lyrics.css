@@ -367,12 +367,13 @@ h5.stories-section-label:nth-of-type(2) { color: var(--accent); background: rgba
 .lyrics-single-editor { max-width: 800px; margin: 0 auto; }
 /* 제목별 가사 탭 */
 .title-lyrics-tabs {
-    max-width: 800px; margin: 0 auto 8px; display: flex; flex-wrap: wrap; gap: 4px;
+    max-width: 800px; margin: 0 auto 8px; display: flex; flex-direction: column; gap: 4px;
 }
 .title-lyrics-tab {
-    padding: 8px 16px; border: 2px solid var(--text-light); border-radius: var(--radius-sm);
+    padding: 10px 16px; border: 2px solid var(--text-light); border-radius: var(--radius-sm);
     background: var(--bg-card); color: var(--text-secondary); font-size: var(--font-xs);
     font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: var(--transition);
+    width: 100%; text-align: left;
 }
 .title-lyrics-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
 .title-lyrics-tab:hover:not(.active) { border-color: var(--primary-light); color: var(--primary); }

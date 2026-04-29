@@ -13,7 +13,7 @@
 <body>
     <header class="header">
         <div class="header-left">
-            <a href="index.html" class="back-btn" title="메인으로"><span class="back-arrow">&#8592;</span><span class="back-text">메인으로</span></a>
+            <a href="index.html" class="back-btn" title="메인으로" onclick="window.location.href='index.html';return false;"><span class="back-arrow">&#8592;</span><span class="back-text">메인으로</span></a>
             <div class="logo"><span class="logo-text">SUNO MASTER PRO 12</span></div>
         </div>
         <div class="header-right">
@@ -422,6 +422,7 @@
                 <div class="lyrics-format-tabs">
                     <button class="lyrics-format-tab active" data-format="section" id="tabFormatSection">&#128196; 섹션 태그만</button>
                     <button class="lyrics-format-tab" data-format="meta" id="tabFormatMeta">&#128204; 메타태그 포함</button>
+                    <button class="lyrics-format-tab" data-format="korean" id="tabFormatKorean">&#127472;&#127479; 한국어 가사</button>
                 </div>
                 <p class="lyrics-format-desc" id="lyricsFormatDesc">섹션 태그([Verse], [Chorus] 등)만 포함된 깔끔한 가사입니다.</p>
 

@@ -2184,6 +2184,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 공통 한→영 사전 (다른 언어에 매핑이 없을 때 영어 경유용)
     const KOR_BASE = {
         // 구문 (2어절 이상)
+        '봄날': 'Spring Day', '겨울밤': 'Winter Night', '가을날': 'Autumn Day', '여름날': 'Summer Day',
+        '새벽빛': 'Dawn Light', '저녁 식사': 'Dinner', '아침 식사': 'Breakfast', '점심 식사': 'Lunch',
+        '부모님': 'Parents', '할머니': 'Grandmother', '할아버지': 'Grandfather',
+        '손녀': 'Granddaughter', '손자': 'Grandson', '식사': 'Meal', '저녁밥': 'Evening Meal',
+        '봄비': 'Spring Rain', '가을비': 'Autumn Rain', '첫비': 'First Rain', '여름비': 'Summer Rain',
+        '새벽하늘': 'Dawn Sky', '저녁하늘': 'Evening Sky', '밤하늘': 'Night Sky',
+        '공원에서': 'At the Park', '바닷가에서': 'By the Sea', '카페에서': 'At the Café',
+        '가족': 'Family', '부부': 'Couple', '연인': 'Lovers', '친구들': 'Friends',
+        '고향집': 'Hometown House', '빈집': 'Empty House', '작은 집': 'Small Home',
+        '걱정 마': 'Don\'t Worry', '울지 마': 'Don\'t Cry', '잘 될 거야': 'It\'ll Be Fine',
         '또다른 인연': 'Another Fate', '새로운 시작': 'New Beginning', '사랑의 노래': 'Love Song',
         '별빛 아래': 'Under Starlight', '달빛 아래': 'Under Moonlight', '마지막 인사': 'Last Goodbye',
         '영원한 약속': 'Eternal Promise', '다시 만나': 'Meet Again', '우리의 계절': 'Our Season',
@@ -2478,20 +2488,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (anyMatched && !/[가-힣]/.test(translated)) {
             return `${translated} (${trimmed})`;
         }
+        // 부분 매칭 후 남은 한국어 조사 제거 시도
+        if (anyMatched) {
+            const cleaned = translated.replace(/[가-힣은는이가을를에서의로도만과와]/g, '').replace(/\s+/g, ' ').trim();
+            if (cleaned && cleaned !== translated && !/[가-힣]/.test(cleaned)) {
+                return `${cleaned} (${trimmed})`;
+            }
+        }
 
-        // 5단계: 단어 분리 후 각각 번역 (해당 언어 → KOR_BASE 순서)
+        // 5단계: 단어 분리 후 각각 번역 — 조사 제거 후 재시도 포함
+        const korParticles = ['에서의', '이라는', '처럼', '같은', '같이', '에게서', '에게', '에서', '으로부터', '으로', '보다', '까지', '부터', '이라', '이어', '에', '의', '이', '가', '을', '를', '은', '는', '로', '도', '만', '야', '여', '과', '와'];
+        function stripParticle(w) {
+            for (const p of korParticles) {
+                if (w.endsWith(p) && w.length > p.length + 1) return w.slice(0, -p.length);
+            }
+            return w;
+        }
         const words = trimmed.split(/\s+/);
         if (words.length >= 1) {
-            const translatedWords = words.map(w => map[w] || KOR_BASE[w] || w);
+            const translatedWords = words.map(w => {
+                const stripped = stripParticle(w);
+                return map[w] || KOR_BASE[w] || map[stripped] || KOR_BASE[stripped] || w;
+            });
             const result = translatedWords.join(' ');
             if (result !== trimmed && !/[가-힣]/.test(result)) {
                 return `${result} (${trimmed})`;
             }
+            // 부분 번역 성공 시 (일부 한자어 잔존)에도 의미 있으면 반환
+            const partialCount = translatedWords.filter(w => !/[가-힣]/.test(w)).length;
+            if (partialCount > 0 && partialCount >= Math.ceil(words.length / 2)) {
+                const partial = translatedWords.join(' ');
+                if (partial !== trimmed) return `${partial} (${trimmed})`;
+            }
         }
 
         // 최종 실패: 번역 불가능한 한국어 → 원본 그대로 반환
-        // KOR_BASE에도 없으면 해당 언어 표기 + 한국어 원본 유지
-        // 번역 실패 시 원본 그대로 반환 (태그 붙이지 않음)
         return trimmed;
     }
 
@@ -2976,6 +3007,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 스토리 텍스트에서 핵심 단어를 직접 추출
+    // 자유 텍스트에서 의미 있는 한국어 키워드 직접 추출 (사전 무관)
+    function extractRawKeywords(text) {
+        if (!text) return [];
+        const stopWords = new Set([
+            '하는', '하면', '하고', '하며', '하여', '이라', '이고', '이며', '이어서',
+            '함께', '함께한', '함께하는', '에서', '에게', '으로', '부터', '까지',
+            '처럼', '같이', '같은', '위해', '위한', '있는', '없는', '되는', '되어',
+            '그리고', '그래서', '그런데', '하지만', '또한', '것이', '것을', '것에',
+            '것과', '것도', '있어', '없어', '있고', '없고', '합니다', '했습니다',
+            '있습니다', '입니다', '됩니다', '해야', '해서', '정말', '아주', '매우',
+            '너무', '조금', '더욱', '점점', '이제', '항상', '자주', '이렇게', '저렇게',
+            '이런', '저런', '하러', '가려고', '오려고', '되려고', '이루어', '이루어지는'
+        ]);
+        return text
+            .replace(/[은는이가을를에서의로도만과와]/g, ' ')
+            .split(/[\s\.,·!\?\/\(\)\[\]]+/)
+            .map(w => w.trim())
+            .filter(w => w.length >= 2 && !/^[0-9a-zA-Z]+$/.test(w) && !stopWords.has(w))
+            .slice(0, 8);
+    }
+
     function extractWordsFromStory(text) {
         if (!text) return [];
         // 의미 있는 한국어 명사/감정어 사전
@@ -3031,6 +3083,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const themeNameText = currentThemeName || '';
         const sitWords = extractWordsFromStory(sitText);
         const themeNameWords = extractWordsFromStory(themeNameText);
+        // 사전 미등록 키워드도 직접 추출 — 연관성 극대화 핵심
+        const rawSitKeywords = extractRawKeywords(sitText);
+        const rawThemeKeywords = extractRawKeywords(themeNameText);
+        const rawStoryKeywords = extractRawKeywords(story.desc || '').concat(extractRawKeywords(story.name || ''));
 
         // 4. 분위기에서 감정 추출 (기본 무드맵)
         const emotionMap = {
@@ -3079,9 +3135,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (gl.includes('록') || gl.includes('rock')) genreEmotions.push('열정', '자유');
         });
 
-        // 감정 풀: 스토리 키워드 > 상황 단어 > 노래주제 > 세대 핵심 감정 > 분위기 (우선순위)
+        // 감정 풀: 스토리 키워드 > 상황 단어(raw 3배) > 노래주제 > 세대 핵심 감정 > 분위기 (우선순위)
+        // rawSitKeywords/rawStoryKeywords 3배 가중치 → 사용자 데이터 연관성 극대화
         const emotions = [...storyKeywords, ...storyWords, ...storyNameWords, ...themeWords,
-                          ...sitWords, ...themeNameWords, ...genEmotions, ...moodEmotions, ...genreEmotions];
+                          ...rawStoryKeywords, ...rawStoryKeywords, ...rawStoryKeywords,
+                          ...sitWords, ...rawSitKeywords, ...rawSitKeywords, ...rawSitKeywords,
+                          ...themeNameWords, ...rawThemeKeywords, ...rawThemeKeywords,
+                          ...genEmotions, ...moodEmotions, ...genreEmotions];
 
         // 6. 이미지 풀: 스토리 > 상황 단어 > 세대별 구체 장면 > 기본값 (자료 5부 요소 5)
         const storyImages = storyWords.filter(w =>
@@ -3115,7 +3175,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // situation + 장소 단어를 이미지 풀에 3배 가중치로 추가 (파이프라인 반영 극대화)
         const sitImageWords = sitWords.filter(w => w.length > 1);
         const themeImgWords = themeNameWords.filter(w => w.length >= 2);
-        const pipelineImgs = [...sitImageWords, ...themeImgWords];
+        // raw 키워드도 이미지/장소 풀에 직접 투입 (사전 미등록 단어 포함)
+        const pipelineImgs = [...sitImageWords, ...rawSitKeywords, ...themeImgWords, ...rawThemeKeywords, ...rawStoryKeywords];
 
         const images = storyImages.length > 0
             ? [...storyImages, ...pipelineImgs, ...pipelineImgs, ...pipelineImgs, ...genSceneImgs, ...genDefaultImgs]
@@ -3129,7 +3190,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'middle-aged':  ['퇴근길', '지하철', '마트 앞', '아파트 단지', '골목', '카페'],
             seniors:        ['공원', '시장', '고향 마을', '텃밭 옆', '경로당', '병원 앞']
         };
-        const placePool = [...(places.length > 0 ? places : []),
+        // rawSitKeywords를 placePool 앞에 배치 — 사용자 설정 장소/주제 최우선 반영
+        const placePool = [...rawSitKeywords, ...rawThemeKeywords,
+                           ...(places.length > 0 ? places : []),
                            ...(selectedSituation ? [selectedSituation] : []),
                            ...(gen && placeDefaults[gen] ? placeDefaults[gen] : ['카페', '거리', '공원', '바다', '하늘 아래'])];
 
@@ -3912,6 +3975,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLyricsInfo();
     });
 
+    document.getElementById('tabFormatKorean').addEventListener('click', () => {
+        currentFormat = 'korean';
+        document.querySelectorAll('.lyrics-format-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tabFormatKorean').classList.add('active');
+        document.getElementById('lyricsFormatDesc').textContent = '\uD55C\uAD6D\uC5B4\uB85C \uBC88\uC5ED\uB41C \uAC00\uC0AC\uC785\uB2C8\uB2E4. \uC12D\uC158 \uD0DC\uADF8\uB9CC \uD3EC\uD568\uB429\uB2C8\uB2E4.';
+        if (Object.keys(titleLyricsMap).length > 0) showTitleLyrics(currentTitleIdx);
+        updateLyricsInfo();
+    });
+
     // 제목별 가사 캐시
     let titleLyricsMap = {}; // { title: { section: '...', meta: '...', korSection: '...', korMeta: '...' } }
     let currentTitleIdx = 0;
@@ -3945,16 +4017,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 한국어 번역 항상 생성 (언어 무관 — "한국어 가사" 탭용)
+        // try-finally로 langOverride stuck 방지
         const actualLang = getSelectedLanguage();
-        langOverride = 'korean';
-        titles.forEach((t, i) => {
-            state.selectedTitle = t;
-            currentFormat = 'meta';
-            const korMetaVer = generateLyricsText();
-            titleLyricsMap[i].korSection = stripMetaTags(korMetaVer);
-            titleLyricsMap[i].korMeta = korMetaVer;
-        });
-        langOverride = null;
+        try {
+            langOverride = 'korean';
+            titles.forEach((t, i) => {
+                state.selectedTitle = t;
+                currentFormat = 'meta';
+                const korMetaVer = generateLyricsText();
+                titleLyricsMap[i].korSection = stripMetaTags(korMetaVer);
+                titleLyricsMap[i].korMeta = korMetaVer;
+            });
+        } finally {
+            langOverride = null;
+        }
 
         const needsKorTranslation = actualLang !== 'korean';
         if (needsKorTranslation) {
@@ -3992,13 +4068,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function showTitleLyrics(idx) {
         const data = titleLyricsMap[idx];
         if (!data) return;
-        const fmt = document.querySelector('.lyrics-format-tab.active').dataset.format || 'section';
-        document.getElementById('lyricsMainTextarea').value = fmt === 'meta' ? data.meta : data.section;
+        const fmt = document.querySelector('.lyrics-format-tab.active')?.dataset.format || 'section';
 
-        // 한국어 번역 동기화
+        // 탭별 가사 표시
+        let lyricsToShow = '';
+        if (fmt === 'meta') lyricsToShow = data.meta || '';
+        else if (fmt === 'korean') lyricsToShow = data.korSection || data.section || '';
+        else lyricsToShow = data.section || '';
+        document.getElementById('lyricsMainTextarea').value = lyricsToShow;
+
+        // 한국어 번역 별도 영역 — 비한국어 언어이고 section/meta 탭일 때만 표시
         const korArea = document.getElementById('korTranslationArea');
         const korTA = document.getElementById('korTranslationTextarea');
-        if (data.korSection || data.korMeta) {
+        const actualLang = getSelectedLanguage();
+        if (fmt !== 'korean' && actualLang !== 'korean' && (data.korSection || data.korMeta)) {
             korTA.value = fmt === 'meta' ? (data.korMeta || '') : (data.korSection || '');
             korArea.style.display = 'block';
         } else {
@@ -5276,6 +5359,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('⚠️ 처음부터 다시 시작하시겠습니까?\n현재까지 작업한 모든 내용이 삭제됩니다.')) return;
         Object.keys(state).forEach(k => { if (Array.isArray(state[k])) state[k] = []; else if (typeof state[k] === 'object') state[k] = null; else state[k] = ''; });
         state.titleCount = 5; state.sectionLyrics = {}; state.generations = [];
+        langOverride = null; // stuck 방지
         step2Initialized = false; lockedTitles = [];
         document.querySelectorAll('.toggle-btn.active').forEach(b => b.classList.remove('active'));
         document.getElementById('loadedPromptPreview').style.display = 'none';
