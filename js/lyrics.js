@@ -4219,6 +4219,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === 레퍼런스 전체 구조를 1:1 완벽 복제 ===
     function generateFromReferenceComplete(refText, title, gen, lang, isMeta) {
+        activeContextPools = buildContextPools(title, gen, lang);
         const lines = refText.split('\n');
         let result = '';
         const usedLines = new Set();
@@ -4270,14 +4271,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             do {
-                if (lang === 'korean') {
-                    newLine = generateKoreanByCharCount(charCount, currentSection, title, gen);
-                } else if (lang === 'english' || lang === 'mixed') {
-                    newLine = generateEnglishByWordCount(wordCount, currentSection, title);
-                } else {
-                    // 기타 언어
-                    newLine = generateLineByLanguage(lang, charCount, currentSection, title, gen);
-                }
+                newLine = generateContextAwareLine(lang, charCount, wordCount, currentSection, title, gen);
                 tries++;
             } while (usedLines.has(newLine) && tries < 30);
 
@@ -4323,6 +4317,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 레퍼런스 파싱 캐시
     let parsedRefCache = null;
     let parsedRefText = '';
+    let activeContextPools = null;
 
     function generateFromReference(section, num, title, gen, refText, lang) {
         // 파싱 캐시
@@ -4370,9 +4365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let newLine = '';
                 let tries = 0;
                 do {
-                    if (lang === 'korean') newLine = generateKoreanByCharCount(charCount, section, title, gen);
-                    else if (lang === 'english' || lang === 'mixed') newLine = generateEnglishByWordCount(wordCount, section, title);
-                    else newLine = generateLineByLanguage(lang, charCount, section, title, gen);
+                    newLine = generateContextAwareLine(lang, charCount, wordCount, section, title, gen);
                     tries++;
                 } while (usedLines.has(newLine) && tries < 20);
 
@@ -4507,6 +4500,240 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         return sections;
+    }
+
+    // === 파이프라인 컨텍스트 기반 가사 라인 생성 ===
+    function generateContextAwareLine(lang, charCount, wordCount, section, title, gen) {
+        const pools = activeContextPools ? (activeContextPools[section] || activeContextPools['Verse'] || null) : null;
+        if (!pools) {
+            if (lang === 'korean') return generateKoreanByCharCount(charCount, section, title, gen);
+            if (lang === 'english' || lang === 'mixed') return generateEnglishByWordCount(wordCount, section, title);
+            return generateLineByLanguage(lang, charCount, section, title, gen);
+        }
+        const tgt = lang === 'korean' ? charCount : wordCount;
+        let cands;
+        if (tgt <= (lang === 'korean' ? 6 : 3))        cands = pools.short || pools.medium;
+        else if (tgt <= (lang === 'korean' ? 12 : 7))  cands = pools.medium || pools.long || pools.short;
+        else                                            cands = pools.long || pools.medium;
+        if (!cands || cands.length === 0) cands = pools.medium || pools.short || [''];
+        return cands[Math.floor(Math.random() * cands.length)];
+    }
+
+    function buildContextPools(title, gen, lang) {
+        const d = state.promptData || {};
+        const genres = d.genres || [];
+        const moods = d.mood || [];
+        const targets = normalizeTargetLabels(d.target || []);
+        const targetAge = targets[0] || '2030세대';
+
+        const gl = genres.map(g => (g || '').toLowerCase()).join(' ');
+        let feeling = '그리움', feelingEng = 'longing';
+        if (gl.includes('팝') || gl.includes('pop'))          { feeling = '설렘';   feelingEng = 'excitement'; }
+        else if (gl.includes('힙합') || gl.includes('hip'))   { feeling = '자신감'; feelingEng = 'confidence'; }
+        else if (gl.includes('r&b') || gl.includes('알앤비')) { feeling = '사랑';   feelingEng = 'love'; }
+        else if (gl.includes('트로트') || gl.includes('trot')){ feeling = '흥';     feelingEng = 'joy'; }
+        else if (gl.includes('재즈') || gl.includes('jazz'))  { feeling = '여유';   feelingEng = 'serenity'; }
+        else if (gl.includes('록') || gl.includes('rock'))    { feeling = '열정';   feelingEng = 'passion'; }
+        else if (gl.includes('인디') || gl.includes('indie')) { feeling = '솔직함'; feelingEng = 'sincerity'; }
+
+        const ml = moods.join(' ');
+        let atmo = '감성적인', atmoEng = 'emotional';
+        if (ml.includes('힐링') || ml.includes('편안') || ml.includes('포근')) { atmo = '따뜻한';   atmoEng = 'warm'; }
+        else if (ml.includes('그리') || ml.includes('쓸쓸') || ml.includes('센치')) { atmo = '아련한'; atmoEng = 'nostalgic'; }
+        else if (ml.includes('신나') || ml.includes('흥겨') || ml.includes('파워'))  { atmo = '신나는'; atmoEng = 'uplifting'; }
+        else if (ml.includes('설레') || ml.includes('사랑'))  { atmo = '설레는';   atmoEng = 'romantic'; }
+        else if (ml.includes('새벽') || ml.includes('몽환'))  { atmo = '몽환적인'; atmoEng = 'dreamy'; }
+        else if (ml.includes('위로'))                          { atmo = '위로되는'; atmoEng = 'comforting'; }
+
+        const isFormal = targetAge === '5060세대' || targetAge === '시니어세대';
+        const isYoung  = targetAge === '10대';
+        const t  = title.replace(/\s*\([^)]*\)/g, '').trim() || '이 노래';
+        const rawPlace = currentThemeName || '';
+        const p  = (rawPlace.split(/[\/,&·]/)[0].trim() || '여기').substring(0, 8);
+
+        if (lang === 'korean') return buildKorCtxPools(t, feeling, atmo, p, isFormal, isYoung);
+        return buildEngCtxPools(t, feelingEng, atmoEng, p);
+    }
+
+    function buildKorCtxPools(t, feeling, atmo, p, isFormal, isYoung) {
+        const vEnd = isFormal ? '어요' : '어';
+        const nEnd = isFormal ? '네요' : '네';
+        const sfx  = isFormal ? '요'   : '';
+        return {
+            Verse: {
+                short: [
+                    '그 날처럼', '혼자 걷다', '눈을 감아', '기억 속에',
+                    '아직 여기', '바람이 불면', '오늘도 또', `${p}에서`
+                ],
+                medium: [
+                    `${atmo} 이 길을 걷다 보면`, `${p}에서 멈춰 서는 순간`,
+                    '오늘도 같은 길인데 달라', '혼자라서 더 선명한 기억',
+                    '말하지 못한 것들이 쌓여', '아직도 그 날이 눈에 보여',
+                    '이 감정을 뭐라 불러야 해', '창밖에 비가 내리던 그 날',
+                    '시간이 멈춰버린 것 같아', '익숙한 향기에 네가 떠올라'
+                ],
+                long: [
+                    `${atmo} 공기 속에서 ${feeling}이 밀려오${nEnd}`,
+                    `${p}를 지나칠 때마다 그 장면이 떠올라`,
+                    '말하지 못한 진심이 노래가 되어 흘러',
+                    '매일 같은 시간 같은 자리에서 생각해',
+                    '눈을 감으면 선명하게 네가 보이는 게 이상해',
+                    '처음엔 몰랐어 이 감정이 이렇게 클 줄은'
+                ]
+            },
+            'Pre-Chorus': {
+                short: ['전할 수 없어', '이 마음이', '멈출 수 없어', '더 이상은'],
+                medium: [
+                    `이 마음을 어떻게 전해야 할${sfx}`, `멈출 수가 없어 이 ${feeling}이`,
+                    '한 걸음 더 가면 닿을 것 같아', '눈물이 나도 괜찮아 오늘은',
+                    '이제는 말할 수 있어 솔직하게', `${atmo} 이 감정이 목끝에 차올라`
+                ],
+                long: [
+                    `이 마음이 전해지길 바라며 한 발 더 내딛${vEnd}`,
+                    `${feeling}이 가득 차올라 더는 못 참겠어`,
+                    '포기하지 않을게 이 감정 이대로 안고 가'
+                ]
+            },
+            Chorus: {
+                short: [t, '너를 위해', '이 순간에', '기억할게', '영원히'],
+                medium: [
+                    `${t} 너에게 닿을 때까지`, '이 순간을 영원히 기억할게',
+                    `${t} 내 마음을 담아서`, '너와 함께라면 두렵지 않아',
+                    `${feeling}이 담긴 이 노래가 들려`, '언제나 여기 있을게 네 곁에',
+                    `${t} 다시 불러볼게 크게`
+                ],
+                long: [
+                    `${t} 이 노래가 너에게 전해질 때 알아줘`,
+                    `${atmo} 이 빛 속에서 ${feeling}이 가득 차오르는 것 같아`,
+                    `${t} 이 감정 하나로 충분해 영원히`,
+                    '네가 있어서 이 하루가 의미 있어 정말로',
+                    '이 노래를 들을 때마다 떠올려줘 나를'
+                ]
+            },
+            Bridge: {
+                short: ['돌아보면', '결국 나는', '이제 알아', '변하지 마'],
+                medium: [
+                    '돌고 돌아 여기까지 온 거잖아', '결국 내가 원한 건 이거였어',
+                    '이제는 알아 이 감정이 진짜라는 걸', '흔들릴수록 더 단단해지는 게 있어',
+                    '모든 게 지나가도 이건 남을 것 같아', '멀리서 바라만 봤던 날들이 지나고'
+                ],
+                long: [
+                    `결국 모든 길이 ${p}로 이어져 있었${nEnd}`,
+                    '흔들리면서도 여기까지 온 내가 대단하다는 걸 이제 알아',
+                    `${feeling}이 없었다면 여기까지 오지 못했을 거야`
+                ]
+            },
+            Rap: {
+                short: ['멈추지 마', '내 길을 가', '포기 없어'],
+                medium: [
+                    `멈추지 마 ${p}에서 시작된 이 길`, '세상이 뭐라 해도 나는 나야',
+                    `${feeling}으로 채운 이 가사가 진심이야`, '내 이름을 기억해줘 언젠가는'
+                ],
+                long: [
+                    `${p} 위에서 시작한 이 이야기 끝까지 가보는 거야`,
+                    `${feeling} 가득한 이 가사 한 줄 한 줄이 전부 진심이야`
+                ]
+            },
+            Hook: {
+                short: ['느껴봐', '지금 이 순간', '놓치지 마'],
+                medium: [`느껴봐 이 ${atmo} 순간을 놓치지 마`, '이 감정 하나가 전부야 지금은'],
+                long: ['이 순간을 영원히 기억해줘 절대 놓치지 마']
+            },
+            'Post-Chorus': { short: ['Oh oh oh'], medium: ['Oh oh oh yeah'], long: ['La la la la la la'] },
+            'Ad-lib':       { short: ['Yeah'], medium: ['Come on yeah'], long: ['One more time yeah'] },
+            Outro: {
+                short: [t, '기억할게', '고마워'],
+                medium: [
+                    `${t} 이 노래를 오래 기억해줘`, `${atmo} 이 감성 속에 우리가 있어`,
+                    '언제나 여기 있을게 그게 전부야'
+                ],
+                long: [
+                    `${t} 이 노래가 끝나도 이 감정은 남을 거야`,
+                    `${feeling}이 담긴 이 순간이 영원히 기억되길`
+                ]
+            }
+        };
+    }
+
+    function buildEngCtxPools(t, feelingEng, atmoEng, p) {
+        return {
+            Verse: {
+                short: [
+                    'In this moment', 'Looking back now', 'I remember when', 'Still holding on',
+                    'Under the same sky', 'One step at a time', 'Right where I am'
+                ],
+                medium: [
+                    'Standing here where it all began for me', 'Every memory comes rushing back so clear',
+                    `I never knew this ${atmoEng} feeling could be real`, 'The road behind me shows how far I have come',
+                    'All the days I spent just wondering why', 'Something in the air tonight has changed',
+                    'Searching for the words I left unsaid', 'It feels like time has stopped right here'
+                ],
+                long: [
+                    `I never thought I would find myself feeling this ${atmoEng} tonight`,
+                    'Every single step that brought me here was worth it in the end',
+                    `The ${atmoEng} light reminds me of the moments I can never take back`,
+                    'I still remember every word you said like it was yesterday'
+                ]
+            },
+            'Pre-Chorus': {
+                short: ['I cannot let go', 'This is real now', 'Here I am', 'Do not walk away'],
+                medium: [
+                    'I cannot hold back this feeling anymore', 'Everything inside is rising to the top',
+                    'This is where I choose to stand my ground', 'I am holding on to every word you said'
+                ],
+                long: [
+                    'I can feel it burning through my chest I cannot contain this anymore',
+                    'Every piece of me is reaching out across the distance between us'
+                ]
+            },
+            Chorus: {
+                short: [t, 'Feel it now', 'Never let go', 'Right here with you'],
+                medium: [
+                    `${t} calling out across the night`, 'This is everything I have always felt inside',
+                    `${t} shining through the ${atmoEng} light`, 'I will never let this moment fade away',
+                    'You were always where I needed to be', `${t} this is real and it will always be`
+                ],
+                long: [
+                    `${t} I will hold this ${feelingEng} close until the very end of time`,
+                    `This ${atmoEng} moment is the one I will always carry in my heart`,
+                    `${t} everything I am I give to this one moment right now`,
+                    `When I hear your name I feel this ${feelingEng} rise up from inside`
+                ]
+            },
+            Bridge: {
+                short: ['After all this', 'I understand now', 'The answer is clear', 'It was always you'],
+                medium: [
+                    'After all the winding roads I finally see', 'Looking back I understand why now',
+                    'Every single tear was leading me to here', 'I was lost until this feeling found me'
+                ],
+                long: [
+                    'All those years of searching finally brought me here to where I need to be',
+                    `I can see it clearly now the path that led me to this ${atmoEng} place`
+                ]
+            },
+            Rap: {
+                short: ['Never giving up', 'This is my truth'],
+                medium: [
+                    'Never gonna stop until I reach the top of where I am meant to be',
+                    'Every word I wrote came straight from everything I feel inside'
+                ],
+                long: ['From the bottom of my heart I mean every single word that is in this song']
+            },
+            Hook: {
+                short: ['Feel it now'],
+                medium: [`Feel it now this ${atmoEng} moment do not let go`],
+                long: ['Feel this moment never let it fade away from your heart']
+            },
+            'Post-Chorus': { short: ['Oh oh oh'], medium: ['Oh oh oh yeah'], long: ['Na na na na na na'] },
+            'Ad-lib':       { short: ['Yeah'], medium: ['Come on yeah'], long: ['One more time yeah'] },
+            Outro: {
+                short: [t, 'Fading out', 'Always here'],
+                medium: [
+                    `${t} this melody will never fade away`, `${atmoEng} feelings always find their way back`
+                ],
+                long: [`${t} I will carry every moment of this ${feelingEng} with me always`]
+            }
+        };
     }
 
     // === BPM/장르 기반: 적절한 분량 자동 결정 ===
