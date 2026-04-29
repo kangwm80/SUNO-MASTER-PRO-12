@@ -4012,20 +4012,31 @@ document.addEventListener('DOMContentLoaded', () => {
         sectionLyricsCache = '';
         metaLyricsCache = '';
 
-        // 1단계: 원본 언어 가사 생성 + 선택 인덱스 캡처
+        // 1단계: 섹션태그만 있는 원본 언어 가사 생성 + 선택 인덱스 캡처
         trIdxPerTitle = [];
         titles.forEach((t, i) => {
             trCurrentTitle = i;
             trMode = 'capture';
             state.selectedTitle = t;
-            currentFormat = 'meta';
-            const metaVer = generateLyricsText();
-            const sectionVer = stripMetaTags(metaVer);
-            titleLyricsMap[i] = { title: t, section: sectionVer, meta: metaVer };
+            currentFormat = 'section';
+            const sectionVer = generateLyricsText();
+            titleLyricsMap[i] = { title: t, section: sectionVer };
         });
         trMode = 'off';
 
-        // 2단계: 저장된 인덱스로 한국어 번역 생성 (내용 1:1 대응)
+        // 2단계: 메타태그 포함 원본 언어 가사 생성 (동일 인덱스 재사용)
+        titles.forEach((t, i) => {
+            trCurrentTitle = i;
+            trCursor = 0;
+            trMode = 'replay';
+            state.selectedTitle = t;
+            currentFormat = 'meta';
+            const metaVer = generateLyricsText();
+            titleLyricsMap[i].meta = metaVer;
+        });
+        trMode = 'off';
+
+        // 3단계: 저장된 인덱스로 한국어 번역 생성 (내용 1:1 대응)
         const actualLang = getSelectedLanguage();
         try {
             langOverride = 'korean';
@@ -4034,10 +4045,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 trCursor = 0;
                 trMode = 'replay';
                 state.selectedTitle = t;
-                currentFormat = 'meta';
-                const korMetaVer = generateLyricsText();
-                titleLyricsMap[i].korSection = stripMetaTags(korMetaVer);
-                titleLyricsMap[i].korMeta = korMetaVer;
+                currentFormat = 'section';
+                const korVer = generateLyricsText();
+                titleLyricsMap[i].korSection = korVer;
+                titleLyricsMap[i].korMeta = korVer;
             });
         } finally {
             langOverride = null;
@@ -4616,23 +4627,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return generateLineByLanguage(lang, charCount, section, title, gen);
         }
         const tgt = lang === 'korean' ? charCount : wordCount;
-        let cands;
-        if (tgt <= (lang === 'korean' ? 6 : 3))        cands = pools.short || pools.medium;
-        else if (tgt <= (lang === 'korean' ? 12 : 7))  cands = pools.medium || pools.long || pools.short;
-        else                                            cands = pools.long || pools.medium;
-        if (!cands || cands.length === 0) cands = pools.medium || pools.short || [''];
+        let sizeKey;
+        if (tgt <= (lang === 'korean' ? 6 : 3))        sizeKey = 'short';
+        else if (tgt <= (lang === 'korean' ? 12 : 7))  sizeKey = 'medium';
+        else                                            sizeKey = 'long';
+        let cands = pools[sizeKey] || pools.medium || pools.short || [''];
 
         if (trMode === 'capture') {
-            // 원본 언어 생성: 선택 인덱스를 기록
             const idx = Math.floor(Math.random() * cands.length);
             if (!trIdxPerTitle[trCurrentTitle]) trIdxPerTitle[trCurrentTitle] = [];
-            trIdxPerTitle[trCurrentTitle].push(idx);
+            trIdxPerTitle[trCurrentTitle].push({ sizeKey, idx });
             return cands[idx];
         }
-        if (trMode === 'replay' && lang === 'korean') {
-            // 한국어 번역: 원본과 동일한 인덱스 사용
+        if (trMode === 'replay') {
             const stored = (trIdxPerTitle[trCurrentTitle] || [])[trCursor++];
-            if (stored !== undefined) return cands[stored % cands.length];
+            if (stored) {
+                const repCands = pools[stored.sizeKey] || pools.medium || pools.short || [''];
+                return repCands[stored.idx % repCands.length];
+            }
         }
         return cands[Math.floor(Math.random() * cands.length)];
     }
