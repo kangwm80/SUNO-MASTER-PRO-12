@@ -3913,8 +3913,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 제목별 가사 캐시
-    let titleLyricsMap = {}; // { title: { section: '...', meta: '...' } }
+    let titleLyricsMap = {}; // { title: { section: '...', meta: '...', korSection: '...', korMeta: '...' } }
     let currentTitleIdx = 0;
+
+    // 메타태그 라인 제거 — [Mood: ...], [Energy: ...] 등 콜론 포함 태그만 삭제
+    function stripMetaTags(text) {
+        return text.split('\n').filter(line => {
+            const t = line.trim();
+            if (!t.startsWith('[') || !t.includes(']')) return true;
+            const inner = t.slice(1, t.indexOf(']'));
+            return !inner.includes(':');
+        }).join('\n');
+    }
 
     // 가사 자동 생성 버튼 - 모든 제목에 대해 가사 생성
     document.getElementById('btnGenerateLyrics').addEventListener('click', () => {
@@ -3925,29 +3935,29 @@ document.addEventListener('DOMContentLoaded', () => {
         sectionLyricsCache = '';
         metaLyricsCache = '';
 
-        // 각 제목별 가사 생성
+        // meta 1회 생성 → section은 메타태그 라인만 제거하여 동일 내용 보장
         titles.forEach((t, i) => {
             state.selectedTitle = t;
-            currentFormat = 'section';
-            const sectionVer = generateLyricsText();
             currentFormat = 'meta';
             const metaVer = generateLyricsText();
+            const sectionVer = stripMetaTags(metaVer);
             titleLyricsMap[i] = { title: t, section: sectionVer, meta: metaVer };
         });
 
-        // 비한국어 언어인 경우 한국어 번역도 함께 생성
+        // 한국어 번역 항상 생성 (언어 무관 — "한국어 가사" 탭용)
         const actualLang = getSelectedLanguage();
+        langOverride = 'korean';
+        titles.forEach((t, i) => {
+            state.selectedTitle = t;
+            currentFormat = 'meta';
+            const korMetaVer = generateLyricsText();
+            titleLyricsMap[i].korSection = stripMetaTags(korMetaVer);
+            titleLyricsMap[i].korMeta = korMetaVer;
+        });
+        langOverride = null;
+
         const needsKorTranslation = actualLang !== 'korean';
         if (needsKorTranslation) {
-            langOverride = 'korean';
-            titles.forEach((t, i) => {
-                state.selectedTitle = t;
-                currentFormat = 'section';
-                titleLyricsMap[i].korSection = generateLyricsText();
-                currentFormat = 'meta';
-                titleLyricsMap[i].korMeta = generateLyricsText();
-            });
-            langOverride = null;
             document.getElementById('korTranslationArea').style.display = 'block';
         } else {
             document.getElementById('korTranslationArea').style.display = 'none';
@@ -5032,6 +5042,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 버전 탭 이벤트
         document.getElementById('tabVersionA').onclick = () => { finalCurrentVersion = 'a'; updateFinalVersionTab(); };
         document.getElementById('tabVersionB').onclick = () => { finalCurrentVersion = 'b'; updateFinalVersionTab(); };
+        document.getElementById('tabVersionC').onclick = () => { finalCurrentVersion = 'c'; updateFinalVersionTab(); };
     }
 
     function renderFinalForTitle(idx) {
@@ -5088,30 +5099,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateFinalVersionTab() {
-        // 탭 UI
+        // 탭 UI — active 표시
         document.querySelectorAll('.version-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(finalCurrentVersion === 'a' ? 'tabVersionA' : 'tabVersionB').classList.add('active');
-        document.getElementById('versionDesc').textContent = finalCurrentVersion === 'a'
-            ? 'Suno AI Lyrics Field\uC5D0 \uBC14\uB85C \uC0AC\uC6A9. \uBA54\uD0C0\uD0DC\uADF8([Mood], [Energy] \uB4F1) \uD3EC\uD568.'
-            : '\uAE54\uB054\uD55C \uAC00\uC0AC. \uC139\uC158 \uD0DC\uADF8([Verse], [Chorus] \uB4F1)\uB9CC \uD3EC\uD568.';
+        const activeTabId = finalCurrentVersion === 'a' ? 'tabVersionA' : finalCurrentVersion === 'b' ? 'tabVersionB' : 'tabVersionC';
+        document.getElementById(activeTabId).classList.add('active');
 
-        // 가사 내용
+        const descMap = {
+            a: 'Suno AI Lyrics Field에 바로 사용. 메타태그([Mood], [Energy] 등) 포함.',
+            b: '깔끔한 가사. 섹션 태그([Verse], [Chorus] 등)만 포함.',
+            c: '한국어로 번역된 가사. 섹션 태그만 포함.'
+        };
+        document.getElementById('versionDesc').textContent = descMap[finalCurrentVersion] || '';
+
+        // 가사 내용 — 3개 탭 모두 동일 기반 가사, 형식만 다름
         const data = titleLyricsMap[finalCurrentIdx];
         let lyricsText = '';
         if (data) {
-            lyricsText = finalCurrentVersion === 'a' ? (data.meta || '') : (data.section || '');
+            if (finalCurrentVersion === 'a') lyricsText = data.meta || '';
+            else if (finalCurrentVersion === 'b') lyricsText = data.section || '';
+            else lyricsText = data.korSection || data.section || '';
         }
         const box = document.getElementById('finalLyricsBox');
         box.value = lyricsText;
-        document.getElementById('finalLyricsCharCount').textContent = `${lyricsText.length} / 5,000\uC790`;
-        // 자동 높이
+        document.getElementById('finalLyricsCharCount').textContent = `${lyricsText.length} / 5,000자`;
         box.style.height = 'auto';
         box.style.height = Math.max(300, box.scrollHeight) + 'px';
 
-        // 한국어 번역 섹션 (비한국어 언어 시)
+        // 한국어 번역 별도 섹션 — 비한국어 언어이고 메타/섹션 탭일 때만 표시
         const korSection = document.getElementById('finalKorSection');
         const korBox = document.getElementById('finalKorLyricsBox');
-        if (data && (data.korSection || data.korMeta)) {
+        const actualLang = getSelectedLanguage();
+        if (finalCurrentVersion !== 'c' && actualLang !== 'korean' && data && (data.korSection || data.korMeta)) {
             const korText = finalCurrentVersion === 'a' ? (data.korMeta || '') : (data.korSection || '');
             korBox.value = korText;
             korBox.style.height = 'auto';

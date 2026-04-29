@@ -432,12 +432,13 @@ h5.stories-section-label:nth-of-type(2) { color: var(--accent); background: rgba
 /* ===== 5단계: 최종 완성 ===== */
 /* 제목 선택 탭 */
 .final-title-tabs {
-    display: flex; gap: 6px; flex-wrap: wrap; max-width: 800px; margin: 0 auto 20px;
+    display: flex; flex-direction: column; gap: 6px; max-width: 800px; margin: 0 auto 20px;
 }
 .final-title-tab {
-    padding: 10px 20px; border: 2px solid var(--primary-light); border-radius: var(--radius-md);
+    padding: 12px 20px; border: 2px solid var(--primary-light); border-radius: var(--radius-md);
     background: var(--bg-card); color: var(--primary); font-size: var(--font-sm); font-weight: 700;
     font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: var(--transition);
+    width: 100%; text-align: left;
 }
 .final-title-tab:hover { background: rgba(108,92,231,0.08); }
 .final-title-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
