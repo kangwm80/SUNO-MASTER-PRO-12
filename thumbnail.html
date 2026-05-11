@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>썸네일 이미지 만들기 - SUNO MASTER PRO 12</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/thumbnail.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 상단 헤더 -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn" title="메인으로 돌아가기">
+                <span class="back-arrow">&#8592;</span>
+                <span class="back-text">메인으로</span>
+            </a>
+            <div class="logo">
+                <span class="logo-text">SUNO MASTER PRO 12</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="btn-text-size" id="btnTextSize" title="글자 크기 조절">
+                <span class="text-size-icon">가</span>
+            </button>
+            <button class="btn-dark-mode" id="btnDarkMode" title="화면 밝기 조절">
+                <span class="dark-mode-icon">&#9790;</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="thumb-main">
+        <!-- 페이지 헤더 -->
+        <section class="thumb-page-header">
+            <div class="thumb-title-block">
+                <div class="thumb-title-icon">&#127912;</div>
+                <div>
+                    <h1 class="thumb-page-title">썸네일 이미지 만들기</h1>
+                    <p class="thumb-page-subtitle">시각 자극 엔진으로 클릭률 높은 썸네일을 만드세요</p>
+                </div>
+            </div>
+            <button class="btn-api-settings" id="btnOpenApi">
+                <span>&#9881;</span> API 설정
+            </button>
+        </section>
+
+        <div class="thumb-grid">
+            <!-- 컨트롤 패널 -->
+            <section class="thumb-panel">
+                <div class="thumb-section">
+                    <label class="thumb-section-label">
+                        <span class="thumb-step-num">1</span> 핵심 키워드
+                    </label>
+                    <p class="thumb-section-hint">예: 차박, 주식, 캠핑, 여행, 다이어트</p>
+                    <input type="text" id="thumbKeyword" class="thumb-input" placeholder="영상의 핵심 키워드를 입력하세요">
+                </div>
+
+                <div class="thumb-section">
+                    <label class="thumb-section-label">
+                        <span class="thumb-step-num">2</span> 캐릭터 구성
+                    </label>
+                    <div class="thumb-options" data-option-group="gender">
+                        <button class="thumb-option-btn" data-value="male">남자 한 명</button>
+                        <button class="thumb-option-btn active" data-value="female">여자 한 명</button>
+                        <button class="thumb-option-btn" data-value="couple">남녀 커플</button>
+                        <button class="thumb-option-btn" data-value="none">사람 없음</button>
+                    </div>
+                </div>
+
+                <div class="thumb-section">
+                    <label class="thumb-section-label">
+                        <span class="thumb-step-num">3</span> 표정 (시각 자극)
+                    </label>
+                    <div class="thumb-options" data-option-group="emotion">
+                        <button class="thumb-option-btn active" data-value="shock">놀람 &#128561;</button>
+                        <button class="thumb-option-btn" data-value="smile">미소 &#128522;</button>
+                        <button class="thumb-option-btn" data-value="serious">진지함 &#128293;</button>
+                        <button class="thumb-option-btn" data-value="angry">분노 &#128162;</button>
+                    </div>
+                </div>
+
+                <div class="thumb-grid-2">
+                    <div class="thumb-section">
+                        <label class="thumb-section-label">
+                            <span class="thumb-step-num">4</span> 배경 테마
+                        </label>
+                        <select class="thumb-select" id="thumbBackground" data-select-group="background">
+                            <option value="cafe">고급 카페</option>
+                            <option value="mountain">자연/산</option>
+                            <option value="airplane">비행기 내부</option>
+                            <option value="car">자동차 운전</option>
+                            <option value="night">도시 야경</option>
+                            <option value="studio">스튜디오</option>
+                        </select>
+                    </div>
+                    <div class="thumb-section">
+                        <label class="thumb-section-label">
+                            <span class="thumb-step-num">5</span> 이미지 스타일
+                        </label>
+                        <select class="thumb-select" id="thumbStyle" data-select-group="style">
+                            <option value="cinematic">시네마틱 실사</option>
+                            <option value="anime">애니메이션</option>
+                            <option value="render3d">3D 렌더 (UE5)</option>
+                            <option value="cyberpunk">사이버펑크</option>
+                            <option value="vintage">빈티지 필름</option>
+                            <option value="watercolor">수채화</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-generate" id="btnGenerate">
+                    &#10024; 이미지 프롬프트 생성
+                </button>
+            </section>
+
+            <!-- 프리뷰 패널 -->
+            <section class="thumb-preview-wrap">
+                <div class="thumb-preview" id="thumbPreview">
+                    <!-- JS에서 렌더링 -->
+                </div>
+                <div class="thumb-actions">
+                    <button class="thumb-action-btn" id="btnRetry">&#128260; 다시 만들기</button>
+                    <button class="thumb-action-btn" id="btnUpscale">&#128142; 화질 강화</button>
+                    <button class="thumb-action-btn primary" id="btnSave">&#128190; 저장</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- API 설정 모달 -->
+    <div class="popup-overlay" id="apiModal">
+        <div class="popup">
+            <h3 class="popup-title">API 설정</h3>
+            <p style="font-size: var(--font-xs); color: var(--text-secondary); margin-top: 4px;">
+                Midjourney 및 Nanobanana API 키를 등록하면<br>실제 이미지가 자동 생성됩니다.
+            </p>
+            <div class="api-modal-body">
+                <div class="api-modal-field">
+                    <label for="apiMidjourney">Midjourney API Key</label>
+                    <input type="password" id="apiMidjourney" class="thumb-input" placeholder="sk-mj-...">
+                </div>
+                <div class="api-modal-field">
+                    <label for="apiNanobanana">Nanobanana API Key</label>
+                    <input type="password" id="apiNanobanana" class="thumb-input" placeholder="nb-...">
+                </div>
+            </div>
+            <div class="api-modal-actions">
+                <button class="api-modal-cancel" id="btnCancelApi">취소</button>
+                <button class="api-modal-save" id="btnSaveApi">저장</button>
+            </div>
+            <p class="api-saved-msg" id="apiStatus"></p>
+        </div>
+    </div>
+
+    <!-- 글자 크기 팝업 -->
+    <div class="popup-overlay" id="textSizePopup">
+        <div class="popup">
+            <h3 class="popup-title">글자 크기 조절</h3>
+            <div class="text-size-options">
+                <button class="size-btn" data-size="small">가<span class="size-label">작게</span></button>
+                <button class="size-btn active" data-size="medium">가<span class="size-label">보통</span></button>
+                <button class="size-btn" data-size="large">가<span class="size-label">크게</span></button>
+                <button class="size-btn" data-size="xlarge">가<span class="size-label">매우 크게</span></button>
+            </div>
+            <button class="popup-close" id="closeTextSize">닫기</button>
+        </div>
+    </div>
+
+    <script src="js/thumbnail.js"></script>
+</body>
+</html>

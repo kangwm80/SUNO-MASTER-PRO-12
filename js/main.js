@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '직접 만들기': 'custom.html',
                 '전문가 모드': 'pro.html',
                 '노래제목&가사 만들기': 'lyrics.html',
-                '썸네일 이미지 만들기': 'coming-soon.html?menu=썸네일 이미지 만들기',
+                '썸네일 이미지 만들기': 'thumbnail.html',
                 'Tools': 'coming-soon.html?menu=Tools',
                 '영상제작': 'coming-soon.html?menu=영상제작',
                 '내 음악 보관함': 'library.html'
